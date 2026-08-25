@@ -1,0 +1,103 @@
+window:
+  start: '2026-09-14'
+  end: '2026-10-02'
+  durationMinutes: 30
+trainings:
+  - id: wifi-8
+    title: 'WiFi 8: Top 5 Features'
+    shortTitle: WiFi 8
+    instructor: KJ
+    accent: coral
+    mode: Live
+  - id: wifi-log
+    title: WiFi Log Capture
+    shortTitle: WiFi logs
+    instructor: Hannah
+    accent: blue
+    mode: Video
+  - id: bt-log
+    title: BT Log Capture
+    shortTitle: BT logs
+    instructor: Robin
+    accent: mint
+    mode: Video
+  - id: bt-hdt
+    title: BT HDT
+    shortTitle: BT HDT
+    instructor: Brenton
+    accent: yellow
+    mode: Video
+sessions:
+  - id: 1ed8bd6b-7d8f-485a-ae62-988473f83f96
+    trainingId: wifi-8
+    date: '2026-09-14'
+    startTime: '09:00'
+    durationMinutes: 30
+    status: active
+  - id: a40f484c-caf8-451f-a2ea-829f7b6a6937
+    trainingId: wifi-log
+    date: '2026-09-15'
+    startTime: '10:30'
+    durationMinutes: 30
+    status: active
+  - id: e60a0aec-7006-444f-aec1-98f6d078ffb7
+    trainingId: bt-log
+    date: '2026-09-21'
+    startTime: '13:00'
+    durationMinutes: 30
+    status: active
+  - id: 9216b16f-8a07-4cf0-9239-e2d6a878ba81
+    trainingId: bt-hdt
+    date: '2026-09-28'
+    startTime: '15:30'
+    durationMinutes: 30
+    status: cancelled
+  - id: 08ab53af-f6cb-4e29-90f5-17e8b4b1b037
+    trainingId: bt-log
+    date: '2026-09-21'
+    startTime: '10:30'
+    durationMinutes: 30
+    status: active
+  - id: a35212f6-40ea-4048-84f7-670a4d96a52d
+    trainingId: bt-log
+    date: '2026-09-29'
+    startTime: '13:00'
+    durationMinutes: 30
+    status: active
+bookings:
+  - id: f866eb1e-6f83-4b8e-9179-d98a24d20d12
+    sessionId: 1ed8bd6b-7d8f-485a-ae62-988473f83f96
+    oem: Mock Customer Alpha
+    requesterName: Test User
+    requesterEmail: tsao36@gmail.com
+    createdAt: '2026-08-25T14:14:55.372Z'
+    status: confirmed
+  - id: 8e8bf49d-6365-4263-adfe-7d331875f327
+    sessionId: a40f484c-caf8-451f-a2ea-829f7b6a6937
+    oem: Mock Customer Beta
+    requesterName: Test User
+    requesterEmail: tsao36@gmail.com
+    createdAt: '2026-08-25T14:14:55.382Z'
+    status: confirmed
+  - id: 3e934ce8-706d-4e0b-8a45-00cb720dbe70
+    sessionId: e60a0aec-7006-444f-aec1-98f6d078ffb7
+    oem: Mock Customer Gamma
+    requesterName: Test User
+    requesterEmail: tsao36@gmail.com
+    createdAt: '2026-08-25T14:14:55.392Z'
+    status: confirmed
+  - id: 4ef6331f-a259-47a4-bfae-612a17b14043
+    sessionId: 9216b16f-8a07-4cf0-9239-e2d6a878ba81
+    oem: Mock Customer Delta
+    requesterName: Test User
+    requesterEmail: tsao36@gmail.com
+    createdAt: '2026-08-25T14:14:55.408Z'
+    status: confirmed
+  - id: a3cba5bd-2d36-4a78-a62a-fe4ef6165f7c
+    sessionId: 08ab53af-f6cb-4e29-90f5-17e8b4b1b037
+    oem: qq
+    requesterName: dd
+    requesterEmail: jonathan.tsao@intel.com
+    createdAt: '2026-08-25T14:18:40.050Z'
+    status: confirmed
+version: 16
