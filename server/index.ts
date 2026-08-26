@@ -9,6 +9,8 @@ const store = createDataStore()
 const app = express()
 const port = Number(process.env.PORT ?? 3001)
 const staticRoot = path.resolve('dist')
+const OEM_OPTIONS = new Set(['Dell', 'HP', 'Lenovo', 'Asus', 'Acer', 'Fujitsu', 'VAIO', 'Panasonic', 'NEC', 'Samsung', 'LG', 'Honor', 'Wiko', 'Dynabook', 'NA'])
+const ODM_OPTIONS = new Set(['Quanta', 'Pegatron', 'Wistron', 'Inventec', 'Compal', 'LCFC', 'Luxshare', 'Huaqin', 'NA'])
 
 app.use(express.json())
 app.use(cookieParser(password))
@@ -77,13 +79,14 @@ app.delete('/api/sessions/:id', requireScheduler, async (request, response) => {
 })
 
 app.post('/api/bookings', async (request, response) => {
-  const { sessionId, oem, requesterName, requesterEmail } = request.body ?? {}
-  if (!sessionId || !oem || !requesterName || !requesterEmail) return response.status(400).json({ error: 'REQUIRED_FIELDS_MISSING' })
+  const { sessionId, oem, odm, requesterName, requesterEmail } = request.body ?? {}
+  if (!sessionId || !oem || !odm || !requesterName || !requesterEmail) return response.status(400).json({ error: 'REQUIRED_FIELDS_MISSING' })
+  if (!OEM_OPTIONS.has(String(oem)) || !ODM_OPTIONS.has(String(odm))) return response.status(400).json({ error: 'INVALID_CUSTOMER_SELECTION' })
   let booking: Booking | undefined
   await store.update((data) => {
     const session = data.sessions.find((item) => item.id === sessionId && item.status === 'active')
     if (!session) throw new Error('SESSION_NOT_FOUND')
-    booking = { id: crypto.randomUUID(), sessionId, oem, requesterName, requesterEmail, createdAt: new Date().toISOString(), status: 'confirmed' }
+    booking = { id: crypto.randomUUID(), sessionId, oem, odm, requesterName, requesterEmail, createdAt: new Date().toISOString(), status: 'confirmed' }
     data.bookings.push(booking)
   })
   response.status(201).json(booking)

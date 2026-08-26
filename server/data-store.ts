@@ -26,6 +26,7 @@ export type Booking = {
   id: string
   sessionId: string
   oem: string
+  odm?: string
   requesterName: string
   requesterEmail: string
   createdAt: string
