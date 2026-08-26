@@ -216,7 +216,8 @@ button { font: inherit; cursor: pointer; }
 .world-clock time { color: #F3F4EF; font-size: 10px; line-height: 1.1; font-variant-numeric: tabular-nums; }
 .topbar .brand, .topbar .topbar-center { display: none; }
 .world-clocks { margin-left: 0; }
-.timezone-note { margin: -8px 0 14px; color: var(--muted); font-size: 10px; }
+.time-label-row { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.timezone-note { margin: 0; color: var(--muted); font-size: 9px; font-weight: 400; line-height: 1.2; text-align: right; }
 .phone-preview { width: 390px; max-width: 100%; margin: 0 auto; min-height: 100vh; box-shadow: 0 0 0 1px var(--line), 0 18px 55px rgba(50,82,106,.18); }
 .phone-preview .topbar { height: 62px; padding: 0 16px; }
 .phone-preview .topbar-center { display: none; }

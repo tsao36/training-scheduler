@@ -826,7 +826,6 @@ function App() {
           <p className="modal-copy">
             Sessions are 30 minutes and use the course instructor.
           </p>
-          <p className="timezone-note">All session dates and times use Pacific Time (PT).</p>
           <label className="form-label">
             Course
             <select
@@ -857,7 +856,10 @@ function App() {
             />
           </label>
           <label className="form-label">
-            Start time
+            <span className="time-label-row">
+              <span>Start time</span>
+              <span className="timezone-note">All session dates and times use Pacific Time (PT).</span>
+            </span>
             <input
               type="time"
               step="1800"
