@@ -105,8 +105,10 @@ $stderrLog = Join-Path $RepoPath ".server-$Port.stderr.log"
 if (Test-Path $stdoutLog) { Remove-Item $stdoutLog -Force -ErrorAction SilentlyContinue }
 if (Test-Path $stderrLog) { Remove-Item $stderrLog -Force -ErrorAction SilentlyContinue }
 
-$startCmd = "$env:SCHEDULER_PASSWORD='$SchedulerPassword'; `$env:DATA_FILE='$DataFile'; `$env:PORT='$Port'; Set-Location '$RepoPath'; node dist-server/index.js"
-$proc = Start-Process -FilePath "powershell.exe" -ArgumentList "-NoProfile -ExecutionPolicy Bypass -Command $startCmd" -PassThru -WindowStyle Hidden -WorkingDirectory $RepoPath -RedirectStandardOutput $stdoutLog -RedirectStandardError $stderrLog
+$env:SCHEDULER_PASSWORD = $SchedulerPassword
+$env:DATA_FILE = $DataFile
+$env:PORT = "$Port"
+$proc = Start-Process -FilePath "node" -ArgumentList "dist-server/index.js" -PassThru -WindowStyle Hidden -WorkingDirectory $RepoPath -RedirectStandardOutput $stdoutLog -RedirectStandardError $stderrLog
 
 $pidFile = Join-Path $RepoPath ".server-$Port.pid"
 Set-Content -Path $pidFile -Value $proc.Id -Encoding ascii
