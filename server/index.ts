@@ -12,7 +12,7 @@ const store = createDataStore()
 const app = express()
 const port = Number(process.env.PORT ?? 3001)
 const staticRoot = path.resolve('dist')
-const OEM_OPTIONS = new Set(['Dell', 'HP', 'Asus', 'Acer', 'Fujitsu', 'VAIO', 'Panasonic', 'NEC', 'Samsung', 'LG', 'Honor', 'Wiko', 'Dynabook', 'Google', 'Microsoft', 'MSI', 'Xiaomi', 'Lenovo China', 'Lenovo Japan', 'NA'])
+const OEM_OPTIONS = new Set(['Dell', 'HP', 'Asus', 'Acer', 'Fujitsu', 'VAIO', 'Panasonic', 'NEC', 'Samsung', 'LG', 'Honor', 'Wiko', 'Dynabook', 'Google', 'Microsoft', 'MSFT Surface', 'MSI', 'Xiaomi', 'Lenovo China', 'Lenovo Japan', 'NA'])
 const ODM_OPTIONS = new Set(['Quanta', 'Pegatron', 'Wistron', 'Inventec', 'Compal', 'LCFC', 'Luxshare', 'Huaqin', 'NA'])
 const isDate = (value: unknown) => typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)
 const trainingUnavailableLabel = (trainingId: string, title: string) => {
@@ -27,6 +27,47 @@ const hasUnavailableDayBlock = (data: Awaited<ReturnType<typeof store.read>>, se
   if (!training) return false
   const label = trainingUnavailableLabel(training.id, training.title)
   return (data.unavailableDays ?? []).some((item) => item.date === session.date && item.label === label)
+}
+
+const getCFEContactEmail = (trainingId: string, oem: string): string | null => {
+  // WiFi Debug Training CFE contacts
+  if (trainingId === 'wifi-log') {
+    const wifiContacts: Record<string, string> = {
+      'Lenovo China': 'nicky.chen@intel.com',
+      'Honor': 'charles.p.chu@intel.com',
+      'Samsung': 'kj.fang@intel.com',
+      'LG': 'kj.fang@intel.com',
+      'Lenovo Japan': 'timdaway.lai@intel.com',
+      'HP': 'frank.lee@intel.com',
+      'Dell': 'frank.fc.yang@intel.com',
+      'Asus': 'brenton.wu@intel.com',
+    }
+    return wifiContacts[oem] || 'zhiqiang.cai@intel.com' // Default WiFi contact
+  }
+  
+  // BT Debug Training CFE contacts
+  if (trainingId === 'bt-log') {
+    const btContacts: Record<string, string> = {
+      'Acer': 'matt.chen@intel.com',
+      'Lenovo Japan': 'matt.chen@intel.com',
+      'HP': 'steven1.chen@intel.com',
+      'MSFT Surface': 'steven1.chen@intel.com',
+      'Microsoft': 'steven1.chen@intel.com',
+      'Asus': 'yu-wei.chen@intel.com',
+      'Dell': 'wesley.kuo@intel.com',
+      'Samsung': 'bingyue.sun@intel.com',
+      'LG': 'bingyue.sun@intel.com',
+      'Dynabook': 'brenton.wu@intel.com',
+      'VAIO': 'brenton.wu@intel.com',
+      'NEC': 'brenton.wu@intel.com',
+      'Fujitsu': 'brenton.wu@intel.com',
+      'Panasonic': 'brenton.wu@intel.com',
+      'Lenovo China': 'juan.zou@intel.com',
+    }
+    return btContacts[oem] || null
+  }
+  
+  return null
 }
 
 app.use(express.json())
@@ -143,6 +184,7 @@ app.post('/api/bookings', async (request, response) => {
   try {
     if (booking && session && training) {
       const verificationLink = `${baseUrl}/verify-booking?token=${booking.verificationToken}`
+      const cfeContact = getCFEContactEmail(training.id, selectedOem)
       await sendVerificationEmail(
         booking.requesterEmail,
         booking.requesterName,
@@ -150,6 +192,7 @@ app.post('/api/bookings', async (request, response) => {
         session.date,
         session.startTime,
         verificationLink,
+        cfeContact || undefined,
       )
     }
   } catch (error) {
@@ -210,6 +253,7 @@ app.post('/api/bookings/resend-verification', async (request, response) => {
     const training = data.trainings.find((item) => item.id === session?.trainingId)
     if (session && training && booking.verificationToken) {
       const verificationLink = `${baseUrl}/verify-booking?token=${booking.verificationToken}`
+      const cfeContact = getCFEContactEmail(training.id, booking.oem)
       await sendVerificationEmail(
         booking.requesterEmail,
         booking.requesterName,
@@ -217,6 +261,7 @@ app.post('/api/bookings/resend-verification', async (request, response) => {
         session.date,
         session.startTime,
         verificationLink,
+        cfeContact || undefined,
       )
     }
   } catch (error) {

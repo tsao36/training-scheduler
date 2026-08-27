@@ -21,6 +21,7 @@ export async function sendVerificationEmail(
   sessionDate: string,
   sessionTime: string,
   verificationLink: string,
+  cc?: string,
 ): Promise<void> {
   const subject = `Confirm your Training Scheduler booking`
   const html = `
@@ -36,6 +37,7 @@ export async function sendVerificationEmail(
   await transporter.sendMail({
     from: smtpFrom,
     to,
+    cc: cc ? cc : undefined,
     subject,
     html,
   })

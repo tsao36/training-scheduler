@@ -87,7 +87,7 @@ const weekGroups: { label: string; days: Day[] }[] = [
   { label: "21–25 SEP", days: weekdays.slice(5, 10) },
   { label: "28 SEP–02 OCT", days: weekdays.slice(10, 15) },
 ];
-const OEM_OPTIONS = ["Dell", "HP", "Asus", "Acer", "Fujitsu", "VAIO", "Panasonic", "NEC", "Samsung", "LG", "Honor", "Wiko", "Dynabook", "Google", "Microsoft", "MSI", "Xiaomi", "Lenovo China", "Lenovo Japan", "NA"] as const;
+const OEM_OPTIONS = ["Dell", "HP", "Asus", "Acer", "Fujitsu", "VAIO", "Panasonic", "NEC", "Samsung", "LG", "Honor", "Wiko", "Dynabook", "Google", "Microsoft", "MSFT Surface", "MSI", "Xiaomi", "Lenovo China", "Lenovo Japan", "NA"] as const;
 const ODM_OPTIONS = ["Quanta", "Pegatron", "Wistron", "Inventec", "Compal", "LCFC", "Luxshare", "Huaqin", "NA"] as const;
 type OemOption = (typeof OEM_OPTIONS)[number];
 type OdmOption = (typeof ODM_OPTIONS)[number];
