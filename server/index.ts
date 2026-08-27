@@ -4,7 +4,7 @@ import express, { type NextFunction, type Request, type Response } from 'express
 import path from 'node:path'
 import { dump } from 'js-yaml'
 import { createDataStore, type Booking } from './data-store.js'
-import { readEmailRecipientConfig, sendBookingNotificationEmail, getCFEContactEmail, writeEmailRecipientConfig } from './email-service.js'
+import { readEmailRecipientConfig, sendBookingNotificationEmail, sendBookingCancellationNotificationEmail, getCFEContactEmail, writeEmailRecipientConfig } from './email-service.js'
 
 const password = process.env.SCHEDULER_PASSWORD
 if (!password) throw new Error('SCHEDULER_PASSWORD is required')
@@ -206,12 +206,34 @@ app.delete('/api/unavailable-days', requireScheduler, async (request, response) 
 
 app.delete('/api/bookings/:id', async (request, response) => {
   const email = String(request.body?.requesterEmail ?? '')
+  let booking: Booking | undefined
+  let session: Awaited<ReturnType<typeof store.read>>['sessions'][0] | undefined
+  let training: Awaited<ReturnType<typeof store.read>>['trainings'][0] | undefined
   await store.update((data) => {
-    const booking = data.bookings.find((item) => item.id === request.params.id && item.requesterEmail === email && item.status === 'confirmed')
+    booking = data.bookings.find((item) => item.id === request.params.id && item.requesterEmail === email && item.status === 'confirmed')
     if (!booking) throw new Error('BOOKING_NOT_FOUND')
+    session = data.sessions.find((item) => item.id === booking!.sessionId)
+    training = session ? data.trainings.find((item) => item.id === session!.trainingId) : undefined
     booking.status = 'cancelled'
     booking.cancelledAt = new Date().toISOString()
   })
+
+  try {
+    if (booking && session && training) {
+      const instructorEmail = await getCFEContactEmail(training.id, booking.oem, booking.odm ?? 'NA')
+      await sendBookingCancellationNotificationEmail(
+        booking.requesterEmail,
+        booking.requesterName,
+        training.title,
+        session.date,
+        session.startTime,
+        instructorEmail ?? undefined,
+      )
+    }
+  } catch (error) {
+    console.error('Failed to send booking cancellation notification email:', error)
+  }
+
   response.status(204).end()
 })
 

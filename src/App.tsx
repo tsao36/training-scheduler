@@ -3,6 +3,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type MouseEvent,
   type ReactNode,
 } from "react";
 import {
@@ -59,6 +60,7 @@ type UnavailableDay = {
   warning: string;
 };
 type BookingLookup = Booking & { session?: Session; training?: Training };
+type SlotTooltip = { session: Session; bookings: Booking[] };
 type RecipientRow = { id: string; trainingId: string; oem: string; odm: string; email: string };
 type SchedulerData = {
   trainings: Training[];
@@ -283,8 +285,21 @@ function App() {
     warning: "",
   });
   const [activeDayWarnings, setActiveDayWarnings] = useState<UnavailableDay[] | null>(null);
+  const [activeSlotTooltip, setActiveSlotTooltip] = useState<SlotTooltip | null>(null);
   const dayWarningTooltipRef = useRef<HTMLDivElement | null>(null);
+  const slotTooltipRef = useRef<HTMLDivElement | null>(null);
   const [clocks, setClocks] = useState<Clock[]>(() => timeZones.map(([label, timeZone]) => ({ label, timeZone, time: formatClock(timeZone) })));
+  const positionSlotTooltipAt = (clientX: number, clientY: number) => {
+    const tooltip = slotTooltipRef.current;
+    if (!tooltip) return;
+    const width = tooltip.offsetWidth || 240;
+    const height = tooltip.offsetHeight || 180;
+    const left = Math.max(8, Math.min(window.innerWidth - width - 8, clientX + 14));
+    const top = Math.max(8, Math.min(window.innerHeight - height - 8, clientY + 14));
+    tooltip.style.left = `${left}px`;
+    tooltip.style.top = `${top}px`;
+  };
+  const positionSlotTooltip = (event: MouseEvent<HTMLElement>) => positionSlotTooltipAt(event.clientX, event.clientY);
   const refresh = async () => {
     const next = await api<SchedulerData>("/api/scheduler");
     setData(next);
@@ -1045,6 +1060,18 @@ function App() {
                             setSelectedSession(session);
                             setSelectedTraining(session.training ?? null);
                           }}
+                          onMouseEnter={(event) => {
+                            setActiveSlotTooltip({ session, bookings: sessionBookings });
+                            requestAnimationFrame(() => positionSlotTooltip(event));
+                          }}
+                          onMouseMove={positionSlotTooltip}
+                          onMouseLeave={() => setActiveSlotTooltip(null)}
+                          onFocus={(event) => {
+                            setActiveSlotTooltip({ session, bookings: sessionBookings });
+                            const rect = event.currentTarget.getBoundingClientRect();
+                            requestAnimationFrame(() => positionSlotTooltipAt(rect.left, rect.bottom));
+                          }}
+                          onBlur={() => setActiveSlotTooltip(null)}
                         >
                           <strong>
                             {`${session.training?.shortTitle} · ${session.startTime} PT`}
@@ -1055,23 +1082,6 @@ function App() {
                               {confirmedCount} confirmed{pendingCount > 0 ? `, ${pendingCount} pending` : ""}
                             </span>
                           )}
-                          <span className="slot-tooltip">
-                            <b>{session.training?.title}</b>
-                            <span>{session.startTime} PT · 30 min</span>
-                            <span>Instructor: {session.training?.instructor}</span>
-                            <span>Delivery: {session.training?.mode === "Live" ? "Instructor-led" : "CFE online video"}</span>
-                            {sessionBookings.length > 0 ? sessionBookings.map((booking) => (
-                              <span className={`booking-info${booking.status === "pending" ? " pending" : ""}`} key={booking.id}>
-                                <b>OEM: {booking.oem}</b>
-                                <b>ODM: {booking.odm ?? "NA"}</b>
-                                <span>Booked by: {booking.requesterEmail}</span>
-                                {booking.status === "pending" && <span className="pending-badge">⏳ Awaiting confirmation</span>}
-                              </span>
-                            )) : <span>No bookings yet</span>}
-                            <span className="slot-capacity-note">
-                              This slot supports multiple OEM/ODM bookings.
-                            </span>
-                          </span>
                         </button>
                         );
                       }),
@@ -1107,6 +1117,29 @@ function App() {
                 {activeDayWarnings.map((item) => (
                   <span key={`${item.date}-${item.label}`}>{item.warning}</span>
                 ))}
+              </div>
+            )}
+            {activeSlotTooltip && (
+              <div
+                ref={slotTooltipRef}
+                className="slot-tooltip"
+                style={{ left: "8px", top: "8px" }}
+              >
+                <b>{activeSlotTooltip.session.training?.title}</b>
+                <span>{activeSlotTooltip.session.startTime} PT · 30 min</span>
+                <span>Instructor: {activeSlotTooltip.session.training?.instructor}</span>
+                <span>Delivery: {activeSlotTooltip.session.training?.mode === "Live" ? "Instructor-led" : "CFE online video"}</span>
+                {activeSlotTooltip.bookings.length > 0 ? activeSlotTooltip.bookings.map((booking) => (
+                  <span className={`booking-info${booking.status === "pending" ? " pending" : ""}`} key={booking.id}>
+                    <b>OEM: {booking.oem}</b>
+                    <b>ODM: {booking.odm ?? "NA"}</b>
+                    <span>Booked by: {booking.requesterEmail}</span>
+                    {booking.status === "pending" && <span className="pending-badge">Awaiting confirmation</span>}
+                  </span>
+                )) : <span>No bookings yet</span>}
+                <span className="slot-capacity-note">
+                  This slot supports multiple OEM/ODM bookings.
+                </span>
               </div>
             )}
           </section>
