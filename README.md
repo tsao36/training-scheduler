@@ -47,6 +47,38 @@ The data file must already exist, its directory must be writable, and it must co
 
 The server creates automatic backups in a `scheduler-backups` directory beside the YAML file every day at `11:00` and `20:00` Pacific Time. Only the latest 8 backup files are retained. Persist both the YAML directory and its backup directory when running in a container.
 
+## User Guide (Latest)
+
+### Public view
+
+- The calendar only shows booked sessions on the timeline.
+- Empty half-hour cells are still clickable for booking. Clicking an empty slot opens booking for the underlying available session.
+- Hovering a booked slot shows details in tooltip, including topic, instructor, delivery type, OEM, and ODM.
+- Shared slots remain bookable. A slot with existing booking(s) is shown as shared, not full.
+- "My bookings" lets users search with requester email and cancel with the same email confirmation.
+
+### Booking behavior
+
+- Booking requires customer/team, requester name, and requester email.
+- The system rejects duplicate booking by the same Topic + OEM + ODM combination.
+- Bookings are blocked when that training topic is marked unavailable for the selected day.
+- Cancelled bookings remain in YAML with `cancelledAt` for history and audit.
+
+### Scheduler mode (admin)
+
+- Scheduler mode is protected by password and signed session cookie.
+- Scheduler can create 30-minute sessions by clicking empty half-hour cells.
+- Scheduler can delete an active session from the session details panel.
+- Scheduler can open "Manage unavailable days" to add date ranges per training topic.
+- Unavailable days are written to YAML as `unavailableDays` entries and can be removed one-by-one.
+- Calendar shows all-day unavailable warnings for marked dates.
+
+### Topic vs Customer report
+
+- "Topic vs Customer" now requires explicit OEM and ODM selection.
+- Default filter is unselected (none), so totals are shown only after both selections are chosen.
+- Report shows booked-session counts by training topic for the selected OEM/ODM pair.
+
 ## Rules implemented
 
 - Sessions are 30 minutes and can be created on weekdays from 09:00 through 17:00 Pacific Time.
@@ -54,6 +86,9 @@ The server creates automatic backups in a `scheduler-backups` directory beside t
 - The same instructor cannot have overlapping sessions.
 - The same course cannot have two sessions at the same date and time.
 - Anyone can view sessions and create bookings. Bookings require customer/team, requester name, and requester email.
+- Shared slots are still bookable when capacity/rules allow.
+- Booking is blocked on configured `unavailableDays` for matching topic/date.
+- Duplicate booking is rejected for same Topic + OEM + ODM.
 - Scheduler mode protects session management with a signed session cookie.
 - YAML writes use a lock file, fresh read, temporary file, and atomic replacement.
 - Cancelled bookings remain in YAML with `cancelledAt`; cancelled sessions remain when they have bookings.
