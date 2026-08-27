@@ -1,10 +1,13 @@
 import cookieParser from 'cookie-parser'
+import { randomBytes, randomUUID } from 'node:crypto'
 import express, { type NextFunction, type Request, type Response } from 'express'
 import path from 'node:path'
 import { createDataStore, type Booking } from './data-store.js'
+import { sendVerificationEmail } from './email-service.js'
 
 const password = process.env.SCHEDULER_PASSWORD
 if (!password) throw new Error('SCHEDULER_PASSWORD is required')
+const baseUrl = process.env.BASE_URL ?? 'http://localhost:5173'
 const store = createDataStore()
 const app = express()
 const port = Number(process.env.PORT ?? 3001)
@@ -50,7 +53,7 @@ app.get('/api/bookings', async (request, response) => {
   const trainings = new Map(data.trainings.map((training) => [training.id, training]))
   const sessions = new Map(data.sessions.map((session) => [session.id, session]))
   const matches = data.bookings
-    .filter((booking) => booking.status === 'confirmed' && booking.requesterEmail.toLowerCase() === email)
+    .filter((booking) => (booking.status === 'confirmed' || booking.status === 'pending') && booking.requesterEmail.toLowerCase() === email)
     .map((booking) => ({ ...booking, session: sessions.get(booking.sessionId), training: sessions.get(booking.sessionId) ? trainings.get(sessions.get(booking.sessionId)!.trainingId) : undefined }))
   response.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate')
   response.json({ bookings: matches })
@@ -99,8 +102,11 @@ app.post('/api/bookings', async (request, response) => {
   const selectedOdm = String(odm)
   if (!OEM_OPTIONS.has(selectedOem) || !ODM_OPTIONS.has(selectedOdm)) return response.status(400).json({ error: 'INVALID_CUSTOMER_SELECTION' })
   let booking: Booking | undefined
+  let session: Awaited<ReturnType<typeof store.read>>['sessions'][0] | undefined
+  let training: Awaited<ReturnType<typeof store.read>>['trainings'][0] | undefined
+  
   await store.update((data) => {
-    const session = data.sessions.find((item) => item.id === sessionId && item.status === 'active')
+    session = data.sessions.find((item) => item.id === sessionId && item.status === 'active')
     if (!session) throw new Error('SESSION_NOT_FOUND')
 
     if (hasUnavailableDayBlock(data, session.id)) throw new Error('BOOKING_BLOCKED')
@@ -110,23 +116,115 @@ app.post('/api/bookings', async (request, response) => {
       if (existing.oem !== selectedOem) return false
       if ((existing.odm ?? 'NA') !== selectedOdm) return false
       const existingSession = data.sessions.find((item) => item.id === existing.sessionId)
-      return existingSession?.trainingId === session.trainingId
+      return existingSession?.trainingId === session!.trainingId
     })
     if (hasDuplicateTopicCustomerBooking) throw new Error('DUPLICATE_TOPIC_CUSTOMER_BOOKING')
 
+    training = data.trainings.find((item) => item.id === session!.trainingId)
+    const verificationToken = randomBytes(32).toString('hex')
+    const tokenExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+
     booking = {
-      id: crypto.randomUUID(),
+      id: randomUUID(),
       sessionId,
       oem: selectedOem,
       odm: selectedOdm,
       requesterName,
-      requesterEmail,
+      requesterEmail: requesterEmail.toLowerCase(),
       createdAt: new Date().toISOString(),
-      status: 'confirmed',
+      status: 'pending',
+      verificationToken,
+      tokenExpiresAt,
     }
     data.bookings.push(booking)
   })
+
+  // Send verification email
+  try {
+    if (booking && session && training) {
+      const verificationLink = `${baseUrl}/verify-booking?token=${booking.verificationToken}`
+      await sendVerificationEmail(
+        booking.requesterEmail,
+        booking.requesterName,
+        training.title,
+        session.date,
+        session.startTime,
+        verificationLink,
+      )
+    }
+  } catch (error) {
+    console.error('Failed to send verification email:', error)
+    // Don't fail the booking creation if email fails
+  }
+
   response.status(201).json(booking)
+})
+
+app.post('/api/bookings/verify', async (request, response) => {
+  const { token } = request.body ?? {}
+  if (!token) return response.status(400).json({ error: 'TOKEN_REQUIRED' })
+
+  await store.update((data) => {
+    const booking = data.bookings.find((item) => item.verificationToken === token)
+    if (!booking) throw new Error('INVALID_OR_EXPIRED_TOKEN')
+    
+    if (booking.tokenExpiresAt && new Date(booking.tokenExpiresAt) < new Date()) {
+      throw new Error('TOKEN_EXPIRED')
+    }
+
+    booking.status = 'confirmed'
+    booking.verificationToken = undefined
+    booking.tokenExpiresAt = undefined
+  })
+
+  response.status(200).json({ confirmed: true })
+})
+
+app.post('/api/bookings/resend-verification', async (request, response) => {
+  const { bookingId, requesterEmail } = request.body ?? {}
+  if (!bookingId || !requesterEmail) return response.status(400).json({ error: 'REQUIRED_FIELDS_MISSING' })
+
+  const data = await store.read()
+  const booking = data.bookings.find((item) => item.id === bookingId && item.requesterEmail === requesterEmail.toLowerCase())
+  if (!booking) return response.status(404).json({ error: 'BOOKING_NOT_FOUND' })
+  if (booking.status === 'confirmed') return response.status(400).json({ error: 'BOOKING_ALREADY_CONFIRMED' })
+  if (booking.tokenExpiresAt && new Date(booking.tokenExpiresAt) < new Date()) {
+    // Generate new token
+    const newToken = randomBytes(32).toString('hex')
+    const newExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+    
+    await store.update((data) => {
+      const b = data.bookings.find((item) => item.id === bookingId)
+      if (b) {
+        b.verificationToken = newToken
+        b.tokenExpiresAt = newExpiry
+      }
+    })
+    booking.verificationToken = newToken
+    booking.tokenExpiresAt = newExpiry
+  }
+
+  // Resend email
+  try {
+    const session = data.sessions.find((item) => item.id === booking.sessionId)
+    const training = data.trainings.find((item) => item.id === session?.trainingId)
+    if (session && training && booking.verificationToken) {
+      const verificationLink = `${baseUrl}/verify-booking?token=${booking.verificationToken}`
+      await sendVerificationEmail(
+        booking.requesterEmail,
+        booking.requesterName,
+        training.title,
+        session.date,
+        session.startTime,
+        verificationLink,
+      )
+    }
+  } catch (error) {
+    console.error('Failed to resend verification email:', error)
+    return response.status(500).json({ error: 'EMAIL_SEND_FAILED' })
+  }
+
+  response.status(200).json({ resent: true })
 })
 
 app.post('/api/unavailable-days', requireScheduler, async (request, response) => {

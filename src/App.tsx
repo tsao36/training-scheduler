@@ -47,7 +47,9 @@ type Booking = {
   requesterName: string;
   requesterEmail: string;
   createdAt: string;
-  status: "confirmed" | "cancelled";
+  status: "pending" | "confirmed" | "cancelled";
+  verificationToken?: string;
+  tokenExpiresAt?: string;
 };
 type UnavailableDay = {
   date: string;
@@ -201,7 +203,7 @@ function App() {
   const [query, setQuery] = useState("");
   const [weekIndex, setWeekIndex] = useState(0);
   const [viewMode, setViewMode] = useState<"pc" | "phone">("pc");
-  const [modal, setModal] = useState<"booking" | "login" | "my-bookings" | "topic-customer" | "cancel-booking" | "booking-blocks" | null>(
+  const [modal, setModal] = useState<"booking" | "login" | "my-bookings" | "topic-customer" | "cancel-booking" | "booking-blocks" | "booking-confirmation" | "verification-success" | null>(
     null,
   );
   const [bookingDraft, setBookingDraft] = useState<{
@@ -222,6 +224,7 @@ function App() {
   const [selectedOemFilter, setSelectedOemFilter] = useState<OemFilterOption>("");
   const [selectedOdmFilter, setSelectedOdmFilter] = useState<OdmFilterOption>("");
   const [bookingToCancel, setBookingToCancel] = useState<Booking | null>(null);
+  const [bookingConfirmation, setBookingConfirmation] = useState<{ bookingId: string; email: string } | null>(null);
   const [unavailableDraft, setUnavailableDraft] = useState<{
     trainingId: string;
     startDate: string;
@@ -273,6 +276,25 @@ function App() {
     api<{ authenticated: boolean }>("/api/auth/status")
       .then((result) => setAuthenticated(result.authenticated))
       .catch(() => undefined);
+    
+    // Handle email verification token from URL
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('token');
+    if (token) {
+      api<{ confirmed: boolean }>("/api/bookings/verify", {
+        method: "POST",
+        body: JSON.stringify({ token }),
+      })
+        .then(() => {
+          setModal("verification-success");
+          window.history.replaceState({}, document.title, window.location.pathname);
+          refresh().catch((cause: Error) => setError(cause.message));
+        })
+        .catch((cause) => {
+          setError((cause as Error).message);
+          window.history.replaceState({}, document.title, window.location.pathname);
+        });
+    }
   }, []);
   useEffect(() => { const updateClocks = () => setClocks(timeZones.map(([label, timeZone]) => ({ label, timeZone, time: formatClock(timeZone) }))); const interval = window.setInterval(updateClocks, 1000); return () => window.clearInterval(interval); }, []);
   useEffect(() => {
@@ -419,7 +441,7 @@ function App() {
     () =>
       new Set(
         bookings
-          .filter((booking) => booking.status === "confirmed")
+          .filter((booking) => booking.status === "confirmed" || booking.status === "pending")
           .map((booking) => booking.sessionId),
       ),
     [bookings],
@@ -556,16 +578,19 @@ function App() {
   const createBooking = async () => {
     if (!selectedSession) return;
     try {
-      await api("/api/bookings", {
+      const result = await api<Booking>("/api/bookings", {
         method: "POST",
         body: JSON.stringify({
           ...bookingDraft,
           sessionId: selectedSession.id,
         }),
       });
-      await refresh();
-      setModal(null);
+      // Show confirmation message with pending status
+      setBookingConfirmation({ bookingId: result.id, email: bookingDraft.requesterEmail });
+      setModal("booking-confirmation");
       setBookingDraft({ oem: OEM_OPTIONS[0], odm: ODM_OPTIONS[0], requesterName: "", requesterEmail: "" });
+      // Refresh to show pending booking
+      await refresh();
     } catch (cause) {
       setError((cause as Error).message);
     }
@@ -926,7 +951,10 @@ function App() {
                         const sessionBookings = bookings.filter(
                           (booking) => booking.sessionId === session.id,
                         );
+                        const confirmedCount = sessionBookings.filter((b) => b.status === "confirmed").length;
+                        const pendingCount = sessionBookings.filter((b) => b.status === "pending").length;
                         const bookingCount = sessionBookings.length;
+                        const hasPending = pendingCount > 0;
                         const slotStateClass = blockedSessionIds.has(session.id)
                           ? "closed-slot"
                           : bookingCount > 0
@@ -934,7 +962,7 @@ function App() {
                             : "open-slot";
                         return (
                         <button
-                          className={`slot ${session.training?.accent ?? ""} ${slotStateClass}`}
+                          className={`slot ${session.training?.accent ?? ""} ${slotStateClass}${hasPending ? " pending-bookings" : ""}`}
                           key={session.id}
                           type="button"
                           style={{
@@ -954,7 +982,7 @@ function App() {
                           <small>{bookingCount > 0 ? "Shared slot" : "Open"}</small>
                           {bookingCount > 0 && (
                             <span className="slot-booking-count">
-                              {bookingCount} bookings
+                              {confirmedCount} confirmed{pendingCount > 0 ? `, ${pendingCount} pending` : ""}
                             </span>
                           )}
                           <span className="slot-tooltip">
@@ -963,10 +991,11 @@ function App() {
                             <span>Instructor: {session.training?.instructor}</span>
                             <span>Delivery: {session.training?.mode === "Live" ? "Instructor-led" : "CFE online video"}</span>
                             {sessionBookings.length > 0 ? sessionBookings.map((booking) => (
-                              <span className="booking-info" key={booking.id}>
+                              <span className={`booking-info${booking.status === "pending" ? " pending" : ""}`} key={booking.id}>
                                 <b>OEM: {booking.oem}</b>
                                 <b>ODM: {booking.odm ?? "NA"}</b>
                                 <span>Booked by: {booking.requesterEmail}</span>
+                                {booking.status === "pending" && <span className="pending-badge">⏳ Awaiting confirmation</span>}
                               </span>
                             )) : <span>No bookings yet</span>}
                             <span className="slot-capacity-note">
@@ -1377,6 +1406,30 @@ function App() {
             <label className="form-label">Requester email<input name="requesterEmail" type="email" required autoFocus /></label>
             <button className="cancel-confirm-button" type="submit"><Trash2 size={16} /> Cancel booking</button>
           </form>
+        </Modal>
+      )}
+      {modal === "booking-confirmation" && bookingConfirmation && (
+        <Modal title="Booking confirmation email sent" close={() => { setBookingConfirmation(null); setModal(null); }}>
+          <p className="modal-copy">
+            A confirmation email has been sent to <strong>{bookingConfirmation.email}</strong>. 
+            Please click the link in the email to confirm your booking.
+          </p>
+          <p className="modal-copy">
+            The confirmation link will expire in 24 hours. Your booking will appear on the schedule after confirmation.
+          </p>
+          <button className="book-button" type="button" onClick={() => { setBookingConfirmation(null); setModal(null); }}>
+            <Check size={17} /> Done
+          </button>
+        </Modal>
+      )}
+      {modal === "verification-success" && (
+        <Modal title="Booking confirmed!" close={() => setModal(null)}>
+          <p className="modal-copy">
+            Your booking has been successfully confirmed and is now visible on the schedule.
+          </p>
+          <button className="book-button" type="button" onClick={() => setModal(null)}>
+            <Check size={17} /> Got it
+          </button>
         </Modal>
       )}
     </div>

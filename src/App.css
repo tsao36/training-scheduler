@@ -248,6 +248,9 @@ button { font: inherit; cursor: pointer; }
 .slot.shared-slot:hover { background: #32526A; border-color: #A18851; box-shadow: 0 0 0 3px rgba(161,136,81,.3); }
 .slot.closed-slot { z-index: 4; color: #F3F4EF; background: #90626C; border: 3px solid #32526A; border-left-width: 5px; }
 .slot.closed-slot strong, .slot.closed-slot small { color: #F3F4EF; }
+.slot.pending-bookings { opacity: 0.65; filter: grayscale(0.3); }
+.slot-tooltip .booking-info.pending { opacity: 0.75; }
+.pending-badge { display: block; margin-top: 3px; padding-top: 3px; border-top: 1px solid rgba(255,255,255,.3); color: #FFD700; font-size: 9px; font-weight: 600; }
 .slot-booking-count { position: absolute; right: 2px; top: 2px; padding: 1px 4px; border-radius: 999px; background: #A18851; color: #F3F4EF; font-size: 7px; line-height: 1.2; font-weight: 700; pointer-events: none; }
 .legend-dot.shared { background: #32526A; border: 2px solid #A18851; box-sizing: border-box; }
 .legend-dot.closed { background: #90626C; border: 2px solid #32526A; box-sizing: border-box; }

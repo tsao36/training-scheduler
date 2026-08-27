@@ -31,7 +31,9 @@ export type Booking = {
   requesterEmail: string
   createdAt: string
   cancelledAt?: string
-  status: 'confirmed' | 'cancelled'
+  status: 'pending' | 'confirmed' | 'cancelled'
+  verificationToken?: string
+  tokenExpiresAt?: string
 }
 
 export type SchedulerData = {
