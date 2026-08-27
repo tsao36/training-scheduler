@@ -118,6 +118,15 @@ const api = async <T,>(url: string, options?: RequestInit): Promise<T> => {
     headers: { "Content-Type": "application/json" },
     ...options,
   });
+  const contentType = response.headers.get("content-type") ?? "";
+  if (!contentType.includes("application/json")) {
+    const bodyText = await response.text();
+    throw new Error(
+      bodyText.includes("<!doctype html>")
+        ? "The server responded with the app page instead of JSON. Check that the scheduler backend is running."
+        : `Request failed (${response.status} ${response.statusText})`,
+    );
+  }
   if (!response.ok) {
     const payload = (await response.json()) as { error?: string };
     throw new Error(userError(payload.error ?? "REQUEST_FAILED"));
@@ -687,11 +696,6 @@ function App() {
           </span>
           <span>{authenticated ? "Scheduler mode" : "Public view"}</span>
         </button>
-        {authenticated && (
-          <button className="secondary-button" type="button" onClick={loadRecipientConfig}>
-            Configure recipients
-          </button>
-        )}
       </header>
       <main className="main-content">
         <div className="page-heading">
@@ -706,6 +710,11 @@ function App() {
             <button className="secondary-button" type="button" onClick={() => { setLookupResults(null); setModal("my-bookings"); }}>
               <CalendarDays size={16} /> My bookings
             </button>
+            {authenticated && (
+              <button className="secondary-button" type="button" onClick={loadRecipientConfig}>
+                Configure recipients
+              </button>
+            )}
             <button className="secondary-button" type="button" onClick={() => setModal("topic-customer")}>
               <Users size={16} /> Topic vs Customer
             </button>
