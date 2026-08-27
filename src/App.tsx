@@ -51,6 +51,7 @@ type Booking = {
   status: "pending" | "confirmed" | "cancelled";
   verificationToken?: string;
   tokenExpiresAt?: string;
+  instructorEmail?: string | null;
 };
 type UnavailableDay = {
   date: string;
@@ -268,7 +269,7 @@ function App() {
   const [selectedOemFilter, setSelectedOemFilter] = useState<OemFilterOption>("");
   const [selectedOdmFilter, setSelectedOdmFilter] = useState<OdmFilterOption>("");
   const [bookingToCancel, setBookingToCancel] = useState<Booking | null>(null);
-  const [bookingConfirmation, setBookingConfirmation] = useState<{ bookingId: string; email: string } | null>(null);
+  const [bookingConfirmation, setBookingConfirmation] = useState<{ bookingId: string; email: string; instructorEmail?: string | null } | null>(null);
   const [recipientRows, setRecipientRows] = useState<RecipientRow[]>([]);
   const [unavailableDraft, setUnavailableDraft] = useState<{
     trainingId: string;
@@ -612,7 +613,7 @@ function App() {
           sessionId: selectedSession.id,
         }),
       });
-      setBookingConfirmation({ bookingId: result.id, email: bookingDraft.requesterEmail });
+      setBookingConfirmation({ bookingId: result.id, email: result.requesterEmail, instructorEmail: result.instructorEmail });
       setModal("booking-confirmation");
       setBookingDraft({ oem: OEM_OPTIONS[0], odm: ODM_OPTIONS[0], requesterName: "", requesterEmail: "" });
       await refresh();
@@ -1539,7 +1540,8 @@ function App() {
       {modal === "booking-confirmation" && bookingConfirmation && (
         <Modal title="Booking confirmed" close={() => { setBookingConfirmation(null); setModal(null); }}>
           <p className="modal-copy">
-            Your booking has been confirmed and a notification email has been sent to <strong>{bookingConfirmation.email}</strong>.
+            Your booking has been confirmed and a notification email has been sent to <strong>{bookingConfirmation.email}</strong>
+            {bookingConfirmation.instructorEmail ? <> and <strong>{bookingConfirmation.instructorEmail}</strong></> : null}.
           </p>
           <p className="modal-copy">
             The corresponding engineering contact for this session has also been notified.

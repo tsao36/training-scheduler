@@ -147,9 +147,10 @@ app.post('/api/bookings', async (request, response) => {
     data.bookings.push(booking)
   })
 
+  let instructorEmail: string | null = null
   try {
     if (booking && session && training) {
-      const instructorEmail = await getCFEContactEmail(training.id, selectedOem, selectedOdm)
+      instructorEmail = await getCFEContactEmail(training.id, selectedOem, selectedOdm)
       await sendBookingNotificationEmail(
         booking.requesterEmail,
         booking.requesterName,
@@ -163,7 +164,7 @@ app.post('/api/bookings', async (request, response) => {
     console.error('Failed to send booking notification email:', error)
   }
 
-  response.status(201).json(booking)
+  response.status(201).json({ ...booking, instructorEmail })
 })
 
 app.post('/api/unavailable-days', requireScheduler, async (request, response) => {
