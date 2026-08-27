@@ -247,7 +247,6 @@ function App() {
   const [selectedSession, setSelectedSession] = useState<Session | null>(null);
   const [query, setQuery] = useState("");
   const [weekIndex, setWeekIndex] = useState(0);
-  const [viewMode, setViewMode] = useState<"pc" | "phone">("pc");
   const [modal, setModal] = useState<"booking" | "login" | "my-bookings" | "topic-customer" | "cancel-booking" | "booking-blocks" | "booking-confirmation" | "verification-success" | "email-recipients" | null>(
     null,
   );
@@ -422,24 +421,6 @@ function App() {
     if (!banner) return;
     delete banner.dataset.errorCode;
   }, [error]);
-  useEffect(() => {
-    const shell = document.querySelector(".app-shell");
-    const topbar = document.querySelector(".topbar");
-    if (!shell || !topbar) return;
-    shell.classList.toggle("phone-preview", viewMode === "phone");
-    shell.classList.toggle("pc-preview", viewMode === "pc");
-    let switcher = topbar.querySelector<HTMLButtonElement>(".device-switcher");
-    if (!switcher) {
-      switcher = document.createElement("button");
-      switcher.className = "device-switcher";
-      switcher.type = "button";
-      switcher.setAttribute("aria-label", "Switch between PC and phone view");
-      topbar.append(switcher);
-    }
-    switcher.innerHTML = viewMode === "pc" ? "▣ Phone view" : "▯ PC view";
-    switcher.onclick = () => setViewMode(viewMode === "pc" ? "phone" : "pc");
-    return () => switcher?.remove();
-  }, [viewMode]);
   const trainings = data?.trainings ?? [];
   const visibleUnavailableDays = useMemo(
     () =>
@@ -773,9 +754,9 @@ function App() {
         <div className="page-heading">
           <div>
             <p className="eyebrow">TEAM OPERATIONS / TRAINING</p>
-            <h1>Training schedule</h1>
+            <h1>Training Schedule</h1>
             <p className="lede">
-              Coordinate technical enablement across your OEM network.
+              Coordinate technical enablement across your customer network.
             </p>
           </div>
           <div className="heading-actions">

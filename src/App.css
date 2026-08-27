@@ -266,8 +266,6 @@ button { font: inherit; cursor: pointer; }
 .slot-booking-count { position: absolute; right: 2px; top: 2px; padding: 1px 4px; border-radius: 999px; background: #A18851; color: #F3F4EF; font-size: 7px; line-height: 1.2; font-weight: 700; pointer-events: none; }
 .legend-dot.shared { background: #32526A; border: 2px solid #A18851; box-sizing: border-box; }
 .legend-dot.closed { background: #90626C; border: 2px solid #32526A; box-sizing: border-box; }
-.device-switcher { position: absolute; right: 210px; top: 18px; border: 1px solid rgba(119,159,227,.65); background: transparent; color: #dbe5f6; padding: 7px 10px; font-size: 10px; font-weight: 700; }
-.device-switcher:hover { background: var(--blue); color: var(--navy); }
 .topbar { position: relative; }
 .world-clocks { display: flex; align-items: center; gap: 10px; margin-left: auto; margin-right: 18px; }
 .world-clock { display: grid; gap: 1px; min-width: 54px; color: #DDE5E8; text-align: center; }
@@ -277,27 +275,11 @@ button { font: inherit; cursor: pointer; }
 .world-clocks { margin-left: 0; }
 .time-label-row { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
 .timezone-note { margin: 0; color: var(--muted); font-size: 9px; font-weight: 400; line-height: 1.2; text-align: right; }
-.phone-preview { width: 390px; max-width: 100%; margin: 0 auto; min-height: 100vh; box-shadow: 0 0 0 1px var(--line), 0 18px 55px rgba(50,82,106,.18); }
-.phone-preview .topbar { height: 62px; padding: 0 16px; }
-.phone-preview .topbar-center { display: none; }
-.phone-preview .world-clocks { display: none; }
 @media (max-width: 900px) {
 	.topbar { overflow: hidden; padding-left: 18px; padding-right: 18px; }
 	.topbar-center, .world-clocks { display: none; }
 	.guide-button { margin-left: auto; }
 }
-.phone-preview .user-menu > span:last-child { display: none; }
-.phone-preview .device-switcher { right: 62px; top: 16px; }
-.phone-preview .main-content { padding: 28px 16px 44px; }
-.phone-preview .page-heading { align-items: start; flex-direction: column; gap: 18px; }
-.phone-preview .stats-row { grid-template-columns: 1fr 1fr; }
-.phone-preview .capacity { grid-column: 1 / -1; }
-.phone-preview .workspace { display: block; }
-.phone-preview .course-panel, .phone-preview .booking-panel { border: 0; }
-.phone-preview .course-panel { border-bottom: 1px solid var(--line); }
-.phone-preview .calendar-panel { overflow-x: auto; }
-.phone-preview .calendar-grid { min-width: 430px; }
-.phone-preview .calendar-footer { min-width: 430px; }
 .lede { font-size: 15px; }
 .eyebrow, .section-kicker { font-size: 11px; }
 .stat strong { font-size: 16px; }
