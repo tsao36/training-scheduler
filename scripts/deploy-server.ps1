@@ -4,6 +4,12 @@ param(
   [int]$Port = 3001,
   [string]$SchedulerPassword = "123",
   [string]$DataFile = "",
+  [string]$SmtpHost = "smtpauth.intel.com",
+  [int]$SmtpPort = 587,
+  [string]$SmtpUser = "jonathan.tsao@intel.com",
+  [string]$SmtpPass = "",
+  [string]$SmtpFrom = "jonathan.tsao@intel.com",
+  [string]$BaseUrl = "http://10.225.74.147:3001",
   [switch]$UseNpmInstall
 )
 
@@ -108,6 +114,12 @@ if (Test-Path $stderrLog) { Remove-Item $stderrLog -Force -ErrorAction SilentlyC
 $env:SCHEDULER_PASSWORD = $SchedulerPassword
 $env:DATA_FILE = $DataFile
 $env:PORT = "$Port"
+$env:SMTP_HOST = $SmtpHost
+$env:SMTP_PORT = "$SmtpPort"
+$env:SMTP_USER = $SmtpUser
+$env:SMTP_PASS = $SmtpPass
+$env:SMTP_FROM = $SmtpFrom
+$env:BASE_URL = $BaseUrl
 $proc = Start-Process -FilePath "node" -ArgumentList "dist-server/index.js" -PassThru -WindowStyle Hidden -WorkingDirectory $RepoPath -RedirectStandardOutput $stdoutLog -RedirectStandardError $stderrLog
 
 $pidFile = Join-Path $RepoPath ".server-$Port.pid"
