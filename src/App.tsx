@@ -529,6 +529,28 @@ function App() {
         : "open";
   const canBookSelectedSession =
     Boolean(selectedSession) && selectedSessionState !== "closed";
+  const bookingTopicOptions = useMemo(
+    () => {
+      if (!selectedSession) return [];
+      const sessionsAtSlot = sessions.filter(
+        (session) =>
+          session.date === selectedSession.date &&
+          session.startTime === selectedSession.startTime &&
+          !blockedSessionIds.has(session.id),
+      );
+      return courseCatalog
+        .map((entry) => ({
+          key: entry.key,
+          title: entry.title,
+          session: sessionsAtSlot.find(
+            (session) => session.training && majorCourseMeta(session.training).key === entry.key,
+          ),
+        }))
+        .filter((entry): entry is { key: string; title: string; session: Session } => Boolean(entry.session));
+    },
+    [blockedSessionIds, courseCatalog, selectedSession, sessions],
+  );
+  const selectedBookingTopicKey = selectedSession?.training ? majorCourseMeta(selectedSession.training).key : "";
   const sessionById = useMemo(
     () => new Map(sessions.map((session) => [session.id, session])),
     [sessions],
@@ -1459,9 +1481,29 @@ function App() {
             Your booking will be visible to everyone using this schedule.
           </p>
           <label className="form-label">
+            Training topic
+            <select
+              value={selectedBookingTopicKey}
+              disabled={bookingInProgress}
+              onChange={(event) => {
+                const option = bookingTopicOptions.find((item) => item.key === event.target.value);
+                if (!option) return;
+                setSelectedSession(option.session);
+                setSelectedTraining(option.session.training ?? null);
+              }}
+            >
+              {bookingTopicOptions.map((option) => (
+                <option value={option.key} key={option.key}>
+                  {option.title}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="form-label">
             OEM
             <select
               value={bookingDraft.oem}
+              disabled={bookingInProgress}
               onChange={(event) =>
                 setBookingDraft({
                   ...bookingDraft,
@@ -1480,6 +1522,7 @@ function App() {
             ODM
             <select
               value={bookingDraft.odm}
+              disabled={bookingInProgress}
               onChange={(event) =>
                 setBookingDraft({
                   ...bookingDraft,
