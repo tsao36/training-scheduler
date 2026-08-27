@@ -39,6 +39,7 @@ export type SchedulerData = {
   trainings: Training[]
   sessions: Session[]
   bookings: Booking[]
+  unavailableDays?: { date: string; label: string; warning: string }[]
   version: number
 }
 

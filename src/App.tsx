@@ -85,7 +85,7 @@ const weekGroups: { label: string; days: Day[] }[] = [
   { label: "21–25 SEP", days: weekdays.slice(5, 10) },
   { label: "28 SEP–02 OCT", days: weekdays.slice(10, 15) },
 ];
-const OEM_OPTIONS = ["Dell", "HP", "Lenovo", "Asus", "Acer", "Fujitsu", "VAIO", "Panasonic", "NEC", "Samsung", "LG", "Honor", "Wiko", "Dynabook", "NA"] as const;
+const OEM_OPTIONS = ["Dell", "HP", "Asus", "Acer", "Fujitsu", "VAIO", "Panasonic", "NEC", "Samsung", "LG", "Honor", "Wiko", "Dynabook", "Google", "Microsoft", "MSI", "Xiaomi", "Lenovo China", "Lenovo Japan", "NA"] as const;
 const ODM_OPTIONS = ["Quanta", "Pegatron", "Wistron", "Inventec", "Compal", "LCFC", "Luxshare", "Huaqin", "NA"] as const;
 type OemOption = (typeof OEM_OPTIONS)[number];
 type OdmOption = (typeof ODM_OPTIONS)[number];
@@ -99,6 +99,13 @@ const userError = (code: string) =>
     DUPLICATE_SESSION: "This course already has a session at that time.",
     INSTRUCTOR_CONFLICT: "This instructor already has a session at that time.",
     BOOKING_NOT_FOUND: "This booking could not be found.",
+    BOOKING_BLOCKED: "This booking is blocked by scheduler rules.",
+    REQUIRED_UNAVAILABLE_FIELDS_MISSING:
+      "Please select a training topic and valid start/end dates.",
+    INVALID_UNAVAILABLE_RANGE: "The end date must be after the start date.",
+    UNAVAILABLE_DAY_NOT_FOUND: "This unavailable day could not be found.",
+    DUPLICATE_TOPIC_CUSTOMER_BOOKING:
+      "This OEM/ODM already has a booking for the same training topic.",
   })[code] ?? "Something went wrong. Please try again.";
 const api = async <T,>(url: string, options?: RequestInit): Promise<T> => {
   const response = await fetch(url, {
@@ -118,6 +125,15 @@ const slotTop = (startTime: string) => {
   return `${(hours - 9) * 51 + (minutes / 60) * 51}px`;
 };
 const monthLabel = (date: string) => (date.startsWith("2026-10") ? "OCT" : "SEP");
+const timeFromRow = (row: number) => {
+  const totalMinutes = 9 * 60 + row * 30;
+  const hours = String(Math.floor(totalMinutes / 60)).padStart(2, "0");
+  const minutes = String(totalMinutes % 60).padStart(2, "0");
+  return `${hours}:${minutes}`;
+};
+const CALENDAR_ROW_HEIGHT = 25.5;
+const CALENDAR_ROW_COUNT = 17;
+const CALENDAR_BODY_HEIGHT = CALENDAR_ROW_HEIGHT * CALENDAR_ROW_COUNT;
 const timeZones = [
   ["TW/CN Time", "Asia/Taipei"],
   ["JP/KR Time", "Asia/Tokyo"],
@@ -183,13 +199,9 @@ function App() {
   const [query, setQuery] = useState("");
   const [weekIndex, setWeekIndex] = useState(0);
   const [viewMode, setViewMode] = useState<"pc" | "phone">("pc");
-  const [modal, setModal] = useState<"session" | "booking" | "login" | "my-bookings" | "topic-customer" | "cancel-booking" | null>(
+  const [modal, setModal] = useState<"booking" | "login" | "my-bookings" | "topic-customer" | "cancel-booking" | "booking-blocks" | null>(
     null,
   );
-  const [sessionDraft, setSessionDraft] = useState({
-    date: "2026-09-14",
-    startTime: "09:00",
-  });
   const [bookingDraft, setBookingDraft] = useState<{
     oem: OemOption;
     odm: OdmOption;
@@ -208,16 +220,39 @@ function App() {
   const [selectedOemFilter, setSelectedOemFilter] = useState<OemOption>(OEM_OPTIONS[0]);
   const [selectedOdmFilter, setSelectedOdmFilter] = useState<OdmOption>(ODM_OPTIONS[0]);
   const [bookingToCancel, setBookingToCancel] = useState<Booking | null>(null);
+  const [unavailableDraft, setUnavailableDraft] = useState<{
+    trainingId: string;
+    startDate: string;
+    endDate: string;
+    warning: string;
+  }>({
+    trainingId: "",
+    startDate: "",
+    endDate: "",
+    warning: "",
+  });
   const [activeDayWarnings, setActiveDayWarnings] = useState<UnavailableDay[] | null>(null);
   const dayWarningTooltipRef = useRef<HTMLDivElement | null>(null);
   const [clocks, setClocks] = useState<Clock[]>(() => timeZones.map(([label, timeZone]) => ({ label, timeZone, time: formatClock(timeZone) })));
   const refresh = async () => {
     const next = await api<SchedulerData>("/api/scheduler");
     setData(next);
-    const activeSessions = next.sessions.filter(
-      (session) => session.status === "active",
+    const confirmedBookingSessionIds = new Set(
+      next.bookings
+        .filter(
+          (booking) =>
+            booking.status === "confirmed" &&
+            !isSystemUnavailableBooking(booking),
+        )
+        .map((booking) => booking.sessionId),
     );
-    const latest = activeSessions[activeSessions.length - 1];
+    const latest = next.sessions
+      .filter(
+        (session) =>
+          session.status === "active" &&
+          confirmedBookingSessionIds.has(session.id),
+      )
+      .at(-1);
     if (latest) {
       setSelectedSession(latest);
       setSelectedTraining(latest.training ?? null);
@@ -243,10 +278,32 @@ function App() {
       setSelectedTraining(data.trainings[0]);
   }, [data, selectedTraining]);
   useEffect(() => {
-    const sessions =
-      data?.sessions.filter((session) => session.status === "active") ?? [];
-    if (!selectedSession && sessions.length) {
-      const latest = sessions[sessions.length - 1];
+    const availableTrainings = data?.trainings ?? [];
+    if (!unavailableDraft.trainingId && availableTrainings[0]) {
+      setUnavailableDraft((current) => ({
+        ...current,
+        trainingId: availableTrainings[0].id,
+      }));
+    }
+  }, [unavailableDraft.trainingId, data]);
+  useEffect(() => {
+    const confirmedBookingSessionIds = new Set(
+      (data?.bookings ?? [])
+        .filter(
+          (booking) =>
+            booking.status === "confirmed" &&
+            !isSystemUnavailableBooking(booking),
+        )
+        .map((booking) => booking.sessionId),
+    );
+    const latest = (data?.sessions ?? [])
+      .filter(
+        (session) =>
+          session.status === "active" &&
+          confirmedBookingSessionIds.has(session.id),
+      )
+      .at(-1);
+    if (!selectedSession && latest) {
       setSelectedSession(latest);
       setSelectedTraining(latest.training ?? null);
       setWeekIndex(
@@ -259,12 +316,6 @@ function App() {
       );
     }
   }, [data, selectedSession]);
-  useEffect(() => {
-    if (data?.trainings.length)
-      document
-        .querySelector<HTMLButtonElement>(".primary-button")
-        ?.removeAttribute("disabled");
-  }, [data]);
   useEffect(() => {
     const topbar = document.querySelector<HTMLElement>(".topbar");
     if (!topbar) return;
@@ -337,6 +388,17 @@ function App() {
     return () => switcher?.remove();
   }, [viewMode]);
   const trainings = data?.trainings ?? [];
+  const visibleUnavailableDays = useMemo(
+    () =>
+      (data?.unavailableDays ?? [])
+        .slice()
+        .sort(
+          (left, right) =>
+            left.date.localeCompare(right.date) ||
+            left.label.localeCompare(right.label),
+        ),
+    [data],
+  );
   const rawBookings = data?.bookings ?? [];
   const blockedSessionIds = new Set(
     rawBookings
@@ -350,6 +412,23 @@ function App() {
     ) ?? [];
   const bookings = rawBookings.filter(
     (booking) => !isSystemUnavailableBooking(booking),
+  );
+  const bookedSessionIds = useMemo(
+    () =>
+      new Set(
+        bookings
+          .filter((booking) => booking.status === "confirmed")
+          .map((booking) => booking.sessionId),
+      ),
+    [bookings],
+  );
+  const visibleSessions = useMemo(
+    () => sessions.filter((session) => bookedSessionIds.has(session.id)),
+    [sessions, bookedSessionIds],
+  );
+  const availableSessions = useMemo(
+    () => sessions.filter((session) => !bookedSessionIds.has(session.id)),
+    [sessions, bookedSessionIds],
   );
   const courseCatalog = useMemo(() => {
     const grouped = new Map<string, Training[]>();
@@ -388,6 +467,15 @@ function App() {
   const selectedBookings = selectedSession
     ? bookings.filter((booking) => booking.sessionId === selectedSession.id)
     : [];
+  const selectedSessionState = !selectedSession
+    ? "open"
+    : blockedSessionIds.has(selectedSession.id)
+      ? "closed"
+      : selectedBookings.length > 0
+        ? "shared"
+        : "open";
+  const canBookSelectedSession =
+    Boolean(selectedSession) && selectedSessionState !== "closed";
   const sessionById = useMemo(
     () => new Map(sessions.map((session) => [session.id, session])),
     [sessions],
@@ -449,28 +537,12 @@ function App() {
     [unavailableDays],
   );
   const currentWeek = weekGroups[weekIndex];
-  const createSession = async () => {
-    if (!selectedTraining) return;
-    try {
-      await api("/api/sessions", {
-        method: "POST",
-        body: JSON.stringify({
-          ...sessionDraft,
-          trainingId: selectedTraining.id,
-        }),
-      });
-      await refresh();
-      setModal(null);
-    } catch (cause) {
-      const message = (cause as Error).message;
-      setModal(message === "SCHEDULER_AUTH_REQUIRED" ? "login" : "session");
-      setError(
-        message === "SCHEDULER_AUTH_REQUIRED"
-          ? "Scheduler mode is required to create a session."
-          : message,
-      );
+  useEffect(() => {
+    if (!selectedSession) return;
+    if (!sessions.some((session) => session.id === selectedSession.id)) {
+      setSelectedSession(null);
     }
-  };
+  }, [sessions, selectedSession]);
   const createBooking = async () => {
     if (!selectedSession) return;
     try {
@@ -519,14 +591,43 @@ function App() {
       setSelectedSession(null);
     }
   };
-  const openSession = (date: string, startTime: string) => {
-    setSessionDraft({ date, startTime });
-    setModal("session");
-  };
   const lookupBookings = async () => {
     try {
       const result = await api<{ bookings: BookingLookup[] }>(`/api/bookings?email=${encodeURIComponent(lookupEmail)}`);
       setLookupResults(result.bookings);
+    } catch (cause) {
+      setError((cause as Error).message);
+    }
+  };
+  const createUnavailableDay = async () => {
+    try {
+      await api("/api/unavailable-days", {
+        method: "POST",
+        body: JSON.stringify({
+          trainingId: unavailableDraft.trainingId,
+          startDate: unavailableDraft.startDate,
+          endDate: unavailableDraft.endDate,
+          warning: unavailableDraft.warning || undefined,
+        }),
+      });
+      await refresh();
+      setUnavailableDraft((current) => ({
+        ...current,
+        startDate: "",
+        endDate: "",
+        warning: "",
+      }));
+    } catch (cause) {
+      setError((cause as Error).message);
+    }
+  };
+  const deleteUnavailableDay = async (date: string, label: string) => {
+    try {
+      await api("/api/unavailable-days", {
+        method: "DELETE",
+        body: JSON.stringify({ date, label }),
+      });
+      await refresh();
     } catch (cause) {
       setError((cause as Error).message);
     }
@@ -565,9 +666,15 @@ function App() {
             <button className="secondary-button" type="button" onClick={() => setModal("topic-customer")}>
               <Users size={16} /> Topic vs Customer
             </button>
-            <button className="primary-button" type="button" disabled={!selectedTraining} onClick={() => openSession(currentWeek.days[0].date, "09:00")}>
-              <Plus size={17} /> Session for Instructor
-            </button>
+            {authenticated && (
+              <button
+                className="secondary-button"
+                type="button"
+                onClick={() => setModal("booking-blocks")}
+              >
+                <LockKeyhole size={16} /> Manage unavailable days
+              </button>
+            )}
           </div>
         </div>
         {error && (
@@ -602,8 +709,8 @@ function App() {
               <Users size={19} />
             </span>
             <div>
-              <strong>{trainings.length} courses</strong>
-              <span>Available to book</span>
+              <strong>{sessions.length} slots</strong>
+              <span>Pre-filled in database</span>
             </div>
           </div>
           <div className="stat capacity">
@@ -765,25 +872,40 @@ function App() {
                       if ((event.target as HTMLElement).closest(".slot"))
                         return;
                       const rect = event.currentTarget.getBoundingClientRect();
-                      const halfHours = Math.max(
+                      const relativeY = event.clientY - rect.top;
+                      if (relativeY < 0 || relativeY >= CALENDAR_BODY_HEIGHT) return;
+                      const row = Math.max(
                         0,
                         Math.min(
-                          16,
-                          Math.round((event.clientY - rect.top) / 25.5),
+                          CALENDAR_ROW_COUNT - 1,
+                          Math.floor(relativeY / CALENDAR_ROW_HEIGHT),
                         ),
                       );
-                      const total = 9 * 60 + halfHours * 30;
-                      openSession(
-                        day.date,
-                        `${String(Math.floor(total / 60)).padStart(2, "0")}:${total % 60 ? "30" : "00"}`,
-                      );
+                      const clickedTime = timeFromRow(row);
+                      const dayAvailable = availableSessions
+                        .filter((session) => session.date === day.date)
+                        .sort((a, b) =>
+                          a.startTime.localeCompare(b.startTime),
+                        );
+                      if (dayAvailable.length === 0) {
+                        setError("No available sessions left for this day.");
+                        return;
+                      }
+                      const nextMatch =
+                        dayAvailable.find((session) => session.startTime === clickedTime) ??
+                        dayAvailable.find((session) => session.startTime > clickedTime) ??
+                        dayAvailable[0];
+                      setSelectedSession(nextMatch);
+                      setSelectedTraining(nextMatch.training ?? null);
+                      setModal("booking");
+                      setError("");
                     }}
                   >
                     {Array.from({ length: 17 }, (_, index) => (
                       <span className="hour-line" key={index} />
                     ))}
                     {Object.values(
-                      sessions
+                      visibleSessions
                         .filter((session) => session.date === day.date)
                         .reduce<Record<string, Session[]>>((groups, session) => {
                           (groups[session.startTime] ??= []).push(session);
@@ -795,12 +917,14 @@ function App() {
                           (booking) => booking.sessionId === session.id,
                         );
                         const bookingCount = sessionBookings.length;
-                        const customerNames = sessionBookings.map(
-                          (booking) => customerLabel(booking),
-                        );
+                        const slotStateClass = blockedSessionIds.has(session.id)
+                          ? "closed-slot"
+                          : bookingCount > 0
+                            ? "shared-slot"
+                            : "open-slot";
                         return (
                         <button
-                          className={`slot ${session.training?.accent ?? ""} ${bookingCount > 0 ? "booked" : ""}`}
+                          className={`slot ${session.training?.accent ?? ""} ${slotStateClass}`}
                           key={session.id}
                           type="button"
                           style={{
@@ -817,9 +941,12 @@ function App() {
                           <strong>
                             {`${session.training?.shortTitle} · ${session.startTime} PT`}
                           </strong>
-                          <small>
-                            {bookingCount > 0 ? customerNames.join(", ") : "Open"}
-                          </small>
+                          <small>{bookingCount > 0 ? "Shared slot" : "Open"}</small>
+                          {bookingCount > 0 && (
+                            <span className="slot-booking-count">
+                              {bookingCount} bookings
+                            </span>
+                          )}
                           <span className="slot-tooltip">
                             <b>{session.training?.title}</b>
                             <span>{session.startTime} PT · 30 min</span>
@@ -827,10 +954,14 @@ function App() {
                             <span>Delivery: {session.training?.mode === "Live" ? "Instructor-led" : "CFE online video"}</span>
                             {sessionBookings.length > 0 ? sessionBookings.map((booking) => (
                               <span className="booking-info" key={booking.id}>
-                                <b>Customer: {customerLabel(booking)}</b>
+                                <b>OEM: {booking.oem}</b>
+                                <b>ODM: {booking.odm ?? "NA"}</b>
                                 <span>Booked by: {booking.requesterEmail}</span>
                               </span>
                             )) : <span>No bookings yet</span>}
+                            <span className="slot-capacity-note">
+                              This slot supports multiple OEM/ODM bookings.
+                            </span>
                           </span>
                         </button>
                         );
@@ -849,7 +980,10 @@ function App() {
                 <i className="legend-dot video" /> CFE online video
               </span>
               <span>
-                <i className="legend-dot booked" /> Booked
+                <i className="legend-dot shared" /> Shared slot (still bookable)
+              </span>
+              <span>
+                <i className="legend-dot closed" /> Closed slot
               </span>
               <span className="all-day-legend">ALL DAY unavailable on marked dates</span>
               <span className="footer-note">Weekdays · 09:00–17:30 PT</span>
@@ -939,20 +1073,30 @@ function App() {
                 )}
                 {selectedBookings.map((booking) => (
                   <button className="cancel-booking-button" key={`cancel-${booking.id}`} type="button" onClick={() => { setBookingToCancel(booking); setModal("cancel-booking"); }}>
-                    <Trash2 size={14} /> Cancel booking: {customerLabel(booking)}
+                    <Trash2 size={14} /> Cancel booking: OEM {booking.oem} / ODM {booking.odm ?? "NA"}
                   </button>
                 ))}
-                {selectedBookings.length === 0 ? (
+                {selectedSessionState === "shared" && (
+                  <div className="session-capacity shared">
+                    <Check size={16} /> Already booked by {selectedBookings.length} customer(s), still open for other OEM/ODM.
+                  </div>
+                )}
+                {selectedSessionState === "closed" && (
+                  <div className="session-capacity closed">
+                    <LockKeyhole size={16} /> This slot is closed and cannot accept new bookings.
+                  </div>
+                )}
+                {canBookSelectedSession ? (
                   <button
                     className="book-button"
                     type="button"
                     onClick={() => setModal("booking")}
                   >
-                    <Plus size={17} /> Book this session
+                    <Plus size={17} /> {selectedBookings.length > 0 ? "Book this shared slot" : "Book this session"}
                   </button>
                 ) : (
-                  <div className="booked-status">
-                    <Check size={16} /> Session booked
+                  <div className="session-capacity closed">
+                    <LockKeyhole size={16} /> Slot closed
                   </div>
                 )}
               </>
@@ -1041,21 +1185,21 @@ function App() {
           </div>
         </Modal>
       )}
-      {modal === "session" && (
-        <Modal title="Create session" close={() => setModal(null)}>
+      {modal === "booking-blocks" && (
+        <Modal title="Manage unavailable days" close={() => setModal(null)}>
           <p className="modal-copy">
-            Sessions are 30 minutes and use the course instructor.
+            Add or remove unavailable days. These entries are stored in YAML and
+            enforced by the server when users book sessions.
           </p>
           <label className="form-label">
-            Course
+            Training topic
             <select
-              value={selectedTraining?.id ?? ""}
+              value={unavailableDraft.trainingId}
               onChange={(event) =>
-                setSelectedTraining(
-                  trainings.find(
-                    (training) => training.id === event.target.value,
-                  ) ?? null,
-                )
+                setUnavailableDraft({
+                  ...unavailableDraft,
+                  trainingId: event.target.value,
+                })
               }
             >
               {trainings.map((training) => (
@@ -1066,35 +1210,73 @@ function App() {
             </select>
           </label>
           <label className="form-label">
-            Date
+            Start date
             <input
               type="date"
-              value={sessionDraft.date}
+              value={unavailableDraft.startDate}
               onChange={(event) =>
-                setSessionDraft({ ...sessionDraft, date: event.target.value })
-              }
-            />
-          </label>
-          <label className="form-label">
-            <span className="time-label-row">
-              <span>Start time</span>
-              <span className="timezone-note">All session dates and times use Pacific Time (PT).</span>
-            </span>
-            <input
-              type="time"
-              step="1800"
-              value={sessionDraft.startTime}
-              onChange={(event) =>
-                setSessionDraft({
-                  ...sessionDraft,
-                  startTime: event.target.value,
+                setUnavailableDraft({
+                  ...unavailableDraft,
+                  startDate: event.target.value,
                 })
               }
             />
           </label>
-          <button className="book-button" type="button" onClick={createSession}>
-            <Check size={17} /> Create session
+          <label className="form-label">
+            End date
+            <input
+              type="date"
+              value={unavailableDraft.endDate}
+              onChange={(event) =>
+                setUnavailableDraft({
+                  ...unavailableDraft,
+                  endDate: event.target.value,
+                })
+              }
+            />
+          </label>
+          <label className="form-label">
+            Warning message (optional)
+            <input
+              type="text"
+              value={unavailableDraft.warning}
+              onChange={(event) =>
+                setUnavailableDraft({
+                  ...unavailableDraft,
+                  warning: event.target.value,
+                })
+              }
+              placeholder="Leave empty to auto-generate"
+            />
+          </label>
+          <button className="book-button" type="button" onClick={createUnavailableDay}>
+            <Plus size={17} /> Add unavailable days
           </button>
+          <div className="booking-block-list">
+            <h3>Current unavailable days</h3>
+            {visibleUnavailableDays.length === 0 ? (
+              <p className="empty-list">No unavailable days yet.</p>
+            ) : (
+              visibleUnavailableDays.map((day) => {
+                return (
+                  <div className="booking-block-item" key={`${day.date}-${day.label}`}>
+                    <div>
+                      <strong>{day.label}</strong>
+                      <span>{day.date}</span>
+                      <span>{day.warning}</span>
+                    </div>
+                    <button
+                      className="cancel-booking-button"
+                      type="button"
+                      onClick={() => deleteUnavailableDay(day.date, day.label)}
+                    >
+                      <Trash2 size={14} /> Delete
+                    </button>
+                  </div>
+                );
+              })
+            )}
+          </div>
         </Modal>
       )}
       {modal === "booking" && (
@@ -1175,7 +1357,11 @@ function App() {
         <Modal title="Cancel booking" close={() => { setBookingToCancel(null); setModal(null); }}>
           <p className="modal-copy">Enter the email used for this booking to confirm cancellation.</p>
           <form onSubmit={(event) => { event.preventDefault(); cancelBooking(new FormData(event.currentTarget).get("requesterEmail") as string); }}>
-            <div className="cancel-summary"><strong>{customerLabel(bookingToCancel)}</strong><span>{bookingToCancel.requesterName}</span></div>
+            <div className="cancel-summary">
+              <strong>OEM: {bookingToCancel.oem}</strong>
+              <strong>ODM: {bookingToCancel.odm ?? "NA"}</strong>
+              <span>{bookingToCancel.requesterName}</span>
+            </div>
             <label className="form-label">Requester email<input name="requesterEmail" type="email" required autoFocus /></label>
             <button className="cancel-confirm-button" type="submit"><Trash2 size={16} /> Cancel booking</button>
           </form>

@@ -9,8 +9,22 @@ const store = createDataStore()
 const app = express()
 const port = Number(process.env.PORT ?? 3001)
 const staticRoot = path.resolve('dist')
-const OEM_OPTIONS = new Set(['Dell', 'HP', 'Lenovo', 'Asus', 'Acer', 'Fujitsu', 'VAIO', 'Panasonic', 'NEC', 'Samsung', 'LG', 'Honor', 'Wiko', 'Dynabook', 'NA'])
+const OEM_OPTIONS = new Set(['Dell', 'HP', 'Asus', 'Acer', 'Fujitsu', 'VAIO', 'Panasonic', 'NEC', 'Samsung', 'LG', 'Honor', 'Wiko', 'Dynabook', 'Google', 'Microsoft', 'MSI', 'Xiaomi', 'Lenovo China', 'Lenovo Japan', 'NA'])
 const ODM_OPTIONS = new Set(['Quanta', 'Pegatron', 'Wistron', 'Inventec', 'Compal', 'LCFC', 'Luxshare', 'Huaqin', 'NA'])
+const isDate = (value: unknown) => typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)
+const trainingUnavailableLabel = (trainingId: string, title: string) => {
+  if (trainingId === 'wifi-log') return 'WiFi Debug Training'
+  if (trainingId === 'bt-log') return 'BT Debug Training'
+  return title.replace(/\s+for\s+/i, ' ')
+}
+const hasUnavailableDayBlock = (data: Awaited<ReturnType<typeof store.read>>, sessionId: string) => {
+  const session = data.sessions.find((item) => item.id === sessionId)
+  if (!session) return false
+  const training = data.trainings.find((item) => item.id === session.trainingId)
+  if (!training) return false
+  const label = trainingUnavailableLabel(training.id, training.title)
+  return (data.unavailableDays ?? []).some((item) => item.date === session.date && item.label === label)
+}
 
 app.use(express.json())
 app.use(cookieParser(password))
@@ -81,15 +95,75 @@ app.delete('/api/sessions/:id', requireScheduler, async (request, response) => {
 app.post('/api/bookings', async (request, response) => {
   const { sessionId, oem, odm, requesterName, requesterEmail } = request.body ?? {}
   if (!sessionId || !oem || !odm || !requesterName || !requesterEmail) return response.status(400).json({ error: 'REQUIRED_FIELDS_MISSING' })
-  if (!OEM_OPTIONS.has(String(oem)) || !ODM_OPTIONS.has(String(odm))) return response.status(400).json({ error: 'INVALID_CUSTOMER_SELECTION' })
+  const selectedOem = String(oem)
+  const selectedOdm = String(odm)
+  if (!OEM_OPTIONS.has(selectedOem) || !ODM_OPTIONS.has(selectedOdm)) return response.status(400).json({ error: 'INVALID_CUSTOMER_SELECTION' })
   let booking: Booking | undefined
   await store.update((data) => {
     const session = data.sessions.find((item) => item.id === sessionId && item.status === 'active')
     if (!session) throw new Error('SESSION_NOT_FOUND')
-    booking = { id: crypto.randomUUID(), sessionId, oem, odm, requesterName, requesterEmail, createdAt: new Date().toISOString(), status: 'confirmed' }
+
+    if (hasUnavailableDayBlock(data, session.id)) throw new Error('BOOKING_BLOCKED')
+
+    const hasDuplicateTopicCustomerBooking = data.bookings.some((existing) => {
+      if (existing.status !== 'confirmed') return false
+      if (existing.oem !== selectedOem) return false
+      if ((existing.odm ?? 'NA') !== selectedOdm) return false
+      const existingSession = data.sessions.find((item) => item.id === existing.sessionId)
+      return existingSession?.trainingId === session.trainingId
+    })
+    if (hasDuplicateTopicCustomerBooking) throw new Error('DUPLICATE_TOPIC_CUSTOMER_BOOKING')
+
+    booking = {
+      id: crypto.randomUUID(),
+      sessionId,
+      oem: selectedOem,
+      odm: selectedOdm,
+      requesterName,
+      requesterEmail,
+      createdAt: new Date().toISOString(),
+      status: 'confirmed',
+    }
     data.bookings.push(booking)
   })
   response.status(201).json(booking)
+})
+
+app.post('/api/unavailable-days', requireScheduler, async (request, response) => {
+  const { trainingId, startDate, endDate, warning } = request.body ?? {}
+  if (!trainingId || !isDate(startDate) || !isDate(endDate)) return response.status(400).json({ error: 'REQUIRED_UNAVAILABLE_FIELDS_MISSING' })
+  if (startDate > endDate) return response.status(400).json({ error: 'INVALID_UNAVAILABLE_RANGE' })
+
+  await store.update((data) => {
+    if (!data.trainings.some((training) => training.id === trainingId)) throw new Error('TRAINING_NOT_FOUND')
+    const training = data.trainings.find((item) => item.id === trainingId)!
+    const label = trainingUnavailableLabel(training.id, training.title)
+    const message = typeof warning === 'string' && warning.trim() ? warning.trim() : `${label} is not available all day.`
+    const existing = new Set((data.unavailableDays ?? []).map((item) => `${item.date}|${item.label}`))
+    const dates: string[] = []
+    for (let cursor = new Date(`${startDate}T00:00:00Z`); cursor <= new Date(`${endDate}T00:00:00Z`); cursor.setUTCDate(cursor.getUTCDate() + 1)) {
+      dates.push(cursor.toISOString().slice(0, 10))
+    }
+    data.unavailableDays ??= []
+    dates.forEach((date) => {
+      const key = `${date}|${label}`
+      if (existing.has(key)) return
+      data.unavailableDays!.push({ date, label, warning: message })
+      existing.add(key)
+    })
+  })
+  response.status(201).json({ created: true })
+})
+
+app.delete('/api/unavailable-days', requireScheduler, async (request, response) => {
+  const { date, label } = request.body ?? {}
+  if (!isDate(date) || typeof label !== 'string' || !label.trim()) return response.status(400).json({ error: 'REQUIRED_UNAVAILABLE_FIELDS_MISSING' })
+  await store.update((data) => {
+    const before = (data.unavailableDays ?? []).length
+    data.unavailableDays = (data.unavailableDays ?? []).filter((item) => !(item.date === date && item.label === label))
+    if (data.unavailableDays.length === before) throw new Error('UNAVAILABLE_DAY_NOT_FOUND')
+  })
+  response.status(204).end()
 })
 
 app.delete('/api/bookings/:id', async (request, response) => {
