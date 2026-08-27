@@ -1,10 +1,51 @@
+import fs from 'node:fs/promises'
+import path from 'node:path'
 import nodemailer from 'nodemailer'
+import { dump, load } from 'js-yaml'
 
 const smtpHost = process.env.SMTP_HOST ?? 'smtpauth.intel.com'
 const smtpPort = Number(process.env.SMTP_PORT ?? 587)
 const smtpUser = process.env.SMTP_USER
 const smtpPass = process.env.SMTP_PASS
 const smtpFrom = process.env.SMTP_FROM ?? 'noreply@intel.com'
+const recipientConfigPath = process.env.EMAIL_RECIPIENTS_FILE ?? path.resolve('data/email-recipients.yaml')
+
+const defaultRecipientConfig = {
+  'wifi-log': { default: 'hannahx.hung@intel.com' },
+  'wifi-8': {
+    default: 'zhiqiang.cai@intel.com',
+    'Lenovo China': 'nicky.chen@intel.com',
+    Honor: 'charles.p.chu@intel.com',
+    Samsung: 'kj.fang@intel.com',
+    LG: 'kj.fang@intel.com',
+    'Lenovo Japan': 'timdaway.lai@intel.com',
+    HP: 'frank.lee@intel.com',
+    Dell: 'frank.fc.yang@intel.com',
+    Asus: 'brenton.wu@intel.com',
+    'MSFT Surface': 'frank.lee@intel.com',
+    Surface: 'frank.lee@intel.com',
+    Microsoft: 'zhiqiang.cai@intel.com',
+  },
+  'bt-log': { default: 'shih-hsinx.shen@intel.com' },
+  'bt-hdt': {
+    default: 'shih-hsinx.shen@intel.com',
+    Acer: 'matt.chen@intel.com',
+    'Lenovo Japan': 'matt.chen@intel.com',
+    HP: 'steven1.chen@intel.com',
+    'MSFT Surface': 'steven1.chen@intel.com',
+    Surface: 'steven1.chen@intel.com',
+    Asus: 'yu-wei.chen@intel.com',
+    Dell: 'wesley.kuo@intel.com',
+    Samsung: 'bingyue.sun@intel.com',
+    LG: 'bingyue.sun@intel.com',
+    'Lenovo China': 'juan.zou@intel.com',
+    Dynabook: 'brenton.wu@intel.com',
+    VAIO: 'brenton.wu@intel.com',
+    NEC: 'brenton.wu@intel.com',
+    Fujitsu: 'brenton.wu@intel.com',
+    Panasonic: 'brenton.wu@intel.com',
+  },
+} as const
 
 const transporter = nodemailer.createTransport({
   host: smtpHost,
@@ -14,30 +55,69 @@ const transporter = nodemailer.createTransport({
   tls: { rejectUnauthorized: false },
 })
 
-export async function sendVerificationEmail(
-  to: string,
+export type EmailRecipientConfig = Record<string, Record<string, string>>
+
+export async function readEmailRecipientConfig(): Promise<EmailRecipientConfig> {
+  try {
+    const raw = await fs.readFile(recipientConfigPath, 'utf8')
+    const parsed = load(raw) as Record<string, Record<string, string>> | undefined
+    if (parsed && typeof parsed === 'object') return parsed
+  } catch {
+    // Fall back to built-in defaults if the file does not exist yet.
+  }
+  return { ...defaultRecipientConfig }
+}
+
+export async function writeEmailRecipientConfig(yamlText: string): Promise<EmailRecipientConfig> {
+  const parsed = load(yamlText) as Record<string, Record<string, string>> | undefined
+  if (!parsed || typeof parsed !== 'object') throw new Error('INVALID_EMAIL_RECIPIENTS_YAML')
+
+  const normalized = Object.fromEntries(
+    Object.entries(parsed).map(([trainingId, mapping]) => [trainingId, Object.fromEntries(Object.entries(mapping ?? {}))]),
+  )
+
+  await fs.mkdir(path.dirname(recipientConfigPath), { recursive: true })
+  await fs.writeFile(recipientConfigPath, dump(normalized, { noRefs: true }), 'utf8')
+  return normalized
+}
+
+export function getCFEContactEmailFromConfig(trainingId: string, oem: string | undefined, config: EmailRecipientConfig): string | null {
+  const configForTraining = config[trainingId] ?? {}
+  const exactMatch = oem ? configForTraining[oem] : undefined
+  if (exactMatch) return exactMatch
+  return configForTraining.default ?? null
+}
+
+export async function getCFEContactEmail(trainingId: string, oem?: string): Promise<string | null> {
+  const config = await readEmailRecipientConfig()
+  return getCFEContactEmailFromConfig(trainingId, oem, config)
+}
+
+export async function getBookingNotificationRecipients(trainingId: string, requesterEmail: string, oem?: string): Promise<string[]> {
+  const instructorEmail = await getCFEContactEmail(trainingId, oem)
+  return Array.from(new Set([requesterEmail, ...(instructorEmail ? [instructorEmail] : [])]))
+}
+
+export async function sendBookingNotificationEmail(
+  requesterEmail: string,
   requesterName: string,
   trainingTitle: string,
   sessionDate: string,
   sessionTime: string,
-  verificationLink: string,
-  cc?: string,
+  instructorEmail?: string,
 ): Promise<void> {
-  const subject = `Confirm your Training Scheduler booking`
+  const subject = `Training Scheduler booking confirmed: ${trainingTitle}`
   const html = `
     <p>Hi ${escapeHtml(requesterName)},</p>
-    <p>Thank you for booking <strong>${escapeHtml(trainingTitle)}</strong> on ${sessionDate} at ${sessionTime} PT.</p>
-    <p>To confirm your booking, please click the link below:</p>
-    <p><a href="${escapeHtml(verificationLink)}" style="background-color: #0071c5; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; display: inline-block;">Confirm Booking</a></p>
-    <p>This link will expire in 24 hours.</p>
-    <p>If you did not make this booking, please disregard this email.</p>
+    <p>Your booking for <strong>${escapeHtml(trainingTitle)}</strong> has been confirmed for ${sessionDate} at ${sessionTime} PT.</p>
+    <p>The corresponding engineering contact has also been notified for this session.</p>
     <p>Best regards,<br>Training Scheduler</p>
   `
-  
+
   await transporter.sendMail({
     from: smtpFrom,
-    to,
-    cc: cc ? cc : undefined,
+    to: requesterEmail,
+    cc: instructorEmail,
     subject,
     html,
   })

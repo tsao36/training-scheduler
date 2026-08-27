@@ -1,0 +1,34 @@
+wifi-log:
+  default: hannahx.hung@intel.com
+wifi-8:
+  default: zhiqiang.cai@intel.com
+  Lenovo China: nicky.chen@intel.com
+  Honor: charles.p.chu@intel.com
+  Samsung: kj.fang@intel.com
+  LG: kj.fang@intel.com
+  Lenovo Japan: timdaway.lai@intel.com
+  HP: frank.lee@intel.com
+  Dell: frank.fc.yang@intel.com
+  Asus: brenton.wu@intel.com
+  MSFT Surface: frank.lee@intel.com
+  Surface: frank.lee@intel.com
+  Microsoft: zhiqiang.cai@intel.com
+bt-log:
+  default: shih-hsinx.shen@intel.com
+bt-hdt:
+  default: shih-hsinx.shen@intel.com
+  Acer: matt.chen@intel.com
+  Lenovo Japan: matt.chen@intel.com
+  HP: steven1.chen@intel.com
+  MSFT Surface: steven1.chen@intel.com
+  Surface: steven1.chen@intel.com
+  Asus: yu-wei.chen@intel.com
+  Dell: wesley.kuo@intel.com
+  Samsung: bingyue.sun@intel.com
+  LG: bingyue.sun@intel.com
+  Lenovo China: juan.zou@intel.com
+  Dynabook: brenton.wu@intel.com
+  VAIO: brenton.wu@intel.com
+  NEC: brenton.wu@intel.com
+  Fujitsu: brenton.wu@intel.com
+  Panasonic: brenton.wu@intel.com

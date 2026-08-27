@@ -203,7 +203,7 @@ function App() {
   const [query, setQuery] = useState("");
   const [weekIndex, setWeekIndex] = useState(0);
   const [viewMode, setViewMode] = useState<"pc" | "phone">("pc");
-  const [modal, setModal] = useState<"booking" | "login" | "my-bookings" | "topic-customer" | "cancel-booking" | "booking-blocks" | "booking-confirmation" | "verification-success" | null>(
+  const [modal, setModal] = useState<"booking" | "login" | "my-bookings" | "topic-customer" | "cancel-booking" | "booking-blocks" | "booking-confirmation" | "verification-success" | "email-recipients" | null>(
     null,
   );
   const [bookingDraft, setBookingDraft] = useState<{
@@ -225,6 +225,7 @@ function App() {
   const [selectedOdmFilter, setSelectedOdmFilter] = useState<OdmFilterOption>("");
   const [bookingToCancel, setBookingToCancel] = useState<Booking | null>(null);
   const [bookingConfirmation, setBookingConfirmation] = useState<{ bookingId: string; email: string } | null>(null);
+  const [recipientConfigText, setRecipientConfigText] = useState("");
   const [unavailableDraft, setUnavailableDraft] = useState<{
     trainingId: string;
     startDate: string;
@@ -277,24 +278,6 @@ function App() {
       .then((result) => setAuthenticated(result.authenticated))
       .catch(() => undefined);
     
-    // Handle email verification token from URL
-    const params = new URLSearchParams(window.location.search);
-    const token = params.get('token');
-    if (token) {
-      api<{ confirmed: boolean }>("/api/bookings/verify", {
-        method: "POST",
-        body: JSON.stringify({ token }),
-      })
-        .then(() => {
-          setModal("verification-success");
-          window.history.replaceState({}, document.title, window.location.pathname);
-          refresh().catch((cause: Error) => setError(cause.message));
-        })
-        .catch((cause) => {
-          setError((cause as Error).message);
-          window.history.replaceState({}, document.title, window.location.pathname);
-        });
-    }
   }, []);
   useEffect(() => { const updateClocks = () => setClocks(timeZones.map(([label, timeZone]) => ({ label, timeZone, time: formatClock(timeZone) }))); const interval = window.setInterval(updateClocks, 1000); return () => window.clearInterval(interval); }, []);
   useEffect(() => {
@@ -585,11 +568,9 @@ function App() {
           sessionId: selectedSession.id,
         }),
       });
-      // Show confirmation message with pending status
       setBookingConfirmation({ bookingId: result.id, email: bookingDraft.requesterEmail });
       setModal("booking-confirmation");
       setBookingDraft({ oem: OEM_OPTIONS[0], odm: ODM_OPTIONS[0], requesterName: "", requesterEmail: "" });
-      // Refresh to show pending booking
       await refresh();
     } catch (cause) {
       setError((cause as Error).message);
@@ -603,6 +584,28 @@ function App() {
       setSelectedSession((current) => current ? { ...current } : null);
       setBookingToCancel(null);
       setModal(null);
+    } catch (cause) {
+      setError((cause as Error).message);
+    }
+  };
+  const loadRecipientConfig = async () => {
+    try {
+      const result = await api<{ yaml: string }>("/api/email-recipients");
+      setRecipientConfigText(result.yaml);
+      setModal("email-recipients");
+    } catch (cause) {
+      setError((cause as Error).message);
+    }
+  };
+  const saveRecipientConfig = async () => {
+    try {
+      await api("/api/email-recipients", {
+        method: "PUT",
+        body: JSON.stringify({ yaml: recipientConfigText }),
+      });
+      setModal(null);
+      setRecipientConfigText("");
+      await refresh();
     } catch (cause) {
       setError((cause as Error).message);
     }
@@ -684,6 +687,11 @@ function App() {
           </span>
           <span>{authenticated ? "Scheduler mode" : "Public view"}</span>
         </button>
+        {authenticated && (
+          <button className="secondary-button" type="button" onClick={loadRecipientConfig}>
+            Configure recipients
+          </button>
+        )}
       </header>
       <main className="main-content">
         <div className="page-heading">
@@ -1226,6 +1234,25 @@ function App() {
           </div>
         </Modal>
       )}
+      {modal === "email-recipients" && (
+        <Modal title="Configure email recipients" close={() => setModal(null)}>
+          <p className="modal-copy">Edit the YAML mapping for training IDs and OEM-specific recipients. Changes are saved live to the server YAML file.</p>
+          <textarea
+            value={recipientConfigText}
+            onChange={(event) => setRecipientConfigText(event.target.value)}
+            rows={20}
+            style={{ width: "100%", resize: "vertical", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontSize: 12 }}
+          />
+          <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 12 }}>
+            <button className="secondary-button" type="button" onClick={() => setModal(null)}>
+              Cancel
+            </button>
+            <button className="book-button" type="button" onClick={saveRecipientConfig}>
+              Save recipients
+            </button>
+          </div>
+        </Modal>
+      )}
       {modal === "booking-blocks" && (
         <Modal title="Manage unavailable days" close={() => setModal(null)}>
           <p className="modal-copy">
@@ -1409,26 +1436,15 @@ function App() {
         </Modal>
       )}
       {modal === "booking-confirmation" && bookingConfirmation && (
-        <Modal title="Booking confirmation email sent" close={() => { setBookingConfirmation(null); setModal(null); }}>
+        <Modal title="Booking confirmed" close={() => { setBookingConfirmation(null); setModal(null); }}>
           <p className="modal-copy">
-            A confirmation email has been sent to <strong>{bookingConfirmation.email}</strong>. 
-            Please click the link in the email to confirm your booking.
+            Your booking has been confirmed and a notification email has been sent to <strong>{bookingConfirmation.email}</strong>.
           </p>
           <p className="modal-copy">
-            The confirmation link will expire in 24 hours. Your booking will appear on the schedule after confirmation.
+            The corresponding engineering contact for this session has also been notified.
           </p>
           <button className="book-button" type="button" onClick={() => { setBookingConfirmation(null); setModal(null); }}>
             <Check size={17} /> Done
-          </button>
-        </Modal>
-      )}
-      {modal === "verification-success" && (
-        <Modal title="Booking confirmed!" close={() => setModal(null)}>
-          <p className="modal-copy">
-            Your booking has been successfully confirmed and is now visible on the schedule.
-          </p>
-          <button className="book-button" type="button" onClick={() => setModal(null)}>
-            <Check size={17} /> Got it
           </button>
         </Modal>
       )}

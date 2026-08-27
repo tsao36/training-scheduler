@@ -2,8 +2,9 @@ import cookieParser from 'cookie-parser'
 import { randomBytes, randomUUID } from 'node:crypto'
 import express, { type NextFunction, type Request, type Response } from 'express'
 import path from 'node:path'
+import { dump } from 'js-yaml'
 import { createDataStore, type Booking } from './data-store.js'
-import { sendVerificationEmail } from './email-service.js'
+import { readEmailRecipientConfig, sendBookingNotificationEmail, getCFEContactEmail, writeEmailRecipientConfig } from './email-service.js'
 
 const password = process.env.SCHEDULER_PASSWORD
 if (!password) throw new Error('SCHEDULER_PASSWORD is required')
@@ -27,20 +28,6 @@ const hasUnavailableDayBlock = (data: Awaited<ReturnType<typeof store.read>>, se
   if (!training) return false
   const label = trainingUnavailableLabel(training.id, training.title)
   return (data.unavailableDays ?? []).some((item) => item.date === session.date && item.label === label)
-}
-
-const getCFEContactEmail = (trainingId: string): string | null => {
-  // All WiFi trainings (wifi-log, wifi-8, etc.) go to WiFi engineer
-  if (trainingId.startsWith('wifi-')) {
-    return 'hannahx.hung@intel.com'
-  }
-  
-  // All BT trainings (bt-log, bt-hdt, etc.) go to BT engineer
-  if (trainingId.startsWith('bt-')) {
-    return 'shih-hsinx.shen@intel.com'
-  }
-  
-  return null
 }
 
 app.use(express.json())
@@ -82,6 +69,18 @@ app.post('/api/auth/logout', (_request, response) => {
   response.status(204).end()
 })
 app.get('/api/auth/status', (request, response) => response.json({ authenticated: isScheduler(request) }))
+
+app.get('/api/email-recipients', requireScheduler, async (_request, response) => {
+  const recipients = await readEmailRecipientConfig()
+  response.json({ yaml: dump(recipients, { noRefs: true }) })
+})
+
+app.put('/api/email-recipients', requireScheduler, async (request, response) => {
+  const yamlText = typeof request.body?.yaml === 'string' ? request.body.yaml : ''
+  if (!yamlText.trim()) return response.status(400).json({ error: 'EMAIL_RECIPIENTS_REQUIRED' })
+  const recipients = await writeEmailRecipientConfig(yamlText)
+  response.json({ updated: true, recipients })
+})
 
 app.post('/api/sessions', requireScheduler, async (request, response) => {
   const { trainingId, date, startTime } = request.body ?? {}
@@ -135,9 +134,6 @@ app.post('/api/bookings', async (request, response) => {
     if (hasDuplicateTopicCustomerBooking) throw new Error('DUPLICATE_TOPIC_CUSTOMER_BOOKING')
 
     training = data.trainings.find((item) => item.id === session!.trainingId)
-    const verificationToken = randomBytes(32).toString('hex')
-    const tokenExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
-
     booking = {
       id: randomUUID(),
       sessionId,
@@ -146,103 +142,28 @@ app.post('/api/bookings', async (request, response) => {
       requesterName,
       requesterEmail: requesterEmail.toLowerCase(),
       createdAt: new Date().toISOString(),
-      status: 'pending',
-      verificationToken,
-      tokenExpiresAt,
+      status: 'confirmed',
     }
     data.bookings.push(booking)
   })
 
-  // Send verification email
   try {
     if (booking && session && training) {
-      const verificationLink = `${baseUrl}/verify-booking?token=${booking.verificationToken}`
-      const cfeContact = getCFEContactEmail(training.id)
-      await sendVerificationEmail(
+      const instructorEmail = await getCFEContactEmail(training.id, selectedOem)
+      await sendBookingNotificationEmail(
         booking.requesterEmail,
         booking.requesterName,
         training.title,
         session.date,
         session.startTime,
-        verificationLink,
-        cfeContact || undefined,
+        instructorEmail ?? undefined,
       )
     }
   } catch (error) {
-    console.error('Failed to send verification email:', error)
-    // Don't fail the booking creation if email fails
+    console.error('Failed to send booking notification email:', error)
   }
 
   response.status(201).json(booking)
-})
-
-app.post('/api/bookings/verify', async (request, response) => {
-  const { token } = request.body ?? {}
-  if (!token) return response.status(400).json({ error: 'TOKEN_REQUIRED' })
-
-  await store.update((data) => {
-    const booking = data.bookings.find((item) => item.verificationToken === token)
-    if (!booking) throw new Error('INVALID_OR_EXPIRED_TOKEN')
-    
-    if (booking.tokenExpiresAt && new Date(booking.tokenExpiresAt) < new Date()) {
-      throw new Error('TOKEN_EXPIRED')
-    }
-
-    booking.status = 'confirmed'
-    booking.verificationToken = undefined
-    booking.tokenExpiresAt = undefined
-  })
-
-  response.status(200).json({ confirmed: true })
-})
-
-app.post('/api/bookings/resend-verification', async (request, response) => {
-  const { bookingId, requesterEmail } = request.body ?? {}
-  if (!bookingId || !requesterEmail) return response.status(400).json({ error: 'REQUIRED_FIELDS_MISSING' })
-
-  const data = await store.read()
-  const booking = data.bookings.find((item) => item.id === bookingId && item.requesterEmail === requesterEmail.toLowerCase())
-  if (!booking) return response.status(404).json({ error: 'BOOKING_NOT_FOUND' })
-  if (booking.status === 'confirmed') return response.status(400).json({ error: 'BOOKING_ALREADY_CONFIRMED' })
-  if (booking.tokenExpiresAt && new Date(booking.tokenExpiresAt) < new Date()) {
-    // Generate new token
-    const newToken = randomBytes(32).toString('hex')
-    const newExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
-    
-    await store.update((data) => {
-      const b = data.bookings.find((item) => item.id === bookingId)
-      if (b) {
-        b.verificationToken = newToken
-        b.tokenExpiresAt = newExpiry
-      }
-    })
-    booking.verificationToken = newToken
-    booking.tokenExpiresAt = newExpiry
-  }
-
-  // Resend email
-  try {
-    const session = data.sessions.find((item) => item.id === booking.sessionId)
-    const training = data.trainings.find((item) => item.id === session?.trainingId)
-    if (session && training && booking.verificationToken) {
-      const verificationLink = `${baseUrl}/verify-booking?token=${booking.verificationToken}`
-      const cfeContact = getCFEContactEmail(training.id)
-      await sendVerificationEmail(
-        booking.requesterEmail,
-        booking.requesterName,
-        training.title,
-        session.date,
-        session.startTime,
-        verificationLink,
-        cfeContact || undefined,
-      )
-    }
-  } catch (error) {
-    console.error('Failed to resend verification email:', error)
-    return response.status(500).json({ error: 'EMAIL_SEND_FAILED' })
-  }
-
-  response.status(200).json({ resent: true })
 })
 
 app.post('/api/unavailable-days', requireScheduler, async (request, response) => {

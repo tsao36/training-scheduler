@@ -68,3 +68,27 @@ test('creates a YAML backup and keeps only the latest eight backups', async () =
   assert.equal(backups.length, 8)
   await rm(directory, { recursive: true, force: true })
 })
+
+test('maps wifi and bt bookings to engineering notification recipients', async () => {
+  const { getBookingNotificationRecipients, getCFEContactEmail } = await import('./email-service.js')
+
+  assert.equal(await getCFEContactEmail('wifi-log'), 'hannahx.hung@intel.com')
+  assert.equal(await getCFEContactEmail('bt-log'), 'shih-hsinx.shen@intel.com')
+  assert.equal(await getCFEContactEmail('wifi-8', 'Dell'), 'frank.fc.yang@intel.com')
+  assert.equal(await getCFEContactEmail('wifi-8', 'Honor'), 'charles.p.chu@intel.com')
+  assert.equal(await getCFEContactEmail('bt-hdt', 'HP'), 'steven1.chen@intel.com')
+  assert.equal(await getCFEContactEmail('bt-hdt', 'Asus'), 'yu-wei.chen@intel.com')
+
+  assert.deepEqual(await getBookingNotificationRecipients('wifi-log', 'requester@example.com'), [
+    'requester@example.com',
+    'hannahx.hung@intel.com',
+  ])
+  assert.deepEqual(await getBookingNotificationRecipients('wifi-8', 'requester@example.com', 'Lenovo China'), [
+    'requester@example.com',
+    'nicky.chen@intel.com',
+  ])
+  assert.deepEqual(await getBookingNotificationRecipients('bt-hdt', 'requester@example.com', 'MSFT Surface'), [
+    'requester@example.com',
+    'steven1.chen@intel.com',
+  ])
+})
