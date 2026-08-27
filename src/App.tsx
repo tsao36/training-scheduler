@@ -264,6 +264,7 @@ function App() {
   });
   const [authenticated, setAuthenticated] = useState(false);
   const [error, setError] = useState("");
+  const [bookingInProgress, setBookingInProgress] = useState(false);
   const [lookupEmail, setLookupEmail] = useState("");
   const [lookupResults, setLookupResults] = useState<BookingLookup[] | null>(null);
   const [selectedOemFilter, setSelectedOemFilter] = useState<OemFilterOption>("");
@@ -604,7 +605,8 @@ function App() {
     }
   }, [sessions, selectedSession]);
   const createBooking = async () => {
-    if (!selectedSession) return;
+    if (!selectedSession || bookingInProgress) return;
+    setBookingInProgress(true);
     try {
       const result = await api<Booking>("/api/bookings", {
         method: "POST",
@@ -619,6 +621,8 @@ function App() {
       await refresh();
     } catch (cause) {
       setError((cause as Error).message);
+    } finally {
+      setBookingInProgress(false);
     }
   };
   const cancelBooking = async (email: string) => {
@@ -1518,8 +1522,9 @@ function App() {
               required
             />
           </label>
-          <button className="book-button" type="button" onClick={createBooking}>
-            <Check size={17} /> Confirm booking
+          <button className="book-button" type="button" onClick={createBooking} disabled={bookingInProgress}>
+            {bookingInProgress ? <span className="button-spinner" aria-hidden="true" /> : <Check size={17} />}
+            {bookingInProgress ? "Sending notification..." : "Confirm booking"}
           </button>
         </Modal>
       )}
