@@ -20,6 +20,7 @@ import {
   Video,
   X,
 } from "lucide-react";
+import { dump, load } from "js-yaml";
 import "./App.css";
 
 type Training = {
@@ -57,6 +58,7 @@ type UnavailableDay = {
   warning: string;
 };
 type BookingLookup = Booking & { session?: Session; training?: Training };
+type RecipientRow = { id: string; trainingId: string; oem: string; odm: string; email: string };
 type SchedulerData = {
   trainings: Training[];
   sessions: Session[];
@@ -88,7 +90,7 @@ const weekGroups: { label: string; days: Day[] }[] = [
   { label: "28 SEP–02 OCT", days: weekdays.slice(10, 15) },
 ];
 const OEM_OPTIONS = ["Dell", "HP", "Asus", "Acer", "Fujitsu", "VAIO", "Panasonic", "NEC", "Samsung", "LG", "Honor", "Wiko", "Dynabook", "Google", "Microsoft", "MSFT Surface", "MSI", "Xiaomi", "Lenovo China", "Lenovo Japan", "NA"] as const;
-const ODM_OPTIONS = ["Quanta", "Pegatron", "Wistron", "Inventec", "Compal", "LCFC", "Luxshare", "Huaqin", "NA"] as const;
+const ODM_OPTIONS = ["Quanta", "Pegatron", "Wistron", "Inventec", "Compal", "LCFC", "Luxshare", "Huaqin", "Longcheer", "NA"] as const;
 type OemOption = (typeof OEM_OPTIONS)[number];
 type OdmOption = (typeof ODM_OPTIONS)[number];
 type OemFilterOption = "" | OemOption;
@@ -110,7 +112,40 @@ const userError = (code: string) =>
     UNAVAILABLE_DAY_NOT_FOUND: "This unavailable day could not be found.",
     DUPLICATE_TOPIC_CUSTOMER_BOOKING:
       "This OEM/ODM already has a booking for the same training topic.",
+    INVALID_EMAIL_RECIPIENTS_YAML: "Please check the recipient table for missing or invalid values.",
   })[code] ?? "Something went wrong. Please try again.";
+const createRecipientRow = (trainingId = "", oem = "default", odm = "", email = ""): RecipientRow => ({
+  id: crypto.randomUUID(),
+  trainingId,
+  oem,
+  odm,
+  email,
+});
+const parseRecipientRows = (yamlText: string): RecipientRow[] => {
+  const parsed = load(yamlText);
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) throw new Error(userError("INVALID_EMAIL_RECIPIENTS_YAML"));
+  return Object.entries(parsed as Record<string, unknown>).flatMap(([trainingId, mapping]) => {
+    if (!mapping || typeof mapping !== "object" || Array.isArray(mapping)) throw new Error(userError("INVALID_EMAIL_RECIPIENTS_YAML"));
+    return Object.entries(mapping as Record<string, unknown>).map(([rule, email]) => {
+      if (typeof email !== "string") throw new Error(userError("INVALID_EMAIL_RECIPIENTS_YAML"));
+      const [oem, odm = ""] = rule.split(" / ");
+      return createRecipientRow(trainingId, oem, odm, email);
+    });
+  });
+};
+const recipientRowsToYaml = (rows: RecipientRow[]) => {
+  const normalized: Record<string, Record<string, string>> = {};
+  rows.forEach((row) => {
+    const trainingId = row.trainingId.trim();
+    const oem = row.oem.trim();
+    const odm = row.odm.trim();
+    const email = row.email.trim();
+    if (!trainingId || !oem || !email) throw new Error(userError("INVALID_EMAIL_RECIPIENTS_YAML"));
+    normalized[trainingId] ??= {};
+    normalized[trainingId][odm ? `${oem} / ${odm}` : oem] = email;
+  });
+  return dump(normalized, { noRefs: true });
+};
 const api = async <T,>(url: string, options?: RequestInit): Promise<T> => {
   const response = await fetch(url, {
     cache: "no-store",
@@ -234,7 +269,7 @@ function App() {
   const [selectedOdmFilter, setSelectedOdmFilter] = useState<OdmFilterOption>("");
   const [bookingToCancel, setBookingToCancel] = useState<Booking | null>(null);
   const [bookingConfirmation, setBookingConfirmation] = useState<{ bookingId: string; email: string } | null>(null);
-  const [recipientConfigText, setRecipientConfigText] = useState("");
+  const [recipientRows, setRecipientRows] = useState<RecipientRow[]>([]);
   const [unavailableDraft, setUnavailableDraft] = useState<{
     trainingId: string;
     startDate: string;
@@ -600,7 +635,7 @@ function App() {
   const loadRecipientConfig = async () => {
     try {
       const result = await api<{ yaml: string }>("/api/email-recipients");
-      setRecipientConfigText(result.yaml);
+      setRecipientRows(parseRecipientRows(result.yaml));
       setModal("email-recipients");
     } catch (cause) {
       setError((cause as Error).message);
@@ -608,16 +643,26 @@ function App() {
   };
   const saveRecipientConfig = async () => {
     try {
+      const yaml = recipientRowsToYaml(recipientRows);
       await api("/api/email-recipients", {
         method: "PUT",
-        body: JSON.stringify({ yaml: recipientConfigText }),
+        body: JSON.stringify({ yaml }),
       });
       setModal(null);
-      setRecipientConfigText("");
+      setRecipientRows([]);
       await refresh();
     } catch (cause) {
       setError((cause as Error).message);
     }
+  };
+  const updateRecipientRow = (id: string, updates: Partial<Omit<RecipientRow, "id">>) => {
+    setRecipientRows((current) => current.map((row) => row.id === id ? { ...row, ...updates } : row));
+  };
+  const addRecipientRow = () => {
+    setRecipientRows((current) => [...current, createRecipientRow(data?.trainings[0]?.id ?? "wifi-log")]);
+  };
+  const deleteRecipientRow = (id: string) => {
+    setRecipientRows((current) => current.filter((row) => row.id !== id));
   };
   const login = async (password: string) => {
     try {
@@ -1244,15 +1289,62 @@ function App() {
         </Modal>
       )}
       {modal === "email-recipients" && (
-        <Modal title="Configure email recipients" close={() => setModal(null)}>
-          <p className="modal-copy">Edit the YAML mapping for training IDs and OEM-specific recipients. Changes are saved live to the server YAML file.</p>
-          <textarea
-            value={recipientConfigText}
-            onChange={(event) => setRecipientConfigText(event.target.value)}
-            rows={20}
-            style={{ width: "100%", resize: "vertical", fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontSize: 12 }}
-          />
-          <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 12 }}>
+        <Modal title="Configure email recipients" close={() => setModal(null)} wide>
+          <p className="modal-copy">Edit who gets notified for each training and OEM. The server saves these rows back to the YAML recipient file.</p>
+          <div className="recipient-table" role="table" aria-label="Email recipient mapping">
+            <div className="recipient-table-head" role="row">
+              <span role="columnheader">Training</span>
+              <span role="columnheader">OEM / rule</span>
+              <span role="columnheader">ODM</span>
+              <span role="columnheader">Recipient email</span>
+              <span role="columnheader">Action</span>
+            </div>
+            {recipientRows.map((row) => (
+              <div className="recipient-table-row" role="row" key={row.id}>
+                <input
+                  aria-label="Training ID"
+                  list="recipient-training-options"
+                  value={row.trainingId}
+                  onChange={(event) => updateRecipientRow(row.id, { trainingId: event.target.value })}
+                />
+                <input
+                  aria-label="OEM or default rule"
+                  list="recipient-oem-options"
+                  value={row.oem}
+                  onChange={(event) => updateRecipientRow(row.id, { oem: event.target.value })}
+                />
+                <input
+                  aria-label="ODM rule"
+                  list="recipient-odm-options"
+                  value={row.odm}
+                  onChange={(event) => updateRecipientRow(row.id, { odm: event.target.value })}
+                />
+                <input
+                  aria-label="Recipient email"
+                  type="email"
+                  value={row.email}
+                  onChange={(event) => updateRecipientRow(row.id, { email: event.target.value })}
+                />
+                <button className="icon-button" type="button" title="Remove recipient row" onClick={() => deleteRecipientRow(row.id)}>
+                  <Trash2 size={15} />
+                </button>
+              </div>
+            ))}
+          </div>
+          <datalist id="recipient-training-options">
+            {data?.trainings.map((training) => <option value={training.id} key={training.id}>{training.title}</option>)}
+          </datalist>
+          <datalist id="recipient-oem-options">
+            <option value="default">Default</option>
+            {OEM_OPTIONS.map((oem) => <option value={oem} key={oem} />)}
+          </datalist>
+          <datalist id="recipient-odm-options">
+            {ODM_OPTIONS.map((odm) => <option value={odm} key={odm} />)}
+          </datalist>
+          <div className="modal-actions">
+            <button className="secondary-button" type="button" onClick={addRecipientRow}>
+              <Plus size={16} /> Add row
+            </button>
             <button className="secondary-button" type="button" onClick={() => setModal(null)}>
               Cancel
             </button>
@@ -1465,15 +1557,17 @@ function Modal({
   title,
   close,
   children,
+  wide = false,
 }: {
   title: string;
   close: () => void;
   children: ReactNode;
+  wide?: boolean;
 }) {
   return (
     <div className="modal-backdrop" onClick={close}>
       <div
-        className="modal"
+        className={wide ? "modal modal-wide" : "modal"}
         role="dialog"
         aria-modal="true"
         onClick={(event) => event.stopPropagation()}

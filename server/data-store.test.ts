@@ -78,6 +78,10 @@ test('maps wifi and bt bookings to engineering notification recipients', async (
   assert.equal(await getCFEContactEmail('wifi-8', 'Honor'), 'charles.p.chu@intel.com')
   assert.equal(await getCFEContactEmail('bt-hdt', 'HP'), 'steven1.chen@intel.com')
   assert.equal(await getCFEContactEmail('bt-hdt', 'Asus'), 'yu-wei.chen@intel.com')
+  assert.equal(await getCFEContactEmail('wifi-8', 'NA', 'Luxshare'), 'zhiqiang.cai@intel.com')
+  assert.equal(await getCFEContactEmail('wifi-8', 'NA', 'Compal'), 'henryx.su@intel.com')
+  assert.equal(await getCFEContactEmail('wifi-8', 'Dynabook', 'NA'), 'jackx.lee@intel.com')
+  assert.equal(await getCFEContactEmail('bt-hdt', 'NA', 'Longcheer'), 'bingyue.sun@intel.com')
 
   assert.deepEqual(await getBookingNotificationRecipients('wifi-log', 'requester@example.com'), [
     'requester@example.com',
@@ -85,9 +89,9 @@ test('maps wifi and bt bookings to engineering notification recipients', async (
   ])
   assert.deepEqual(await getBookingNotificationRecipients('wifi-8', 'requester@example.com', 'Lenovo China'), [
     'requester@example.com',
-    'nicky.chen@intel.com',
+    'zhiqiang.cai@intel.com',
   ])
-  assert.deepEqual(await getBookingNotificationRecipients('bt-hdt', 'requester@example.com', 'MSFT Surface'), [
+  assert.deepEqual(await getBookingNotificationRecipients('bt-hdt', 'requester@example.com', 'MSFT Surface', 'NA'), [
     'requester@example.com',
     'steven1.chen@intel.com',
   ])

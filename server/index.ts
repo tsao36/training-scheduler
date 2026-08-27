@@ -1,5 +1,5 @@
 import cookieParser from 'cookie-parser'
-import { randomBytes, randomUUID } from 'node:crypto'
+import { randomUUID } from 'node:crypto'
 import express, { type NextFunction, type Request, type Response } from 'express'
 import path from 'node:path'
 import { dump } from 'js-yaml'
@@ -14,7 +14,7 @@ const app = express()
 const port = Number(process.env.PORT ?? 3001)
 const staticRoot = path.resolve('dist')
 const OEM_OPTIONS = new Set(['Dell', 'HP', 'Asus', 'Acer', 'Fujitsu', 'VAIO', 'Panasonic', 'NEC', 'Samsung', 'LG', 'Honor', 'Wiko', 'Dynabook', 'Google', 'Microsoft', 'MSFT Surface', 'MSI', 'Xiaomi', 'Lenovo China', 'Lenovo Japan', 'NA'])
-const ODM_OPTIONS = new Set(['Quanta', 'Pegatron', 'Wistron', 'Inventec', 'Compal', 'LCFC', 'Luxshare', 'Huaqin', 'NA'])
+const ODM_OPTIONS = new Set(['Quanta', 'Pegatron', 'Wistron', 'Inventec', 'Compal', 'LCFC', 'Luxshare', 'Huaqin', 'Longcheer', 'NA'])
 const isDate = (value: unknown) => typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)
 const trainingUnavailableLabel = (trainingId: string, title: string) => {
   if (trainingId === 'wifi-log') return 'WiFi Debug Training'
@@ -149,7 +149,7 @@ app.post('/api/bookings', async (request, response) => {
 
   try {
     if (booking && session && training) {
-      const instructorEmail = await getCFEContactEmail(training.id, selectedOem)
+      const instructorEmail = await getCFEContactEmail(training.id, selectedOem, selectedOdm)
       await sendBookingNotificationEmail(
         booking.requesterEmail,
         booking.requesterName,

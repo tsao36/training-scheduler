@@ -13,8 +13,8 @@ const recipientConfigPath = process.env.EMAIL_RECIPIENTS_FILE ?? path.resolve('d
 const defaultRecipientConfig = {
   'wifi-log': { default: 'hannahx.hung@intel.com' },
   'wifi-8': {
-    default: 'zhiqiang.cai@intel.com',
-    'Lenovo China': 'nicky.chen@intel.com',
+    default: 'kj.fang@intel.com',
+    'Lenovo China': 'zhiqiang.cai@intel.com',
     Honor: 'charles.p.chu@intel.com',
     Samsung: 'kj.fang@intel.com',
     LG: 'kj.fang@intel.com',
@@ -22,18 +22,29 @@ const defaultRecipientConfig = {
     HP: 'frank.lee@intel.com',
     Dell: 'frank.fc.yang@intel.com',
     Asus: 'brenton.wu@intel.com',
-    'MSFT Surface': 'frank.lee@intel.com',
-    Surface: 'frank.lee@intel.com',
+    'MSFT Surface': 'timdaway.lai@intel.com',
     Microsoft: 'zhiqiang.cai@intel.com',
+    'NA / Luxshare': 'zhiqiang.cai@intel.com',
+    'NA / Huaqin': 'zhiqiang.cai@intel.com',
+    'NA / Longcheer': 'zhiqiang.cai@intel.com',
+    Dynabook: 'jackx.lee@intel.com',
+    VAIO: 'jackx.lee@intel.com',
+    NEC: 'jackx.lee@intel.com',
+    Fujitsu: 'jackx.lee@intel.com',
+    Panasonic: 'jackx.lee@intel.com',
+    'NA / Compal': 'henryx.su@intel.com',
+    'NA / Pegatron': 'henryx.su@intel.com',
+    'NA / Quanta': 'henryx.su@intel.com',
+    'NA / Inventec': 'henryx.su@intel.com',
+    'NA / Wistron': 'henryx.su@intel.com',
   },
   'bt-log': { default: 'shih-hsinx.shen@intel.com' },
   'bt-hdt': {
-    default: 'shih-hsinx.shen@intel.com',
+    default: 'brenton.wu@intel.com',
     Acer: 'matt.chen@intel.com',
     'Lenovo Japan': 'matt.chen@intel.com',
     HP: 'steven1.chen@intel.com',
     'MSFT Surface': 'steven1.chen@intel.com',
-    Surface: 'steven1.chen@intel.com',
     Asus: 'yu-wei.chen@intel.com',
     Dell: 'wesley.kuo@intel.com',
     Samsung: 'bingyue.sun@intel.com',
@@ -44,6 +55,9 @@ const defaultRecipientConfig = {
     NEC: 'brenton.wu@intel.com',
     Fujitsu: 'brenton.wu@intel.com',
     Panasonic: 'brenton.wu@intel.com',
+    'NA / Luxshare': 'bingyue.sun@intel.com',
+    'NA / Huaqin': 'bingyue.sun@intel.com',
+    'NA / Longcheer': 'bingyue.sun@intel.com',
   },
 } as const
 
@@ -81,20 +95,22 @@ export async function writeEmailRecipientConfig(yamlText: string): Promise<Email
   return normalized
 }
 
-export function getCFEContactEmailFromConfig(trainingId: string, oem: string | undefined, config: EmailRecipientConfig): string | null {
+export function getCFEContactEmailFromConfig(trainingId: string, oem: string | undefined, odm: string | undefined, config: EmailRecipientConfig): string | null {
   const configForTraining = config[trainingId] ?? {}
+  const exactOdmMatch = oem && odm ? configForTraining[`${oem} / ${odm}`] : undefined
+  if (exactOdmMatch) return exactOdmMatch
   const exactMatch = oem ? configForTraining[oem] : undefined
   if (exactMatch) return exactMatch
   return configForTraining.default ?? null
 }
 
-export async function getCFEContactEmail(trainingId: string, oem?: string): Promise<string | null> {
+export async function getCFEContactEmail(trainingId: string, oem?: string, odm?: string): Promise<string | null> {
   const config = await readEmailRecipientConfig()
-  return getCFEContactEmailFromConfig(trainingId, oem, config)
+  return getCFEContactEmailFromConfig(trainingId, oem, odm, config)
 }
 
-export async function getBookingNotificationRecipients(trainingId: string, requesterEmail: string, oem?: string): Promise<string[]> {
-  const instructorEmail = await getCFEContactEmail(trainingId, oem)
+export async function getBookingNotificationRecipients(trainingId: string, requesterEmail: string, oem?: string, odm?: string): Promise<string[]> {
+  const instructorEmail = await getCFEContactEmail(trainingId, oem, odm)
   return Array.from(new Set([requesterEmail, ...(instructorEmail ? [instructorEmail] : [])]))
 }
 
