@@ -1,5 +1,5 @@
 param(
-  [string]$RepoPath = "C:\Training_Scheduler",
+  [string]$RepoPath = "C:\training-scheduler",
   [string]$Branch = "main",
   [int]$Port = 3001,
   [string]$SchedulerPassword = "123",
