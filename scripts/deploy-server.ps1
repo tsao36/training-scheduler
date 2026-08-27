@@ -31,6 +31,22 @@ function Stop-PortProcess([int]$TargetPort) {
   }
 }
 
+function Get-DependencySignatureFile([string]$RootPath) {
+  return Join-Path $RootPath ".deps-signature.sha256"
+}
+
+function Get-DependencySourceFile([string]$RootPath) {
+  $lockPath = Join-Path $RootPath "package-lock.json"
+  if (Test-Path $lockPath) {
+    return $lockPath
+  }
+  return Join-Path $RootPath "package.json"
+}
+
+function Get-FileSha256([string]$Path) {
+  return (Get-FileHash -Path $Path -Algorithm SHA256).Hash
+}
+
 if (-not (Test-Path $RepoPath)) {
   throw "RepoPath not found: $RepoPath"
 }
@@ -50,16 +66,31 @@ Write-Step "Git update"
 & git checkout $Branch
 & git pull --ff-only origin $Branch
 
+$depSourceFile = Get-DependencySourceFile -RootPath $RepoPath
+$depSignatureFile = Get-DependencySignatureFile -RootPath $RepoPath
+$currentSignature = Get-FileSha256 -Path $depSourceFile
+$storedSignature = if (Test-Path $depSignatureFile) { (Get-Content $depSignatureFile -Raw).Trim() } else { "" }
+$hasNodeModules = Test-Path (Join-Path $RepoPath "node_modules")
+
+$shouldInstallDependencies = $UseNpmInstall -or (-not $hasNodeModules) -or ($storedSignature -ne $currentSignature)
+
 Write-Step "Install dependencies"
-if ($UseNpmInstall) {
-  & npm install
-} else {
-  try {
-    & npm ci
-  } catch {
-    Write-Warning "npm ci failed; fallback to npm install"
+if ($shouldInstallDependencies) {
+  if ($UseNpmInstall) {
+    Write-Host "Forced dependency install via -UseNpmInstall"
     & npm install
+  } else {
+    try {
+      & npm ci
+    } catch {
+      Write-Warning "npm ci failed; fallback to npm install"
+      & npm install
+    }
   }
+  Set-Content -Path $depSignatureFile -Value $currentSignature -Encoding ascii
+  Write-Host "Dependency signature updated from $depSourceFile"
+} else {
+  Write-Host "Dependencies unchanged; skip npm install"
 }
 
 Write-Step "Build"
