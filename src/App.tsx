@@ -89,6 +89,8 @@ const OEM_OPTIONS = ["Dell", "HP", "Asus", "Acer", "Fujitsu", "VAIO", "Panasonic
 const ODM_OPTIONS = ["Quanta", "Pegatron", "Wistron", "Inventec", "Compal", "LCFC", "Luxshare", "Huaqin", "NA"] as const;
 type OemOption = (typeof OEM_OPTIONS)[number];
 type OdmOption = (typeof ODM_OPTIONS)[number];
+type OemFilterOption = "" | OemOption;
+type OdmFilterOption = "" | OdmOption;
 const userError = (code: string) =>
   ({
     SCHEDULER_AUTH_REQUIRED: "Scheduler mode is required to manage sessions.",
@@ -217,8 +219,8 @@ function App() {
   const [error, setError] = useState("");
   const [lookupEmail, setLookupEmail] = useState("");
   const [lookupResults, setLookupResults] = useState<BookingLookup[] | null>(null);
-  const [selectedOemFilter, setSelectedOemFilter] = useState<OemOption>(OEM_OPTIONS[0]);
-  const [selectedOdmFilter, setSelectedOdmFilter] = useState<OdmOption>(ODM_OPTIONS[0]);
+  const [selectedOemFilter, setSelectedOemFilter] = useState<OemFilterOption>("");
+  const [selectedOdmFilter, setSelectedOdmFilter] = useState<OdmFilterOption>("");
   const [bookingToCancel, setBookingToCancel] = useState<Booking | null>(null);
   const [unavailableDraft, setUnavailableDraft] = useState<{
     trainingId: string;
@@ -481,6 +483,14 @@ function App() {
     [sessions],
   );
   const topicVsCustomerRows = useMemo(() => {
+    if (!selectedOemFilter || !selectedOdmFilter) {
+      return trainings
+        .map((training) => ({
+          title: training.title,
+          count: 0,
+        }))
+        .sort((a, b) => a.title.localeCompare(b.title));
+    }
     const counts = new Map<string, number>();
     bookings
       .filter(
@@ -1150,8 +1160,9 @@ function App() {
             OEM
             <select
               value={selectedOemFilter}
-              onChange={(event) => setSelectedOemFilter(event.target.value as OemOption)}
+              onChange={(event) => setSelectedOemFilter(event.target.value as OemFilterOption)}
             >
+              <option value="">Select OEM</option>
               {OEM_OPTIONS.map((oem) => (
                 <option value={oem} key={oem}>
                   {oem}
@@ -1163,8 +1174,9 @@ function App() {
             ODM
             <select
               value={selectedOdmFilter}
-              onChange={(event) => setSelectedOdmFilter(event.target.value as OdmOption)}
+              onChange={(event) => setSelectedOdmFilter(event.target.value as OdmFilterOption)}
             >
+              <option value="">Select ODM</option>
               {ODM_OPTIONS.map((odm) => (
                 <option value={odm} key={odm}>
                   {odm}
@@ -1173,7 +1185,7 @@ function App() {
             </select>
           </label>
           <div className="topic-summary-total">
-            <strong>Total booked sessions ({selectedOemFilter} / {selectedOdmFilter}):</strong> {selectedCustomerTotal}
+            <strong>Total booked sessions ({selectedOemFilter || "Select OEM"} / {selectedOdmFilter || "Select ODM"}):</strong> {selectedCustomerTotal}
           </div>
           <div className="topic-summary-list">
             {topicVsCustomerRows.map((row) => (
