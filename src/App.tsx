@@ -12,6 +12,8 @@ import {
   ChevronRight,
   Check,
   Clock3,
+  ExternalLink,
+  FolderOpen,
   LockKeyhole,
   Plus,
   Search,
@@ -98,6 +100,27 @@ type OemOption = (typeof OEM_OPTIONS)[number];
 type OdmOption = (typeof ODM_OPTIONS)[number];
 type OemFilterOption = "" | OemOption;
 type OdmFilterOption = "" | OdmOption;
+const SHAREPOINT_VIDEO_LIBRARY_URL = "https://intel.sharepoint.com/:f:/s/WSGTeam/IgB4zIznGB5rToXQ8UrFc_3JAdvZtTxfALSIiI3l0zarNUE?e=4F43zK";
+type TrainingVideoEntry = { title: string; url: string };
+type TrainingVideoSubject = { subject: string; english?: TrainingVideoEntry; mandarin?: TrainingVideoEntry };
+const TRAINING_VIDEOS: TrainingVideoSubject[] = [
+  { subject: "Sharing Your Sound through Windows Auracast (PAS)", english: { title: "English", url: "https://intel.sharepoint.com/:v:/s/WSGTeam/IQBCN-Ro-SgbTLws1Ky4bklsAe7E5JP1exM9vOdeoGRMVZM?e=XeFex6" }, mandarin: { title: "Mandarin", url: "https://intel.sharepoint.com/:v:/s/WSGTeam/IQDOiA4JQTe2T69xbmM6WtFGAaoTpRWQ44D8Wsrgqht7paU?e=xoScfM" } },
+  { subject: "Wi-Fi Aware: Future of Proximity", english: { title: "English", url: "https://intel.sharepoint.com/:v:/s/WSGTeam/IQBNPGr0rnlAQIwd6cjsc4ueAR5JXamPYeXqtecYnOGKJJA?e=t5g570" }, mandarin: { title: "Mandarin", url: "https://intel.sharepoint.com/:v:/s/WSGTeam/IQAnOtvlOyslRa_-Oo12RVaZAXKEWG0IuPLbLY3Mc0jS8jk?e=zlTECj" } },
+  { subject: "Auracast™: Unmute Your World", english: { title: "English", url: "https://intel.sharepoint.com/:v:/s/WSGTeam/IQDTGUS8sP1AQoJbSX0vFd2UAQ9nfdSMANIpIx19Y_0eEbo?e=t7tdew" }, mandarin: { title: "Mandarin", url: "https://intel.sharepoint.com/:v:/s/WSGTeam/IQCa4UioS8C5SbwdBKU2x75fAR5rumlx0pXuW8LstPwe1NM?e=bbFTav" } },
+  { subject: "Untangling Bluetooth Audio Codecs", english: { title: "English", url: "https://intel.sharepoint.com/:v:/s/WSGTeam/IQD2WgFJkhx9RY__ORdi6vGtAV5icPD4yYuW-vz0pI_k2vw?e=rAqG3G" }, mandarin: { title: "Mandarin", url: "https://intel.sharepoint.com/:v:/s/WSGTeam/IQApZ8yReswjQ5S9x6rioyMaAecaaUne2dJs-vWhiWiq5Q0?e=Qviwzl" } },
+  { subject: "Why Bluetooth Headset Call Quality Is Poor on Windows", english: { title: "English", url: "https://intel.sharepoint.com/:v:/s/WSGTeam/IQCpJNuerUvpRInQv73KcvYVAQIETjEjNkEk7uVb8mnmy48?e=vqTjcQ" }, mandarin: { title: "Mandarin", url: "https://intel.sharepoint.com/:v:/s/WSGTeam/IQBGOMOO2-B2Q5G_L_aGMpEjAU4vZTHm-tQXOFlGBiUL2Xk?e=6BwcEt" } },
+  { subject: "The Truth About Wireless Lossless Audio", english: { title: "English", url: "https://intel.sharepoint.com/:v:/s/WSGTeam/IQCcTpmZkh1VSJER3JrL7P3OAQtYZD5Dy5m2QmHDeG89QX8?e=44QSDO" }, mandarin: { title: "Mandarin", url: "https://intel.sharepoint.com/:v:/s/WSGTeam/IQDZAX43wJ8lS5jp1Ev7N_fkAQh-AwectO2-HJ936NhLn6U?e=8ZJJsn" } },
+  { subject: "Next-Generation Bluetooth: More Than a Version Upgrade", english: { title: "English", url: "https://intel.sharepoint.com/:v:/s/WSGTeam/IQA82fNsl4yVQZkd3UO9eRtkAcw3OR8k1xYAdO24hyuLpj8?e=flVuKV" }, mandarin: { title: "Mandarin", url: "https://intel.sharepoint.com/:v:/s/WSGTeam/IQBwQLPkZe6FS4qagrcID-JYAVwRO_SzbioemL8oEnNPT00?e=EKAJwo" } },
+  { subject: "Classic Bluetooth vs LE Bluetooth", english: { title: "English", url: "https://intel.sharepoint.com/:v:/s/WSGTeam/IQCSr187bpZuTZ_2CCjxcvypAQ-p9482s-xr9hiLfRmBFgs?e=pN9dxW" }, mandarin: { title: "Mandarin", url: "https://intel.sharepoint.com/:v:/s/WSGTeam/IQAUQgByF9QAS6Ebo4kRplTSAdPk0-9MvM84b1FJaQ4N_ys?e=2TZ0Le" } },
+  { subject: "An Engineer's Guide to Bluetooth", english: { title: "English", url: "https://intel.sharepoint.com/:v:/s/WSGTeam/IQCNMQ9A_LcZSohZ1zpzSP8aATOXTWezVaAZW7c3uL0iNzM?e=vf30Ey" }, mandarin: { title: "Mandarin", url: "https://intel.sharepoint.com/:v:/s/WSGTeam/IQBdwDIjM8XYQbZKrPGTC75UAdNQ8Ny2kJreUsdpZs_6i1U?e=BVNcFv" } },
+  { subject: "Why Is Wireless Audio So Unreliable?", english: { title: "English", url: "https://intel.sharepoint.com/:v:/s/WSGTeam/IQC2BxIl9loBTb1xcuAKFyFmAbi-s6jfi20wrrtkfAz8xMs?e=3eYBog" }, mandarin: { title: "Mandarin", url: "https://intel.sharepoint.com/:v:/s/WSGTeam/IQDky7_yiFTxRrpaiQOWKXxaAT2Kt9jHdc-XPYvdzsBYoD0?e=bvF8F7" } },
+  { subject: "Hidden Rules of Networks: Using the OSI Model to Understand WiFi", english: { title: "English", url: "https://intel.sharepoint.com/:v:/s/WSGTeam/IQCCHu8J1ddrRK3jS9QFs5SKAY58zGkewgtKBrT8KpEQQBg?e=Q1O0uF" }, mandarin: { title: "Mandarin", url: "https://intel.sharepoint.com/:v:/s/WSGTeam/IQA4xXdTu36GQozZSQo3ABGWAV9mrmNNGT6vmRNlD8zpr7I?e=fiqaPH" } },
+  { subject: "Wi-Fi: The Secret Handshake", english: { title: "English", url: "https://intel.sharepoint.com/:v:/s/WSGTeam/IQBntniBIGvqQYx3UkpznasKAawIUgvSq03qlrjUaEeFN0Y?e=MPgccO" }, mandarin: { title: "Mandarin", url: "https://intel.sharepoint.com/:v:/s/WSGTeam/IQDqACFa-_aVSbROgXmCqnyyAd2Iw6db8d9tvBL4EpmLHNs?e=qXg0Wb" } },
+  { subject: "Wi-Fi Troubleshooting: 802.11", english: { title: "English", url: "https://intel.sharepoint.com/:v:/s/WSGTeam/IQBqTxNkOngJTr0485TFhyRiATN_tJwZPDRin-GfGYLTw5k?e=5DtcFC" }, mandarin: { title: "Mandarin", url: "https://intel.sharepoint.com/:v:/s/WSGTeam/IQDVwv0lf1EKQbrDJZf_S2pKAUsSqLoeCmOlzT-FIS_6K4o?e=G49DGa" } },
+  { subject: "Unmasking Wi-Fi: Why Is Your Connection So Unstable?", english: { title: "English", url: "https://intel.sharepoint.com/:v:/s/WSGTeam/IQDSEFewXhwnSZUsRzxzk-mjAcyiBku_MI6cT7RbRZ1mlgs?e=GG4RUR" }, mandarin: { title: "Mandarin", url: "https://intel.sharepoint.com/:v:/s/WSGTeam/IQCapyy_mJCER79HU9JfjtkDAU9iKAaDGD58xCgtGqtF9jM?e=bjLDOZ" } },
+  { subject: "Mastering the RF Environment for Effective Wi-Fi Testing", english: { title: "English", url: "https://intel.sharepoint.com/:v:/s/WSGTeam/IQBo1GHKlM_WQ6uEhCfnYDuoAb_7UFPxtWzJ7RHxnjFsGNE?e=EySqAw" }, mandarin: { title: "Mandarin", url: "https://intel.sharepoint.com/:v:/s/WSGTeam/IQCL82Smc65sTqK0Y7tffnu9AYMj4AzgvhriXD0Q8wdB5M0?e=y9M9kh" } },
+  { subject: "The Invisible Battlefield: Modern Electronic Design", english: { title: "English", url: "https://intel.sharepoint.com/:v:/s/WSGTeam/IQBOt_KgHcuZQLLZ05hJI_VXAaL-LlTibe2VzhjtSoVta4E?e=D120VL" }, mandarin: { title: "Mandarin", url: "https://intel.sharepoint.com/:v:/s/WSGTeam/IQC3GhTbI8NWQrnN3WH2XCsFAZItV1Ggso6sjLYzk095VWQ?e=l4gt1G" } },
+];
 const userError = (code: string) =>
   ({
     SCHEDULER_AUTH_REQUIRED: "Scheduler mode is required to manage sessions.",
@@ -249,7 +272,7 @@ function App() {
   const [selectedSession, setSelectedSession] = useState<Session | null>(null);
   const [query, setQuery] = useState("");
   const [weekIndex, setWeekIndex] = useState(0);
-  const [modal, setModal] = useState<"booking" | "login" | "my-bookings" | "topic-customer" | "cancel-booking" | "booking-blocks" | "booking-confirmation" | "verification-success" | "email-recipients" | null>(
+  const [modal, setModal] = useState<"booking" | "login" | "my-bookings" | "topic-customer" | "cancel-booking" | "booking-blocks" | "booking-confirmation" | "verification-success" | "email-recipients" | "training-videos" | null>(
     null,
   );
   const [bookingDraft, setBookingDraft] = useState<{
@@ -881,6 +904,9 @@ function App() {
                 </button>
               ))}
             </div>
+            <button className="secondary-button offline-video-trigger" type="button" onClick={() => setModal("training-videos")}>
+              <Video size={16} /> Offline training videos
+            </button>
           </aside>
           <section className="calendar-panel">
             <div className="calendar-toolbar">
@@ -1324,6 +1350,41 @@ function App() {
               <div className="topic-summary-row" key={row.title}>
                 <span>{row.title}</span>
                 <strong>{row.count}</strong>
+              </div>
+            ))}
+          </div>
+        </Modal>
+      )}
+      {modal === "training-videos" && (
+        <Modal title="Offline training videos" close={() => setModal(null)} wide>
+          <p className="modal-copy">Download and distribute these recordings to customers at will.</p>
+          <a className="offline-video-library-link" href={SHAREPOINT_VIDEO_LIBRARY_URL} target="_blank" rel="noreferrer">
+            <FolderOpen size={13} /> Open full SharePoint library
+          </a>
+          <div className="course-list offline-video-list">
+            {TRAINING_VIDEOS.map((entry) => (
+              <div className="course-item offline-video-item" key={entry.subject}>
+                <span className="course-dot slate" />
+                <span className="course-copy">
+                  <strong>{entry.subject}</strong>
+                  <small>
+                    <Video size={12} /> Offline recording{" "}
+                    <span className="bullet">•</span>{" "}
+                    For customer distribution
+                  </small>
+                </span>
+                <span className="offline-video-links">
+                  {entry.english && (
+                    <a className="offline-video-link" href={entry.english.url} target="_blank" rel="noreferrer">
+                      <ExternalLink size={12} /> EN
+                    </a>
+                  )}
+                  {entry.mandarin && (
+                    <a className="offline-video-link" href={entry.mandarin.url} target="_blank" rel="noreferrer">
+                      <ExternalLink size={12} /> 中文
+                    </a>
+                  )}
+                </span>
               </div>
             ))}
           </div>

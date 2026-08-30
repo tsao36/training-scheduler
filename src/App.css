@@ -117,6 +117,40 @@ button { font: inherit; cursor: pointer; }
 	color: #3B5167;
 	font-size: 12px;
 }
+.video-library-link { width: auto; display: inline-flex; }
+.offline-video-trigger { width: 100%; margin-top: 16px; }
+.offline-video-library-link {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	margin-top: 8px;
+	color: #4a87a3;
+	font-size: 10px;
+	font-weight: 700;
+}
+.offline-video-library-link:hover { color: var(--coral); }
+.offline-video-list { margin-top: 8px; max-height: 50vh; overflow: auto; }
+.offline-video-item {
+	align-items: center;
+	background: #FBF7EF;
+	border-left: 2px solid #d7ab56;
+	cursor: default;
+}
+.offline-video-item:hover { background: #FBF7EF; }
+.course-dot.slate { background: #8a8f98; }
+.offline-video-links { display: flex; gap: 5px; margin-left: auto; flex: 0 0 auto; }
+.offline-video-link {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	border: 1px solid var(--blue);
+	color: var(--navy);
+	padding: 5px 8px;
+	font-size: 9px;
+	font-weight: 700;
+	white-space: nowrap;
+}
+.offline-video-link:hover { background: #E5ECF8; }
 @media (max-width: 1100px) { .workspace { grid-template-columns: 235px minmax(430px, 1fr); }.booking-panel { grid-column: 1 / -1; border-left: 0; border-top: 1px solid var(--line); }.booking-panel-head { align-items: center; }.booking-panel .detail-list { display: flex; justify-content: space-between; }.booking-panel .book-button { width: 240px; margin-left: auto; display: flex; }.booking-panel .booking-hint { display: none; } }
 @media (max-width: 760px) { .topbar { padding: 0 18px; }.topbar-center { display: none; }.main-content { padding: 32px 16px 45px; }.page-heading { align-items: start; flex-direction: column; gap: 22px; }.heading-actions { width: 100%; }.heading-actions button { flex: 1 1 0; }.stats-row { grid-template-columns: 1fr 1fr; }.capacity { grid-column: 1 / -1; }.workspace { display: block; }.course-panel, .booking-panel { border: 0; }.course-panel { border-bottom: 1px solid var(--line); }.calendar-panel { overflow-x: auto; }.calendar-grid { min-width: 550px; }.calendar-footer { min-width: 550px; }.booking-panel .detail-list { display: block; }.booking-panel .book-button { width: 100%; margin-left: 0; } }
 
