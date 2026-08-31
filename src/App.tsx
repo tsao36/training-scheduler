@@ -270,7 +270,7 @@ function App() {
   const [selectedSession, setSelectedSession] = useState<Session | null>(null);
   const [query, setQuery] = useState("");
   const [weekIndex, setWeekIndex] = useState(0);
-  const [modal, setModal] = useState<"booking" | "login" | "my-bookings" | "topic-customer" | "booking-blocks" | "booking-confirmation" | "verification-success" | "email-recipients" | "training-videos" | null>(
+  const [modal, setModal] = useState<"booking" | "login" | "my-bookings" | "topic-customer" | "booking-blocks" | "booking-confirmation" | "verification-success" | "email-recipients" | "training-videos" | "bt-hdt-agenda" | null>(
     null,
   );
   const [bookingDraft, setBookingDraft] = useState<{
@@ -920,6 +920,7 @@ function App() {
                   key={entry.key}
                   type="button"
                   onClick={() => setSelectedTraining(entry.training)}
+                  onDoubleClick={() => { if (entry.key === "bt-hdt-major") setModal("bt-hdt-agenda"); }}
                 >
                   <span className={`course-dot ${entry.training.accent}`} />
                   <span className="course-copy">
@@ -929,6 +930,9 @@ function App() {
                       <span className="bullet">•</span>{" "}
                       Recorded video with live QnA by Instructor
                     </small>
+                    {entry.key === "bt-hdt-major" && (
+                      <small className="course-hint">Double-click for detail</small>
+                    )}
                   </span>
                 </button>
               ))}
@@ -1364,6 +1368,18 @@ function App() {
               </div>
             ))}
           </div>
+        </Modal>
+      )}
+      {modal === "bt-hdt-agenda" && (
+        <Modal title="BT HDT Training agenda" close={() => setModal(null)}>
+          <ol className="agenda-list">
+            <li>Why HDT, and why now — the market forces behind the specification</li>
+            <li>What HDT is, and where it fits in Bluetooth's evolution</li>
+            <li>Key characteristics in plain language</li>
+            <li>Application scenarios on a notebook platform</li>
+            <li>Specification status and a realistic view of the timeline</li>
+            <li>What this means for your platform roadmap, and what to plan for now</li>
+          </ol>
         </Modal>
       )}
       {modal === "training-videos" && (
