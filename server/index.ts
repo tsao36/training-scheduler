@@ -5,6 +5,7 @@ import path from 'node:path'
 import { dump } from 'js-yaml'
 import { createDataStore, type Booking } from './data-store.js'
 import { readEmailRecipientConfig, sendBookingNotificationEmail, sendBookingCancellationNotificationEmail, getCFEContactEmail, writeEmailRecipientConfig } from './email-service.js'
+import { readTrainingVideoCatalog } from './training-videos.js'
 
 const password = process.env.SCHEDULER_PASSWORD
 if (!password) throw new Error('SCHEDULER_PASSWORD is required')
@@ -47,6 +48,11 @@ const sendData = async (_request: Request, response: Response) => {
 }
 
 app.get('/api/scheduler', sendData)
+app.get('/api/training-videos', async (_request, response) => {
+  const catalog = await readTrainingVideoCatalog()
+  response.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate')
+  response.json(catalog)
+})
 app.get('/api/bookings', async (request, response) => {
   const email = String(request.query.email ?? '').trim().toLowerCase()
   if (!email) return response.status(400).json({ error: 'REQUESTER_EMAIL_REQUIRED' })
