@@ -211,12 +211,12 @@ app.delete('/api/unavailable-days', requireScheduler, async (request, response) 
 })
 
 app.delete('/api/bookings/:id', async (request, response) => {
-  const email = String(request.body?.requesterEmail ?? '')
+  const email = String(request.body?.requesterEmail ?? '').trim().toLowerCase()
   let booking: Booking | undefined
   let session: Awaited<ReturnType<typeof store.read>>['sessions'][0] | undefined
   let training: Awaited<ReturnType<typeof store.read>>['trainings'][0] | undefined
   await store.update((data) => {
-    booking = data.bookings.find((item) => item.id === request.params.id && item.requesterEmail === email && item.status === 'confirmed')
+    booking = data.bookings.find((item) => item.id === request.params.id && item.requesterEmail.trim().toLowerCase() === email && item.status === 'confirmed')
     if (!booking) throw new Error('BOOKING_NOT_FOUND')
     session = data.sessions.find((item) => item.id === booking!.sessionId)
     training = session ? data.trainings.find((item) => item.id === session!.trainingId) : undefined

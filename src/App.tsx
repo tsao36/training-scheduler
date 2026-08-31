@@ -112,7 +112,7 @@ const userError = (code: string) =>
     SESSION_NOT_FOUND: "This session is no longer available.",
     DUPLICATE_SESSION: "This course already has a session at that time.",
     INSTRUCTOR_CONFLICT: "This instructor already has a session at that time.",
-    BOOKING_NOT_FOUND: "This booking could not be found.",
+    BOOKING_NOT_FOUND: "This booking could not be found, or the email entered does not match the requester email on file.",
     BOOKING_BLOCKED: "This booking is blocked by scheduler rules.",
     REQUIRED_UNAVAILABLE_FIELDS_MISSING:
       "Please select a training topic and valid start/end dates.",
@@ -254,7 +254,7 @@ function App() {
   const [selectedSession, setSelectedSession] = useState<Session | null>(null);
   const [query, setQuery] = useState("");
   const [weekIndex, setWeekIndex] = useState(0);
-  const [modal, setModal] = useState<"booking" | "login" | "my-bookings" | "topic-customer" | "cancel-booking" | "booking-blocks" | "booking-confirmation" | "verification-success" | "email-recipients" | "training-videos" | null>(
+  const [modal, setModal] = useState<"booking" | "login" | "my-bookings" | "topic-customer" | "booking-blocks" | "booking-confirmation" | "verification-success" | "email-recipients" | "training-videos" | null>(
     null,
   );
   const [bookingDraft, setBookingDraft] = useState<{
@@ -275,7 +275,6 @@ function App() {
   const [lookupResults, setLookupResults] = useState<BookingLookup[] | null>(null);
   const [selectedOemFilter, setSelectedOemFilter] = useState<OemFilterOption>("");
   const [selectedOdmFilter, setSelectedOdmFilter] = useState<OdmFilterOption>("");
-  const [bookingToCancel, setBookingToCancel] = useState<Booking | null>(null);
   const [bookingConfirmation, setBookingConfirmation] = useState<{ bookingId: string; email: string; instructorEmail?: string | null } | null>(null);
   const [recipientRows, setRecipientRows] = useState<RecipientRow[]>([]);
   const [trainingVideoCatalog, setTrainingVideoCatalog] = useState<TrainingVideoCatalog | null>(null);
@@ -406,10 +405,10 @@ function App() {
       '<div class="guide-modal" role="dialog" aria-modal="true"><button class="guide-close" type="button" aria-label="Close user guide">×</button><div class="guide-kicker">TRAINING SCHEDULER</div><h2>User guide</h2><div class="guide-tabs"><button class="active" data-language="en">English</button><button data-language="zh">繁體中文</button><button data-language="ko">한국어</button><button data-language="ja">日本語</button></div><div class="guide-content"></div></div>';
     document.body.append(guide);
     const content: Record<string, string> = {
-      en: "<h3>Find a session</h3><p>Use the week arrows to browse weekdays from September 14 through October 2. Hover over a session to see course, instructor, delivery, and booking details.</p><h3>Book a session</h3><p>Select an open session and click <b>Book this session</b>. Enter the customer or team name, requester name, and requester email. Booking is confirmed immediately and the session shows the customer name.</p><h3>View or cancel bookings</h3><p>Click <b>My bookings</b>, enter the same requester email, and select <b>Find my bookings</b>. To cancel, open the booked session, click <b>Cancel booking</b>, and confirm with that email.</p><h3>Scheduler operations</h3><p>Enter Scheduler mode with the scheduler password. Click an empty half-hour to create a 30-minute session, or select a session and use <b>Delete session</b>. Sessions must be weekdays, start between 09:00 and 17:00 PT, and use 30-minute increments.</p><h3>Time zones</h3><p>Schedule times use Pacific Time (PT). The header clocks show TW/CN, JP/KR, and U.S. West Coast local time.</p>",
-      zh: "<h3>尋找場次</h3><p>使用週次箭頭瀏覽 9 月 14 日至 10 月 2 日的平日。將滑鼠移到場次上，可查看課程、講師、授課方式與預約資訊。</p><h3>預約場次</h3><p>選擇開放場次並點擊「Book this session」。填寫客戶或團隊名稱、預約人姓名與 email。預約會立即確認，場次會顯示客戶名稱。</p><h3>查看或取消預約</h3><p>點擊「My bookings」，輸入相同的預約人 email，再點擊「Find my bookings」。要取消預約，開啟已預約場次，點擊「Cancel booking」，並用相同 email 確認。</p><h3>Scheduler 操作</h3><p>使用管理密碼進入 Scheduler mode。點擊空白半小時建立 30 分鐘場次，或選擇場次後使用「Delete session」。場次必須是平日、Pacific Time 09:00 至 17:00 開始，並使用 30 分鐘間隔。</p><h3>時區</h3><p>排程時間使用 Pacific Time（PT）。頁首時鐘顯示台灣／中國、日韓與美國西岸時間。</p>",
-      ko: "<h3>세션 찾기</h3><p>주간 화살표를 사용해 9월 14일부터 10월 2일까지의 평일을 확인하세요. 세션 위에 마우스를 올리면 과정, 강사, 진행 방식과 예약 정보를 볼 수 있습니다.</p><h3>세션 예약</h3><p>열린 세션을 선택하고 “Book this session”을 클릭하세요. 고객 또는 팀 이름, 신청자 이름과 이메일을 입력합니다. 예약은 즉시 확정되며 세션에 고객 이름이 표시됩니다.</p><h3>예약 확인 또는 취소</h3><p>“My bookings”를 클릭하고 예약에 사용한 이메일을 입력한 뒤 “Find my bookings”를 선택하세요. 취소하려면 예약된 세션에서 “Cancel booking”을 클릭하고 같은 이메일로 확인합니다.</p><h3>Scheduler 작업</h3><p>Scheduler password로 Scheduler mode에 들어가세요. 빈 30분 구간을 클릭해 30분 세션을 만들거나 세션을 선택해 “Delete session”을 사용하세요. 세션은 평일, Pacific Time 09:00~17:00 시작 시간, 30분 단위여야 합니다.</p><h3>시간대</h3><p>일정 시간은 Pacific Time(PT)을 사용합니다. 상단 시계는 TW/CN, JP/KR 및 미국 서부 시간을 표시합니다.</p>",
-      ja: "<h3>セッションを探す</h3><p>週の矢印で、9月14日から10月2日までの平日を確認できます。セッションにカーソルを合わせると、コース、講師、配信方法、予約情報が表示されます。</p><h3>セッションを予約</h3><p>空いているセッションを選び、「Book this session」をクリックします。顧客またはチーム名、申請者名、メールアドレスを入力してください。予約はすぐに確定し、セッションに顧客名が表示されます。</p><h3>予約の確認とキャンセル</h3><p>「My bookings」をクリックし、予約時のメールアドレスを入力して「Find my bookings」を選択します。キャンセルするには予約済みセッションで「Cancel booking」をクリックし、同じメールアドレスで確認します。</p><h3>Scheduler の操作</h3><p>Scheduler passwordでScheduler modeに入ります。空いている30分枠をクリックしてセッションを作成するか、セッションを選択して「Delete session」を使用します。平日、Pacific Timeの09:00〜17:00開始、30分単位で設定してください。</p><h3>タイムゾーン</h3><p>スケジュールはPacific Time（PT）を使用します。ヘッダーにはTW/CN、JP/KR、米国西海岸の現在時刻が表示されます。</p>",
+      en: "<h3>Find a session</h3><p>Use the week arrows to browse weekdays from September 14 through October 2. Hover over a session to see course, instructor, delivery, and booking details.</p><h3>Book a session</h3><p>Select an open session and click <b>Book this session</b>. Enter the customer or team name, requester name, and requester email. Booking is confirmed immediately and the session shows the customer name.</p><h3>View bookings</h3><p>Click <b>My bookings</b>, enter the same requester email, and select <b>Find my bookings</b>.</p><h3>Scheduler operations</h3><p>Enter Scheduler mode with the scheduler password. Click an empty half-hour to create a 30-minute session, or select a session and use <b>Delete session</b>. Sessions must be weekdays, start between 09:00 and 17:00 PT, and use 30-minute increments.</p><h3>Time zones</h3><p>Schedule times use Pacific Time (PT). The header clocks show TW/CN, JP/KR, and U.S. West Coast local time.</p>",
+      zh: "<h3>尋找場次</h3><p>使用週次箭頭瀏覽 9 月 14 日至 10 月 2 日的平日。將滑鼠移到場次上，可查看課程、講師、授課方式與預約資訊。</p><h3>預約場次</h3><p>選擇開放場次並點擊「Book this session」。填寫客戶或團隊名稱、預約人姓名與 email。預約會立即確認，場次會顯示客戶名稱。</p><h3>查看預約</h3><p>點擊「My bookings」，輸入相同的預約人 email，再點擊「Find my bookings」。</p><h3>Scheduler 操作</h3><p>使用管理密碼進入 Scheduler mode。點擊空白半小時建立 30 分鐘場次，或選擇場次後使用「Delete session」。場次必須是平日、Pacific Time 09:00 至 17:00 開始，並使用 30 分鐘間隔。</p><h3>時區</h3><p>排程時間使用 Pacific Time（PT）。頁首時鐘顯示台灣／中國、日韓與美國西岸時間。</p>",
+      ko: "<h3>세션 찾기</h3><p>주간 화살표를 사용해 9월 14일부터 10월 2일까지의 평일을 확인하세요. 세션 위에 마우스를 올리면 과정, 강사, 진행 방식과 예약 정보를 볼 수 있습니다.</p><h3>세션 예약</h3><p>열린 세션을 선택하고 “Book this session”을 클릭하세요. 고객 또는 팀 이름, 신청자 이름과 이메일을 입력합니다. 예약은 즉시 확정되며 세션에 고객 이름이 표시됩니다.</p><h3>예약 확인</h3><p>“My bookings”를 클릭하고 예약에 사용한 이메일을 입력한 뒤 “Find my bookings”를 선택하세요.</p><h3>Scheduler 작업</h3><p>Scheduler password로 Scheduler mode에 들어가세요. 빈 30분 구간을 클릭해 30분 세션을 만들거나 세션을 선택해 “Delete session”을 사용하세요. 세션은 평일, Pacific Time 09:00~17:00 시작 시간, 30분 단위여야 합니다.</p><h3>시간대</h3><p>일정 시간은 Pacific Time(PT)을 사용합니다. 상단 시계는 TW/CN, JP/KR 및 미국 서부 시간을 표시합니다.</p>",
+      ja: "<h3>セッションを探す</h3><p>週の矢印で、9月14日から10月2日までの平日を確認できます。セッションにカーソルを合わせると、コース、講師、配信方法、予約情報が表示されます。</p><h3>セッションを予約</h3><p>空いているセッションを選び、「Book this session」をクリックします。顧客またはチーム名、申請者名、メールアドレスを入力してください。予約はすぐに確定し、セッションに顧客名が表示されます。</p><h3>予約の確認</h3><p>「My bookings」をクリックし、予約時のメールアドレスを入力して「Find my bookings」を選択します。</p><h3>Scheduler の操作</h3><p>Scheduler passwordでScheduler modeに入ります。空いている30分枠をクリックしてセッションを作成するか、セッションを選択して「Delete session」を使用します。平日、Pacific Timeの09:00〜17:00開始、30分単位で設定してください。</p><h3>タイムゾーン</h3><p>スケジュールはPacific Time（PT）を使用します。ヘッダーにはTW/CN、JP/KR、米国西海岸の現在時刻が表示されます。</p>",
     };
     const contentElement = guide.querySelector<HTMLElement>(".guide-content");
     const tabs = Array.from(
@@ -650,18 +649,6 @@ function App() {
       setError((cause as Error).message);
     } finally {
       setBookingInProgress(false);
-    }
-  };
-  const cancelBooking = async (email: string) => {
-    if (!bookingToCancel) return;
-    try {
-      await api(`/api/bookings/${bookingToCancel.id}`, { method: "DELETE", body: JSON.stringify({ requesterEmail: email }) });
-      await refresh();
-      setSelectedSession((current) => current ? { ...current } : null);
-      setBookingToCancel(null);
-      setModal(null);
-    } catch (cause) {
-      setError((cause as Error).message);
     }
   };
   const loadRecipientConfig = async () => {
@@ -1225,11 +1212,6 @@ function App() {
                     <Trash2 size={15} /> Delete session
                   </button>
                 )}
-                {selectedBookings.map((booking) => (
-                  <button className="cancel-booking-button" key={`cancel-${booking.id}`} type="button" onClick={() => { setBookingToCancel(booking); setModal("cancel-booking"); }}>
-                    <Trash2 size={14} /> Cancel booking: OEM {booking.oem} / ODM {booking.odm ?? "NA"}
-                  </button>
-                ))}
                 {selectedSessionState === "shared" && (
                   <div className="session-capacity shared">
                     <Check size={16} /> Already booked by {selectedBookings.length} customer(s), still open for other OEM/ODM.
@@ -1630,20 +1612,6 @@ function App() {
             {bookingInProgress ? <span className="button-spinner" aria-hidden="true" /> : <Check size={17} />}
             {bookingInProgress ? "Sending notification..." : "Confirm booking"}
           </button>
-        </Modal>
-      )}
-      {modal === "cancel-booking" && bookingToCancel && (
-        <Modal title="Cancel booking" close={() => { setBookingToCancel(null); setModal(null); }}>
-          <p className="modal-copy">Enter the email used for this booking to confirm cancellation.</p>
-          <form onSubmit={(event) => { event.preventDefault(); cancelBooking(new FormData(event.currentTarget).get("requesterEmail") as string); }}>
-            <div className="cancel-summary">
-              <strong>OEM: {bookingToCancel.oem}</strong>
-              <strong>ODM: {bookingToCancel.odm ?? "NA"}</strong>
-              <span>{bookingToCancel.requesterName}</span>
-            </div>
-            <label className="form-label">Requester email<input name="requesterEmail" type="email" required autoFocus /></label>
-            <button className="cancel-confirm-button" type="submit"><Trash2 size={16} /> Cancel booking</button>
-          </form>
         </Modal>
       )}
       {modal === "booking-confirmation" && bookingConfirmation && (
