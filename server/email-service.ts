@@ -1,5 +1,6 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
+import { randomUUID } from 'node:crypto'
 import nodemailer from 'nodemailer'
 import { dump, load } from 'js-yaml'
 
@@ -91,7 +92,9 @@ export async function writeEmailRecipientConfig(yamlText: string): Promise<Email
   )
 
   await fs.mkdir(path.dirname(recipientConfigPath), { recursive: true })
-  await fs.writeFile(recipientConfigPath, dump(normalized, { noRefs: true }), 'utf8')
+  const temporaryPath = `${recipientConfigPath}.${randomUUID()}.tmp`
+  await fs.writeFile(temporaryPath, dump(normalized, { noRefs: true }), 'utf8')
+  await fs.rename(temporaryPath, recipientConfigPath)
   return normalized
 }
 

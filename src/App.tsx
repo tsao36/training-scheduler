@@ -220,6 +220,34 @@ const unavailableLabel = (training?: Training) =>
   training?.title.replace(/\s+for\s+/i, " ") ?? "Not available";
 const customerLabel = (booking: Booking) =>
   booking.odm ? `${booking.oem} / ${booking.odm}` : booking.oem;
+type AgendaItem = { text: string; children?: string[] };
+const COURSE_AGENDAS: Record<string, { title: string; items: AgendaItem[] }> = {
+  "wifi-8-major": {
+    title: "WiFi 8 Training agenda",
+    items: [
+      { text: "Introduction: why Wi-Fi 8 UHR matters" },
+      {
+        text: "The Key Pillars of Wi-Fi 8",
+        children: [
+          "Real-World Performance: higher speed, improved latency, and network capacity",
+          "Trusted & Secured: security, privacy, and connection continuity",
+          "Power Saving: longer battery life and lower power consumption",
+        ],
+      },
+    ],
+  },
+  "bt-hdt-major": {
+    title: "BT HDT Training agenda",
+    items: [
+      { text: "Why HDT, and why now — the market forces behind the specification" },
+      { text: "What HDT is, and where it fits in Bluetooth's evolution" },
+      { text: "Key characteristics in plain language" },
+      { text: "Application scenarios on a notebook platform" },
+      { text: "Specification status and a realistic view of the timeline" },
+      { text: "What this means for your platform roadmap, and what to plan for now" },
+    ],
+  },
+};
 const majorCourseMeta = (training: Training) => {
   const normalized = `${training.id} ${training.title}`.toLowerCase();
   if (normalized.includes("wifi") && normalized.includes("8")) {
@@ -270,7 +298,7 @@ function App() {
   const [selectedSession, setSelectedSession] = useState<Session | null>(null);
   const [query, setQuery] = useState("");
   const [weekIndex, setWeekIndex] = useState(0);
-  const [modal, setModal] = useState<"booking" | "login" | "my-bookings" | "topic-customer" | "booking-blocks" | "booking-confirmation" | "verification-success" | "email-recipients" | "training-videos" | "bt-hdt-agenda" | null>(
+  const [modal, setModal] = useState<"booking" | "login" | "my-bookings" | "topic-customer" | "booking-blocks" | "booking-confirmation" | "verification-success" | "email-recipients" | "training-videos" | "course-agenda" | null>(
     null,
   );
   const [bookingDraft, setBookingDraft] = useState<{
@@ -292,6 +320,7 @@ function App() {
   const [bookingConfirmation, setBookingConfirmation] = useState<{ bookingId: string; email: string; instructorEmail?: string | null } | null>(null);
   const [recipientRows, setRecipientRows] = useState<RecipientRow[]>([]);
   const [trainingVideoCatalog, setTrainingVideoCatalog] = useState<TrainingVideoCatalog | null>(null);
+  const [agendaCourseKey, setAgendaCourseKey] = useState("");
   const [unavailableDraft, setUnavailableDraft] = useState<{
     trainingId: string;
     startDate: string;
@@ -319,9 +348,10 @@ function App() {
     tooltip.style.top = `${top}px`;
   };
   const positionSlotTooltip = (event: MouseEvent<HTMLElement>) => positionSlotTooltipAt(event.clientX, event.clientY);
-  const refresh = async () => {
+  const refresh = async ({ focusLatestBooking = true } = {}) => {
     const next = await api<SchedulerData>("/api/scheduler");
     setData(next);
+    if (!focusLatestBooking) return;
     const confirmedBookingSessionIds = new Set(
       next.bookings
         .filter(
@@ -362,6 +392,21 @@ function App() {
     
   }, []);
   useEffect(() => { const updateClocks = () => setClocks(timeZones.map(([label, timeZone]) => ({ label, timeZone, time: formatClock(timeZone) }))); const interval = window.setInterval(updateClocks, 1000); return () => window.clearInterval(interval); }, []);
+  useEffect(() => {
+    // Keep the shared schedule current so concurrent users don't act on stale slots.
+    const syncSchedule = () => {
+      if (document.hidden) return;
+      refresh({ focusLatestBooking: false }).catch(() => undefined);
+    };
+    const interval = window.setInterval(syncSchedule, 60_000);
+    window.addEventListener("focus", syncSchedule);
+    document.addEventListener("visibilitychange", syncSchedule);
+    return () => {
+      window.clearInterval(interval);
+      window.removeEventListener("focus", syncSchedule);
+      document.removeEventListener("visibilitychange", syncSchedule);
+    };
+  }, []);
   useEffect(() => {
     if (!selectedTraining && data?.trainings[0])
       setSelectedTraining(data.trainings[0]);
@@ -920,7 +965,7 @@ function App() {
                   key={entry.key}
                   type="button"
                   onClick={() => setSelectedTraining(entry.training)}
-                  onDoubleClick={() => { if (entry.key === "bt-hdt-major") setModal("bt-hdt-agenda"); }}
+                  onDoubleClick={() => { if (COURSE_AGENDAS[entry.key]) { setAgendaCourseKey(entry.key); setModal("course-agenda"); } }}
                 >
                   <span className={`course-dot ${entry.training.accent}`} />
                   <span className="course-copy">
@@ -930,7 +975,7 @@ function App() {
                       <span className="bullet">•</span>{" "}
                       Recorded video with live QnA by Instructor
                     </small>
-                    {entry.key === "bt-hdt-major" && (
+                    {COURSE_AGENDAS[entry.key] && (
                       <small className="course-hint">Double-click for detail</small>
                     )}
                   </span>
@@ -1370,15 +1415,21 @@ function App() {
           </div>
         </Modal>
       )}
-      {modal === "bt-hdt-agenda" && (
-        <Modal title="BT HDT Training agenda" close={() => setModal(null)}>
+      {modal === "course-agenda" && COURSE_AGENDAS[agendaCourseKey] && (
+        <Modal title={COURSE_AGENDAS[agendaCourseKey].title} close={() => setModal(null)}>
           <ol className="agenda-list">
-            <li>Why HDT, and why now — the market forces behind the specification</li>
-            <li>What HDT is, and where it fits in Bluetooth's evolution</li>
-            <li>Key characteristics in plain language</li>
-            <li>Application scenarios on a notebook platform</li>
-            <li>Specification status and a realistic view of the timeline</li>
-            <li>What this means for your platform roadmap, and what to plan for now</li>
+            {COURSE_AGENDAS[agendaCourseKey].items.map((item) => (
+              <li key={item.text}>
+                {item.text}
+                {item.children && (
+                  <ul className="agenda-sublist">
+                    {item.children.map((child) => (
+                      <li key={child}>{child}</li>
+                    ))}
+                  </ul>
+                )}
+              </li>
+            ))}
           </ol>
         </Modal>
       )}

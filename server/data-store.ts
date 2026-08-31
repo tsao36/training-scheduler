@@ -47,6 +47,10 @@ export type SchedulerData = {
 
 type StoredSchedulerData = Omit<SchedulerData, 'version'> & { version?: number }
 
+const LOCK_RETRY_MS = 20
+const LOCK_ATTEMPTS = 500
+const STALE_LOCK_MS = 30_000
+
 export class DataStore {
   constructor(
     private readonly filePath: string,
@@ -110,12 +114,18 @@ export class DataStore {
   }
 
   private async acquireLock(lockPath: string): Promise<import('node:fs/promises').FileHandle> {
-    for (let attempt = 0; attempt < 50; attempt += 1) {
+    for (let attempt = 0; attempt < LOCK_ATTEMPTS; attempt += 1) {
       try {
         return await fs.open(lockPath, 'wx')
       } catch (error) {
         if ((error as NodeJS.ErrnoException).code !== 'EEXIST') throw error
-        await new Promise((resolve) => setTimeout(resolve, 20))
+        // A lock this old means a previous process died before releasing it.
+        const stats = await fs.stat(lockPath).catch(() => null)
+        if (stats && Date.now() - stats.mtimeMs > STALE_LOCK_MS) {
+          await fs.rm(lockPath, { force: true })
+          continue
+        }
+        await new Promise((resolve) => setTimeout(resolve, LOCK_RETRY_MS))
       }
     }
     throw new Error('DATA_LOCK_TIMEOUT')
