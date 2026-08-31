@@ -937,7 +937,8 @@ function App() {
               <Video size={16} /> Offline training videos
             </button>
           </aside>
-          <section className="calendar-panel">
+          <section className="calendar-panel schedule-spotlight">
+            <span className="schedule-spotlight-badge">Start here — click an open slot to book a session</span>
             <div className="calendar-toolbar">
               <div>
                 <span className="section-kicker">SCHEDULE VIEW</span>
@@ -973,7 +974,6 @@ function App() {
               </div>
             </div>
             <div className="week-group active-week">
-              <div className="week-label">{currentWeek.label}</div>
               <div
                 className="calendar-grid"
                 style={{
@@ -1147,19 +1147,6 @@ function App() {
               </div>
             </div>
             <div className="calendar-footer">
-              <span>
-                <i className="legend-dot live" /> Instructor-led
-              </span>
-              <span>
-                <i className="legend-dot video" /> CFE online video
-              </span>
-              <span>
-                <i className="legend-dot shared" /> Shared slot (still bookable)
-              </span>
-              <span>
-                <i className="legend-dot closed" /> Closed slot
-              </span>
-              <span className="all-day-legend">ALL DAY unavailable on marked dates</span>
               <span className="footer-note">Weekdays · 09:00–17:30 PT</span>
             </div>
             {activeDayWarnings && (

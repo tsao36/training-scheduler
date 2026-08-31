@@ -27,6 +27,30 @@ button { font: inherit; cursor: pointer; }
 .capacity { display: block; padding: 18px 22px; }.capacity-label { display: flex; align-items: baseline; justify-content: space-between; }.capacity-label strong { color: var(--coral); font-size: 20px; }.capacity-label span { margin-top: 0 !important; }.progress { height: 5px; background: #e8e7e2; margin-top: 10px; }.progress span { display: block; width: 76%; height: 100%; background: var(--coral); }
 .workspace { display: grid; grid-template-columns: 270px minmax(480px, 1fr) 275px; min-height: 620px; border: 1px solid var(--line); background: white; }
 .course-panel, .calendar-panel, .booking-panel { padding: 25px 21px; }.course-panel { border-right: 1px solid var(--line); }.booking-panel { border-left: 1px solid var(--line); background: #fcfbf8; }
+.schedule-spotlight {
+	position: relative;
+	z-index: 1;
+	padding-top: 46px;
+	box-shadow: inset 0 0 0 3px var(--coral), 0 10px 30px rgba(233,120,97,.18);
+}
+.schedule-spotlight-badge {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	padding: 8px 12px;
+	background: var(--coral);
+	color: white;
+	font-size: 10px;
+	font-weight: 700;
+	letter-spacing: .4px;
+	text-transform: uppercase;
+	text-align: center;
+}
 .panel-title, .calendar-toolbar, .booking-panel-head { display: flex; justify-content: space-between; align-items: start; }.panel-title h2, .calendar-toolbar h2, .booking-panel h2 { margin: 0; color: var(--navy); font-size: 19px; line-height: 1.1; font-weight: 600; }.icon-button, .round-button { display: grid; place-items: center; border: 1px solid var(--line); background: transparent; color: var(--muted); width: 29px; height: 29px; }.icon-button:hover, .round-button:hover { color: var(--coral); border-color: var(--coral); }
 .search-field { display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--line); color: #9d9c96; padding: 18px 2px 10px; }.search-field input { border: 0; outline: 0; width: 100%; background: transparent; color: var(--navy); font-size: 12px; }.course-list { margin-top: 12px; }.course-item { position: relative; display: flex; width: 100%; gap: 10px; padding: 12px 7px; border: 0; border-left: 2px solid transparent; text-align: left; background: transparent; color: var(--navy); }.course-item:hover, .course-item.selected { background: #f8f6f1; border-left-color: var(--coral); }.course-item.selected .course-arrow { color: var(--coral); }.course-dot { flex: 0 0 auto; width: 9px; height: 9px; margin-top: 4px; }.coral { background: #e97861; }.blue { background: #619bb9; }.mint { background: #65b79c; }.yellow { background: #d7ab56; }.violet { background: #887caf; }.course-copy { min-width: 0; }.course-copy strong { display: block; font-size: 12px; font-weight: 600; line-height: 1.25; }.course-copy small { display: flex; align-items: center; gap: 4px; margin-top: 5px; color: var(--muted); font-size: 10px; white-space: nowrap; }.bullet { color: #c3c1b9; margin: 0 2px; }.course-arrow { margin-left: auto; color: #c2c1ba; }
 .oem-note { display: flex; gap: 9px; margin-top: 25px; padding: 13px 12px; background: #fff5ee; border-top: 2px solid #ef9a76; }.note-mark { display: grid; place-items: center; flex: 0 0 auto; width: 18px; height: 18px; background: #ef9a76; color: white; font-size: 11px; font-weight: bold; }.oem-note strong { color: var(--navy); font-size: 11px; }.oem-note p { color: #8c756b; font-size: 10px; line-height: 1.45; margin: 4px 0 0; }
