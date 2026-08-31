@@ -181,6 +181,22 @@ const slotTop = (startTime: string) => {
   return `${(hours - 9) * 51 + (minutes / 60) * 51}px`;
 };
 const monthLabel = (date: string) => (date.startsWith("2026-10") ? "OCT" : "SEP");
+const sessionDateLabel = (date: string) => {
+  const day = weekdays.find((item) => item.date === date);
+  return day ? `${monthLabel(date)} ${day.day} (${day.weekday})` : date;
+};
+const deriveRequesterName = (email: string) => {
+  const local = email.split("@")[0] ?? email;
+  const parts = local.split(/[._-]+/).filter(Boolean).map((part) => part.charAt(0).toUpperCase() + part.slice(1));
+  return parts.length > 0 ? parts.join(" ") : email;
+};
+// Session start times are the Taiwan wall-clock time customers book; just relabel with an AM/PM indicator.
+const twTimeLabel = (_date: string, time: string) => {
+  const [hours, minutes] = time.split(":").map(Number);
+  const period = hours >= 12 ? "PM" : "AM";
+  const hour12 = hours % 12 === 0 ? 12 : hours % 12;
+  return `${hour12}:${String(minutes).padStart(2, "0")} ${period}`;
+};
 const timeFromRow = (row: number) => {
   const totalMinutes = 9 * 60 + row * 30;
   const hours = String(Math.floor(totalMinutes / 60)).padStart(2, "0");
@@ -260,12 +276,10 @@ function App() {
   const [bookingDraft, setBookingDraft] = useState<{
     oem: OemOption;
     odm: OdmOption;
-    requesterName: string;
     requesterEmail: string;
   }>({
     oem: OEM_OPTIONS[0],
     odm: ODM_OPTIONS[0],
-    requesterName: "",
     requesterEmail: "",
   });
   const [authenticated, setAuthenticated] = useState(false);
@@ -555,6 +569,47 @@ function App() {
     [blockedSessionIds, courseCatalog, selectedSession, sessions],
   );
   const selectedBookingTopicKey = selectedSession?.training ? majorCourseMeta(selectedSession.training).key : "";
+  const bookingCourseSessions = useMemo(
+    () =>
+      selectedBookingTopicKey
+        ? sessions.filter(
+            (session) => session.training && majorCourseMeta(session.training).key === selectedBookingTopicKey,
+          )
+        : [],
+    [sessions, selectedBookingTopicKey],
+  );
+  const bookingAvailableDates = useMemo(
+    () => Array.from(new Set(bookingCourseSessions.map((session) => session.date))).sort(),
+    [bookingCourseSessions],
+  );
+  const bookingAvailableTimes = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          bookingCourseSessions
+            .filter((session) => session.date === selectedSession?.date)
+            .map((session) => session.startTime),
+        ),
+      ).sort(),
+    [bookingCourseSessions, selectedSession],
+  );
+  const changeBookingDate = (nextDate: string) => {
+    const candidates = bookingCourseSessions.filter((session) => session.date === nextDate);
+    const match =
+      candidates.find((session) => session.startTime === selectedSession?.startTime) ??
+      candidates.slice().sort((a, b) => a.startTime.localeCompare(b.startTime))[0];
+    if (!match) return;
+    setSelectedSession(match);
+    setSelectedTraining(match.training ?? null);
+  };
+  const changeBookingTime = (nextTime: string) => {
+    const match = bookingCourseSessions.find(
+      (session) => session.date === selectedSession?.date && session.startTime === nextTime,
+    );
+    if (!match) return;
+    setSelectedSession(match);
+    setSelectedTraining(match.training ?? null);
+  };
   const sessionById = useMemo(
     () => new Map(sessions.map((session) => [session.id, session])),
     [sessions],
@@ -638,12 +693,13 @@ function App() {
         method: "POST",
         body: JSON.stringify({
           ...bookingDraft,
+          requesterName: deriveRequesterName(bookingDraft.requesterEmail),
           sessionId: selectedSession.id,
         }),
       });
       setBookingConfirmation({ bookingId: result.id, email: result.requesterEmail, instructorEmail: result.instructorEmail });
       setModal("booking-confirmation");
-      setBookingDraft({ oem: OEM_OPTIONS[0], odm: ODM_OPTIONS[0], requesterName: "", requesterEmail: "" });
+      setBookingDraft({ oem: OEM_OPTIONS[0], odm: ODM_OPTIONS[0], requesterEmail: "" });
       await refresh();
     } catch (cause) {
       setError((cause as Error).message);
@@ -1524,6 +1580,34 @@ function App() {
             Your booking will be visible to everyone using this schedule.
           </p>
           <label className="form-label">
+            Session date
+            <select
+              value={selectedSession?.date ?? ""}
+              disabled={bookingInProgress}
+              onChange={(event) => changeBookingDate(event.target.value)}
+            >
+              {bookingAvailableDates.map((date) => (
+                <option value={date} key={date}>
+                  {sessionDateLabel(date)}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="form-label">
+            Start time (Taiwan time)
+            <select
+              value={selectedSession?.startTime ?? ""}
+              disabled={bookingInProgress}
+              onChange={(event) => changeBookingTime(event.target.value)}
+            >
+              {bookingAvailableTimes.map((time) => (
+                <option value={time} key={time}>
+                  {twTimeLabel(selectedSession?.date ?? "", time)}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="form-label">
             Training topic
             <select
               value={selectedBookingTopicKey}
@@ -1579,20 +1663,6 @@ function App() {
                 </option>
               ))}
             </select>
-          </label>
-          <label className="form-label">
-            Requester name
-            <input
-              type="text"
-              value={bookingDraft.requesterName}
-              onChange={(event) =>
-                setBookingDraft({
-                  ...bookingDraft,
-                  requesterName: event.target.value,
-                })
-              }
-              required
-            />
           </label>
           <label className="form-label">
             Requester email
