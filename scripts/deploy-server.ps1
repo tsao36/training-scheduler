@@ -19,6 +19,13 @@ function Write-Step([string]$msg) {
   Write-Host "`n==> $msg" -ForegroundColor Cyan
 }
 
+function Invoke-Checked([string]$Command, [string[]]$Arguments) {
+  & $Command @Arguments
+  if ($LASTEXITCODE -ne 0) {
+    throw "Command failed with exit code ${LASTEXITCODE}: $Command $($Arguments -join ' ')"
+  }
+}
+
 function Stop-PortProcess([int]$TargetPort) {
   $listeners = Get-NetTCPConnection -LocalPort $TargetPort -State Listen -ErrorAction SilentlyContinue
   if (-not $listeners) {
@@ -67,10 +74,32 @@ if (-not (Test-Path $DataFile)) {
   throw "Data file not found: $DataFile"
 }
 
+$repoDataFile = Join-Path $RepoPath "data\scheduler.yaml"
+$preservedDataFile = ""
+$shouldPreserveRepoDataFile = (Resolve-Path $DataFile).Path -eq (Resolve-Path $repoDataFile).Path
+
 Write-Step "Git update"
-& git fetch origin
-& git checkout $Branch
-& git pull --ff-only origin $Branch
+if ($shouldPreserveRepoDataFile) {
+  $dataStatus = & git status --porcelain -- data/scheduler.yaml
+  if ($dataStatus) {
+    $preservedDataFile = Join-Path $env:TEMP "training-scheduler-data-$([guid]::NewGuid()).yaml"
+    Copy-Item -Path $DataFile -Destination $preservedDataFile -Force
+    Write-Host "Preserved runtime data file before git update: $preservedDataFile"
+    Invoke-Checked "git" @("checkout", "--", "data/scheduler.yaml")
+  }
+}
+
+try {
+  Invoke-Checked "git" @("fetch", "origin")
+  Invoke-Checked "git" @("checkout", $Branch)
+  Invoke-Checked "git" @("pull", "--ff-only", "origin", $Branch)
+} finally {
+  if ($preservedDataFile) {
+    Copy-Item -Path $preservedDataFile -Destination $DataFile -Force
+    Remove-Item -Path $preservedDataFile -Force -ErrorAction SilentlyContinue
+    Write-Host "Restored preserved runtime data file after git update."
+  }
+}
 
 $depSourceFile = Get-DependencySourceFile -RootPath $RepoPath
 $depSignatureFile = Get-DependencySignatureFile -RootPath $RepoPath
