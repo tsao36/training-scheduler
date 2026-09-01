@@ -12911,35 +12911,40 @@ bookings:
     requesterName: Test User
     requesterEmail: tsao36@gmail.com
     createdAt: '2026-08-25T14:14:55.372Z'
-    status: confirmed
+    status: cancelled
+    cancelledAt: '2026-09-01T13:06:47.908Z'
   - id: 8e8bf49d-6365-4263-adfe-7d331875f327
     sessionId: a40f484c-caf8-451f-a2ea-829f7b6a6937
     oem: Mock Customer Beta
     requesterName: Test User
     requesterEmail: tsao36@gmail.com
     createdAt: '2026-08-25T14:14:55.382Z'
-    status: confirmed
+    status: cancelled
+    cancelledAt: '2026-09-01T13:06:47.908Z'
   - id: 3e934ce8-706d-4e0b-8a45-00cb720dbe70
     sessionId: e60a0aec-7006-444f-aec1-98f6d078ffb7
     oem: Mock Customer Gamma
     requesterName: Test User
     requesterEmail: tsao36@gmail.com
     createdAt: '2026-08-25T14:14:55.392Z'
-    status: confirmed
+    status: cancelled
+    cancelledAt: '2026-09-01T13:06:47.908Z'
   - id: 4ef6331f-a259-47a4-bfae-612a17b14043
     sessionId: 9216b16f-8a07-4cf0-9239-e2d6a878ba81
     oem: Mock Customer Delta
     requesterName: Test User
     requesterEmail: tsao36@gmail.com
     createdAt: '2026-08-25T14:14:55.408Z'
-    status: confirmed
+    status: cancelled
+    cancelledAt: '2026-09-01T13:06:47.908Z'
   - id: a3cba5bd-2d36-4a78-a62a-fe4ef6165f7c
     sessionId: 08ab53af-f6cb-4e29-90f5-17e8b4b1b037
     oem: qq
     requesterName: dd
     requesterEmail: jonathan.tsao@intel.com
     createdAt: '2026-08-25T14:18:40.050Z'
-    status: confirmed
+    status: cancelled
+    cancelledAt: '2026-09-01T13:06:47.908Z'
   - id: 25573629-e518-4feb-bceb-c84b0eca41fd
     sessionId: a35212f6-40ea-4048-84f7-670a4d96a52d
     oem: surface
@@ -12954,7 +12959,8 @@ bookings:
     requesterName: jack
     requesterEmail: jonathan.tsao@intel.com
     createdAt: '2026-08-26T16:45:37.514Z'
-    status: confirmed
+    status: cancelled
+    cancelledAt: '2026-09-01T13:06:47.908Z'
   - id: 63471ecc-0f5b-4a37-88cf-0bb100a33f0a
     sessionId: e826e8e6-dc24-4520-9b28-b06125f72d9a
     oem: Dell
@@ -12970,7 +12976,8 @@ bookings:
     requesterName: jack
     requesterEmail: jonathan.tsao@intel.com
     createdAt: '2026-08-26T17:07:33.459Z'
-    status: confirmed
+    status: cancelled
+    cancelledAt: '2026-09-01T13:06:47.908Z'
   - id: 0f2fbdec-802f-443d-a4c6-a7960a5a9f83
     sessionId: 00ad4cfe-35df-45da-ac89-4124c3809629
     oem: Not available
@@ -13566,7 +13573,7 @@ bookings:
     requesterEmail: scheduler-block@local
     createdAt: '2026-09-01T08:56:39.668Z'
     status: confirmed
-version: 35
+version: 36
 unavailableDays:
   - date: '2026-09-14'
     label: WiFi 8 Asus
