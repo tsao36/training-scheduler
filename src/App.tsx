@@ -239,7 +239,9 @@ const compactDateList = (dates: string[]) => {
   let start = sorted[0];
   let previous = sorted[0];
   sorted.slice(1).forEach((date) => {
-    if (nextDate(previous) === date) {
+    const previousScheduleIndex = weekdays.findIndex((day) => day.date === previous);
+    const scheduleIndex = weekdays.findIndex((day) => day.date === date);
+    if (nextDate(previous) === date || scheduleIndex === previousScheduleIndex + 1) {
       previous = date;
       return;
     }
@@ -586,13 +588,24 @@ function App() {
   );
   const rawBookings = useMemo(() => data?.bookings ?? [], [data?.bookings]);
   const blockedSessionIds = useMemo(
-    () =>
-      new Set(
+    () => {
+      const baseRecurringSessionIds = new Set(
+        (data?.sessions ?? [])
+          .filter((session) => session.trainingId === "wifi-8" || session.trainingId === "bt-hdt")
+          .map((session) => session.id),
+      );
+      return new Set(
         rawBookings
-          .filter((booking) => booking.status === "confirmed" && isSystemUnavailableBooking(booking))
+          .filter(
+            (booking) =>
+              booking.status === "confirmed" &&
+              isSystemUnavailableBooking(booking) &&
+              baseRecurringSessionIds.has(booking.sessionId),
+          )
           .map((booking) => booking.sessionId),
-      ),
-    [rawBookings],
+      );
+    },
+    [data?.sessions, rawBookings],
   );
   const sessions = useMemo(
     () =>
@@ -669,18 +682,32 @@ function App() {
         });
       });
 
-      return Array.from(byLabelAndTime.values())
+      const partialDayEntries = Array.from(byLabelAndTime.values())
         .map((entry) => ({
           ...entry,
           dateLabel: compactDateList(entry.dates),
           timeLabel: unavailableTimeLabel(entry.startMinutes, entry.endMinutes),
-        }))
+        }));
+      const allDayDatesByLabel = visibleUnavailableDays.reduce<Map<string, string[]>>((groups, entry) => {
+        groups.set(entry.label, [...(groups.get(entry.label) ?? []), entry.date]);
+        return groups;
+      }, new Map());
+      const allDayEntries = Array.from(allDayDatesByLabel, ([label, dates]) => ({
+        label,
+        startMinutes: SCHEDULE_START_MINUTES,
+        endMinutes: SCHEDULE_END_MINUTES,
+        dates,
+        dateLabel: compactDateList(dates),
+        timeLabel: "All day",
+      }));
+
+      return [...allDayEntries, ...partialDayEntries]
         .sort((left, right) => {
           const firstDate = left.dates.slice().sort()[0].localeCompare(right.dates.slice().sort()[0]);
           return firstDate || left.startMinutes - right.startMinutes || left.label.localeCompare(right.label);
         });
     },
-    [unavailableSlotSessions],
+    [unavailableSlotSessions, visibleUnavailableDays],
   );
   const courseCatalog = useMemo(() => {
     const grouped = new Map<string, Training[]>();

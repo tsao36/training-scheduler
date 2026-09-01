@@ -13576,20 +13576,20 @@ bookings:
 version: 36
 unavailableDays:
   - date: '2026-09-14'
-    label: WiFi 8 Asus
-    warning: WiFi 8 Asus is not available all day.
+    label: BT HDT Asus
+    warning: BT HDT Asus is not available all day.
   - date: '2026-09-14'
     label: WiFi 8 Honor
     warning: WiFi 8 Honor is not available all day.
   - date: '2026-09-15'
-    label: WiFi 8 Asus
-    warning: WiFi 8 Asus is not available all day.
+    label: BT HDT Asus
+    warning: BT HDT Asus is not available all day.
   - date: '2026-09-15'
     label: WiFi 8 Honor
     warning: WiFi 8 Honor is not available all day.
   - date: '2026-09-16'
-    label: WiFi 8 Asus
-    warning: WiFi 8 Asus is not available all day.
+    label: BT HDT Asus
+    warning: BT HDT Asus is not available all day.
   - date: '2026-09-16'
     label: WiFi 8 Honor
     warning: WiFi 8 Honor is not available all day.
@@ -13597,8 +13597,8 @@ unavailableDays:
     label: WiFi 8 Honor
     warning: WiFi 8 Honor is not available all day.
   - date: '2026-09-18'
-    label: BT HDT Asus
-    warning: BT HDT Asus is not available all day.
+    label: WiFi 8 Asus
+    warning: WiFi 8 Asus is not available all day.
   - date: '2026-09-18'
     label: WiFi 8 Honor
     warning: WiFi 8 Honor is not available all day.
