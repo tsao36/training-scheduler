@@ -381,6 +381,7 @@ function App() {
   const [error, setError] = useState("");
   const [bookingInProgress, setBookingInProgress] = useState(false);
   const [cancellingBookingId, setCancellingBookingId] = useState<string | null>(null);
+  const [clearBookingsInProgress, setClearBookingsInProgress] = useState(false);
   const [lookupEmail, setLookupEmail] = useState("");
   const [lookupResults, setLookupResults] = useState<BookingLookup[] | null>(null);
   const [selectedOemFilter, setSelectedOemFilter] = useState<OemFilterOption>("");
@@ -938,6 +939,23 @@ function App() {
       setSelectedSession(null);
     }
   };
+  const clearBookedSessions = async () => {
+    if (clearBookingsInProgress) return;
+    const confirmed = window.confirm("Clear all booked sessions? This will cancel every customer booking and keep unavailable blocks.");
+    if (!confirmed) return;
+    setClearBookingsInProgress(true);
+    try {
+      const result = await api<{ cleared: number }>("/api/bookings", { method: "DELETE" });
+      setLookupResults(null);
+      setSelectedSession(null);
+      await refresh({ focusLatestBooking: false });
+      window.alert(`Cleared ${result.cleared} booked session${result.cleared === 1 ? "" : "s"}.`);
+    } catch (cause) {
+      setError((cause as Error).message);
+    } finally {
+      setClearBookingsInProgress(false);
+    }
+  };
   const lookupBookings = async () => {
     try {
       const result = await api<{ bookings: BookingLookup[] }>(`/api/bookings?email=${encodeURIComponent(lookupEmail)}`);
@@ -1048,6 +1066,11 @@ function App() {
                 onClick={() => setModal("booking-blocks")}
               >
                 <LockKeyhole size={16} /> Manage unavailable days
+              </button>
+            )}
+            {authenticated && (
+              <button className="secondary-button" type="button" onClick={clearBookedSessions} disabled={clearBookingsInProgress}>
+                <Trash2 size={16} /> {clearBookingsInProgress ? "Clearing bookings..." : "Clear booked sessions"}
               </button>
             )}
           </div>

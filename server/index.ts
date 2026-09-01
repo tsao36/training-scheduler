@@ -40,6 +40,10 @@ const requireScheduler = (request: Request, response: Response, next: NextFuncti
   if (!isScheduler(request)) return response.status(401).json({ error: 'SCHEDULER_AUTH_REQUIRED' })
   next()
 }
+const isSystemUnavailableBooking = (booking: Booking) =>
+  booking.requesterEmail === 'scheduler-block@local' ||
+  booking.requesterName === 'System Block' ||
+  booking.oem === 'Not available'
 
 const sendData = async (_request: Request, response: Response) => {
   const data = await store.read()
@@ -186,6 +190,21 @@ app.post('/api/bookings', async (request, response) => {
   }
 
   response.status(201).json({ ...booking, instructorEmail })
+})
+
+app.delete('/api/bookings', requireScheduler, async (_request, response) => {
+  let cleared = 0
+  await store.update((data) => {
+    const cancelledAt = new Date().toISOString()
+    data.bookings.forEach((booking) => {
+      if (isSystemUnavailableBooking(booking)) return
+      if (booking.status !== 'confirmed' && booking.status !== 'pending') return
+      booking.status = 'cancelled'
+      booking.cancelledAt = cancelledAt
+      cleared += 1
+    })
+  })
+  response.json({ cleared })
 })
 
 app.post('/api/unavailable-days', requireScheduler, async (request, response) => {
