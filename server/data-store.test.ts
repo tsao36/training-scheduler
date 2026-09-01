@@ -96,3 +96,35 @@ test('maps wifi and bt bookings to engineering notification recipients', async (
     'steven1.chen@intel.com',
   ])
 })
+
+test('booking notification preview includes details and agenda', async () => {
+  const { buildBookingNotificationPreview } = await import('./email-service.js')
+
+  const html = buildBookingNotificationPreview({
+    bookingId: 'booking-a',
+    sessionId: 'session-a',
+    trainingId: 'wifi-8-asus',
+    trainingTitle: 'WiFi 8 for Asus',
+    sessionDate: '2026-09-18',
+    sessionTime: '14:30',
+    durationMinutes: 30,
+    oem: 'Asus',
+    odm: 'Quanta',
+    trainingFormat: 'with-video',
+    requesterName: 'Test User',
+    requesterEmail: 'test@example.com',
+    createdAt: '2026-09-01T00:00:00.000Z',
+    instructorEmail: 'trainer@example.com',
+  })
+
+  assert.match(html, /Booking details/)
+  assert.match(html, /booking-a/)
+  assert.match(html, /WiFi 8 for Asus/)
+  assert.match(html, /Asus/)
+  assert.match(html, /Quanta/)
+  assert.match(html, /Training with video/)
+  assert.doesNotMatch(html, /Requester name/)
+  assert.match(html, /trainer@example.com/)
+  assert.match(html, /WiFi 8 Training agenda/)
+  assert.match(html, /The Key Pillars of Wi-Fi 8/)
+})

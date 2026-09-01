@@ -58,7 +58,7 @@ The server creates automatic backups in a `scheduler-backups` directory beside t
 
 ### Public view
 
-- The calendar only shows booked sessions on the timeline.
+- The calendar shows booked sessions and light-colored unavailable training sessions on the timeline.
 - Empty half-hour cells are still clickable for booking. Clicking an empty slot opens booking for the underlying available session.
 - Hovering a booked slot shows details in tooltip, including topic, instructor, delivery type, OEM, and ODM.
 - Shared slots remain bookable. A slot with existing booking(s) is shown as shared, not full.
@@ -66,8 +66,9 @@ The server creates automatic backups in a `scheduler-backups` directory beside t
 
 ### Booking behavior
 
-- Booking requires customer/team, requester name, and requester email.
+- Booking requires OEM, ODM, training type, and requester email.
 - After booking, the session is confirmed immediately.
+- New booking records persist `trainingFormat` in YAML as `with-video` or `without-video` for later analysis.
 - A booking notification email is sent to the requester and copied to the configured training contact.
 - The system rejects duplicate booking by the same Topic + OEM + ODM combination (confirmed only).
 - Bookings are blocked when that training topic is marked unavailable for the selected day.
@@ -82,7 +83,7 @@ The server creates automatic backups in a `scheduler-backups` directory beside t
 - Unavailable days are written to YAML as `unavailableDays` entries and can be removed one-by-one.
 - Scheduler can open "Configure recipients" to edit notification mappings from `data/email-recipients.yaml` as a table.
 - Recipient rules can target a training default, an OEM, or an exact `OEM / ODM` pair. Exact `OEM / ODM` rules take priority over OEM rules, then default rules.
-- Calendar shows all-day unavailable warnings for marked dates.
+- Calendar shows all-day unavailable warnings for marked dates and light-colored blocked slots for unavailable training sessions.
 
 ### Topic vs Customer report
 
@@ -92,12 +93,13 @@ The server creates automatic backups in a `scheduler-backups` directory beside t
 
 ## Rules implemented
 
-- Sessions are 30 minutes and can be created on weekdays from 09:00 through 17:00 Pacific Time.
+- Sessions are 30 minutes and can be created on weekdays from 09:00 through 17:00 Pacific Time through October 9, 2026.
 - Start times use 30-minute increments. Session end time may be 17:30.
 - The same instructor cannot have overlapping sessions.
 - The same course cannot have two sessions at the same date and time.
-- Anyone can view sessions and create bookings. Bookings require customer/team, requester name, and requester email.
+- Anyone can view sessions and create bookings. Bookings require OEM, ODM, training type, and requester email.
 - Bookings are confirmed immediately and send notification email to the requester plus the configured training contact.
+- Booking records include the selected training type so reservation data can be extracted from YAML for analysis.
 - Shared slots are still bookable when capacity/rules allow.
 - Duplicate booking is rejected for same Topic + OEM + ODM (only confirmed bookings count).
 - Booking is blocked on configured `unavailableDays` for matching topic/date.

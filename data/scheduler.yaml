@@ -1,6 +1,6 @@
 window:
   start: '2026-09-14'
-  end: '2026-10-02'
+  end: '2026-10-09'
   durationMinutes: 30
 trainings:
   - id: wifi-8
@@ -9334,6 +9334,3576 @@ sessions:
     startTime: '17:00'
     durationMinutes: 30
     status: active
+  - id: a099c6f8-3ede-4dd1-9224-60fc3aa76984
+    trainingId: wifi-8
+    date: '2026-10-05'
+    startTime: '09:00'
+    durationMinutes: 30
+    status: active
+  - id: 7a2ba917-3439-4b57-b204-389c810ff20c
+    trainingId: wifi-8
+    date: '2026-10-05'
+    startTime: '09:30'
+    durationMinutes: 30
+    status: active
+  - id: 36224900-eae2-465d-9621-aa0b9e219e48
+    trainingId: wifi-8
+    date: '2026-10-05'
+    startTime: '10:00'
+    durationMinutes: 30
+    status: active
+  - id: a060de54-2634-4a11-ae4a-a76022d11122
+    trainingId: wifi-8
+    date: '2026-10-05'
+    startTime: '10:30'
+    durationMinutes: 30
+    status: active
+  - id: ebda6fd8-264f-49d5-b721-47f66adf089e
+    trainingId: wifi-8
+    date: '2026-10-05'
+    startTime: '11:00'
+    durationMinutes: 30
+    status: active
+  - id: 6d7a4848-bce1-4c74-acf1-72f847c429ff
+    trainingId: wifi-8
+    date: '2026-10-05'
+    startTime: '11:30'
+    durationMinutes: 30
+    status: active
+  - id: 508ccf3d-996b-49c5-8b2c-586c35c70f37
+    trainingId: wifi-8
+    date: '2026-10-05'
+    startTime: '12:00'
+    durationMinutes: 30
+    status: active
+  - id: 5aa34947-0f6e-489e-ae7c-fe36ea92fabe
+    trainingId: wifi-8
+    date: '2026-10-05'
+    startTime: '12:30'
+    durationMinutes: 30
+    status: active
+  - id: 0233d380-4a53-48ae-b07a-1493adf9f87d
+    trainingId: wifi-8
+    date: '2026-10-05'
+    startTime: '13:00'
+    durationMinutes: 30
+    status: active
+  - id: 9f1c963b-8792-4d04-a668-8bdf722ab57d
+    trainingId: wifi-8
+    date: '2026-10-05'
+    startTime: '13:30'
+    durationMinutes: 30
+    status: active
+  - id: 6801d912-d910-4990-82e4-8243154a35a9
+    trainingId: wifi-8
+    date: '2026-10-05'
+    startTime: '14:00'
+    durationMinutes: 30
+    status: active
+  - id: 180bd38b-848a-47fe-9c9a-dea65ea0cdeb
+    trainingId: wifi-8
+    date: '2026-10-05'
+    startTime: '14:30'
+    durationMinutes: 30
+    status: active
+  - id: 4e74ce78-fbcb-4f96-a07f-8b44b2c7a0f4
+    trainingId: wifi-8
+    date: '2026-10-05'
+    startTime: '15:00'
+    durationMinutes: 30
+    status: active
+  - id: 12ba89c4-5361-4970-85f8-f31fe4da1671
+    trainingId: wifi-8
+    date: '2026-10-05'
+    startTime: '15:30'
+    durationMinutes: 30
+    status: active
+  - id: 91714407-0c6c-4c4e-809b-e486db3f60fb
+    trainingId: wifi-8
+    date: '2026-10-05'
+    startTime: '16:00'
+    durationMinutes: 30
+    status: active
+  - id: 19c22f2a-c8c3-4622-9764-339d7e01a173
+    trainingId: wifi-8
+    date: '2026-10-05'
+    startTime: '16:30'
+    durationMinutes: 30
+    status: active
+  - id: 8008564f-2e1b-4c9f-95e4-29c93148116b
+    trainingId: wifi-8
+    date: '2026-10-05'
+    startTime: '17:00'
+    durationMinutes: 30
+    status: active
+  - id: e4e773ff-b04c-4770-9eb5-f97dc5703bdd
+    trainingId: wifi-8
+    date: '2026-10-06'
+    startTime: '09:00'
+    durationMinutes: 30
+    status: active
+  - id: 06276aa0-0c5a-4126-a02d-f0ec008f701c
+    trainingId: wifi-8
+    date: '2026-10-06'
+    startTime: '09:30'
+    durationMinutes: 30
+    status: active
+  - id: ef091dbf-4e53-4360-a5e7-a75f0c9579da
+    trainingId: wifi-8
+    date: '2026-10-06'
+    startTime: '10:00'
+    durationMinutes: 30
+    status: active
+  - id: f1baccbb-bc28-45e1-bd8b-32fe445596f2
+    trainingId: wifi-8
+    date: '2026-10-06'
+    startTime: '10:30'
+    durationMinutes: 30
+    status: active
+  - id: e6985736-4d08-4fbd-8a85-bb388c7f2734
+    trainingId: wifi-8
+    date: '2026-10-06'
+    startTime: '11:00'
+    durationMinutes: 30
+    status: active
+  - id: cf499041-88a9-46a6-a895-fca692bcb122
+    trainingId: wifi-8
+    date: '2026-10-06'
+    startTime: '11:30'
+    durationMinutes: 30
+    status: active
+  - id: e39aa621-8529-47bc-be1a-d356d0ba0023
+    trainingId: wifi-8
+    date: '2026-10-06'
+    startTime: '12:00'
+    durationMinutes: 30
+    status: active
+  - id: 8eb1bd81-b7a8-44df-8508-601a96c9e582
+    trainingId: wifi-8
+    date: '2026-10-06'
+    startTime: '12:30'
+    durationMinutes: 30
+    status: active
+  - id: b984f0ed-52a4-4954-a00e-08bedf71e4f8
+    trainingId: wifi-8
+    date: '2026-10-06'
+    startTime: '13:00'
+    durationMinutes: 30
+    status: active
+  - id: 0f409ee1-2150-4569-8484-6ef378b59ea9
+    trainingId: wifi-8
+    date: '2026-10-06'
+    startTime: '13:30'
+    durationMinutes: 30
+    status: active
+  - id: ece15de6-e0c4-4065-be3f-8904b4ba436c
+    trainingId: wifi-8
+    date: '2026-10-06'
+    startTime: '14:00'
+    durationMinutes: 30
+    status: active
+  - id: a18ab2cb-75eb-4182-a1ef-352c3f2085bb
+    trainingId: wifi-8
+    date: '2026-10-06'
+    startTime: '14:30'
+    durationMinutes: 30
+    status: active
+  - id: 7a602348-59b3-4c57-b97c-a1c1af8ee5ea
+    trainingId: wifi-8
+    date: '2026-10-06'
+    startTime: '15:00'
+    durationMinutes: 30
+    status: active
+  - id: 25150029-db20-4b29-9598-9e4793bef2f6
+    trainingId: wifi-8
+    date: '2026-10-06'
+    startTime: '15:30'
+    durationMinutes: 30
+    status: active
+  - id: c664658c-cedc-4525-82ca-3a06e531c247
+    trainingId: wifi-8
+    date: '2026-10-06'
+    startTime: '16:00'
+    durationMinutes: 30
+    status: active
+  - id: 8afb296a-ea9c-416c-923d-cb85f5d373e3
+    trainingId: wifi-8
+    date: '2026-10-06'
+    startTime: '16:30'
+    durationMinutes: 30
+    status: active
+  - id: 093c61d2-c6b6-4e0a-9333-065d5e9a9c16
+    trainingId: wifi-8
+    date: '2026-10-06'
+    startTime: '17:00'
+    durationMinutes: 30
+    status: active
+  - id: 14c12210-b935-4222-9c20-cbd768d250a4
+    trainingId: wifi-8
+    date: '2026-10-07'
+    startTime: '09:00'
+    durationMinutes: 30
+    status: active
+  - id: de27dc71-e80f-4ef9-a42f-c192693b0e8c
+    trainingId: wifi-8
+    date: '2026-10-07'
+    startTime: '09:30'
+    durationMinutes: 30
+    status: active
+  - id: 38a00d2a-bf2a-4687-9cb0-8b3b18c5be2c
+    trainingId: wifi-8
+    date: '2026-10-07'
+    startTime: '10:00'
+    durationMinutes: 30
+    status: active
+  - id: c9379f84-eaa2-4aa6-b2a7-46b69222f373
+    trainingId: wifi-8
+    date: '2026-10-07'
+    startTime: '10:30'
+    durationMinutes: 30
+    status: active
+  - id: 1decdc9b-a1eb-4baa-b93d-891d1f16f206
+    trainingId: wifi-8
+    date: '2026-10-07'
+    startTime: '11:00'
+    durationMinutes: 30
+    status: active
+  - id: 6193c24f-c25f-40a1-8ebe-30b6555980e6
+    trainingId: wifi-8
+    date: '2026-10-07'
+    startTime: '11:30'
+    durationMinutes: 30
+    status: active
+  - id: 7807e0c7-fe7a-47c1-85ab-5d0b05f9d1f7
+    trainingId: wifi-8
+    date: '2026-10-07'
+    startTime: '12:00'
+    durationMinutes: 30
+    status: active
+  - id: 5e9093d8-37e9-42d1-8410-6c4ec4a2fbfe
+    trainingId: wifi-8
+    date: '2026-10-07'
+    startTime: '12:30'
+    durationMinutes: 30
+    status: active
+  - id: dccc83a1-9ee4-433a-b593-540cfc4bc5d6
+    trainingId: wifi-8
+    date: '2026-10-07'
+    startTime: '13:00'
+    durationMinutes: 30
+    status: active
+  - id: 31b82602-d97d-4140-85f9-c76b95e8c515
+    trainingId: wifi-8
+    date: '2026-10-07'
+    startTime: '13:30'
+    durationMinutes: 30
+    status: active
+  - id: 1011eea7-9f40-4865-ac83-3e1a40e7894d
+    trainingId: wifi-8
+    date: '2026-10-07'
+    startTime: '14:00'
+    durationMinutes: 30
+    status: active
+  - id: 1fce6844-fdeb-43f2-8702-7b5f485cca54
+    trainingId: wifi-8
+    date: '2026-10-07'
+    startTime: '14:30'
+    durationMinutes: 30
+    status: active
+  - id: 4dfa941f-8f78-47da-aebf-098c2871d814
+    trainingId: wifi-8
+    date: '2026-10-07'
+    startTime: '15:00'
+    durationMinutes: 30
+    status: active
+  - id: 93e654fe-a082-49dc-88b6-1811defd1da1
+    trainingId: wifi-8
+    date: '2026-10-07'
+    startTime: '15:30'
+    durationMinutes: 30
+    status: active
+  - id: d298a9d0-32b6-408e-87a8-8ff416bb6b81
+    trainingId: wifi-8
+    date: '2026-10-07'
+    startTime: '16:00'
+    durationMinutes: 30
+    status: active
+  - id: 8982297b-1592-4dd8-b341-2dd8ee03caba
+    trainingId: wifi-8
+    date: '2026-10-07'
+    startTime: '16:30'
+    durationMinutes: 30
+    status: active
+  - id: 94e1c257-6799-4e13-aaf4-93e1ff0edd8f
+    trainingId: wifi-8
+    date: '2026-10-07'
+    startTime: '17:00'
+    durationMinutes: 30
+    status: active
+  - id: 265e3a6c-ee0e-4dfe-b697-c8254c8c6fd2
+    trainingId: wifi-8
+    date: '2026-10-08'
+    startTime: '09:00'
+    durationMinutes: 30
+    status: active
+  - id: 5c99e6af-4050-4ffe-9df2-8cfafc07bc00
+    trainingId: wifi-8
+    date: '2026-10-08'
+    startTime: '09:30'
+    durationMinutes: 30
+    status: active
+  - id: 9e432496-c69a-4e97-9761-f8f4bbcc442c
+    trainingId: wifi-8
+    date: '2026-10-08'
+    startTime: '10:00'
+    durationMinutes: 30
+    status: active
+  - id: c78b1cbe-92bd-4d72-b7bf-9449ee745311
+    trainingId: wifi-8
+    date: '2026-10-08'
+    startTime: '10:30'
+    durationMinutes: 30
+    status: active
+  - id: 126776d9-ab2e-4abc-9fba-ba8b2e2ef9cf
+    trainingId: wifi-8
+    date: '2026-10-08'
+    startTime: '11:00'
+    durationMinutes: 30
+    status: active
+  - id: 9f1f6943-7a92-4dcb-a0d8-d8cde1b82508
+    trainingId: wifi-8
+    date: '2026-10-08'
+    startTime: '11:30'
+    durationMinutes: 30
+    status: active
+  - id: 34b7fc97-0c6d-4004-a25f-9ec40bfa5f65
+    trainingId: wifi-8
+    date: '2026-10-08'
+    startTime: '12:00'
+    durationMinutes: 30
+    status: active
+  - id: e9e2f9cb-8d45-42a6-9ec2-03a6c8e03231
+    trainingId: wifi-8
+    date: '2026-10-08'
+    startTime: '12:30'
+    durationMinutes: 30
+    status: active
+  - id: 3d6b4801-5082-4a50-8586-79d849233235
+    trainingId: wifi-8
+    date: '2026-10-08'
+    startTime: '13:00'
+    durationMinutes: 30
+    status: active
+  - id: 872d79f6-3c9e-4e31-978b-151f9116f947
+    trainingId: wifi-8
+    date: '2026-10-08'
+    startTime: '13:30'
+    durationMinutes: 30
+    status: active
+  - id: ddb8ea55-ed7d-4863-ad79-9ff9624f4314
+    trainingId: wifi-8
+    date: '2026-10-08'
+    startTime: '14:00'
+    durationMinutes: 30
+    status: active
+  - id: b1e02b1d-cbd0-4882-90af-d1f40265622d
+    trainingId: wifi-8
+    date: '2026-10-08'
+    startTime: '14:30'
+    durationMinutes: 30
+    status: active
+  - id: 3c72846b-da5e-4575-a641-4cbe6a658a97
+    trainingId: wifi-8
+    date: '2026-10-08'
+    startTime: '15:00'
+    durationMinutes: 30
+    status: active
+  - id: e13de641-36cb-42e6-af4e-2875ff023a8d
+    trainingId: wifi-8
+    date: '2026-10-08'
+    startTime: '15:30'
+    durationMinutes: 30
+    status: active
+  - id: 210b9cc0-1745-42b0-a3e0-873e292477ad
+    trainingId: wifi-8
+    date: '2026-10-08'
+    startTime: '16:00'
+    durationMinutes: 30
+    status: active
+  - id: 4b8dcbcf-94db-4da5-8746-112c1c0d5706
+    trainingId: wifi-8
+    date: '2026-10-08'
+    startTime: '16:30'
+    durationMinutes: 30
+    status: active
+  - id: c5622347-47e4-490c-a8a6-539aaccec4ce
+    trainingId: wifi-8
+    date: '2026-10-08'
+    startTime: '17:00'
+    durationMinutes: 30
+    status: active
+  - id: 1b558e36-4c3b-4be2-a72f-843625ede76b
+    trainingId: wifi-8
+    date: '2026-10-09'
+    startTime: '09:00'
+    durationMinutes: 30
+    status: active
+  - id: da0dc9cb-b960-446b-80e9-c6b251481e11
+    trainingId: wifi-8
+    date: '2026-10-09'
+    startTime: '09:30'
+    durationMinutes: 30
+    status: active
+  - id: 6b94ed52-6c26-4b43-8946-f39702d1e1d5
+    trainingId: wifi-8
+    date: '2026-10-09'
+    startTime: '10:00'
+    durationMinutes: 30
+    status: active
+  - id: 92dc8161-1ea2-4d27-9a8c-0bdc8b67d043
+    trainingId: wifi-8
+    date: '2026-10-09'
+    startTime: '10:30'
+    durationMinutes: 30
+    status: active
+  - id: 7f0dea2d-e889-4653-b6a0-89e44486934c
+    trainingId: wifi-8
+    date: '2026-10-09'
+    startTime: '11:00'
+    durationMinutes: 30
+    status: active
+  - id: 56ebb0bd-2573-4233-a19e-c0b8004f2192
+    trainingId: wifi-8
+    date: '2026-10-09'
+    startTime: '11:30'
+    durationMinutes: 30
+    status: active
+  - id: a44f3080-134a-460b-b3e5-1e92a7ff8a72
+    trainingId: wifi-8
+    date: '2026-10-09'
+    startTime: '12:00'
+    durationMinutes: 30
+    status: active
+  - id: c9b441aa-d92d-4b02-adcb-8a201a13333b
+    trainingId: wifi-8
+    date: '2026-10-09'
+    startTime: '12:30'
+    durationMinutes: 30
+    status: active
+  - id: dd0a6add-67f5-43a0-8889-c9cfbfa80bbb
+    trainingId: wifi-8
+    date: '2026-10-09'
+    startTime: '13:00'
+    durationMinutes: 30
+    status: active
+  - id: 2328e7e9-0b95-4ed6-a792-b1fdd4bccc60
+    trainingId: wifi-8
+    date: '2026-10-09'
+    startTime: '13:30'
+    durationMinutes: 30
+    status: active
+  - id: e4fbb52e-374a-4d6a-b391-6420ae0ca9ff
+    trainingId: wifi-8
+    date: '2026-10-09'
+    startTime: '14:00'
+    durationMinutes: 30
+    status: active
+  - id: 61973f32-94ed-44ee-874e-a7049ae0419c
+    trainingId: wifi-8
+    date: '2026-10-09'
+    startTime: '14:30'
+    durationMinutes: 30
+    status: active
+  - id: dec1950e-c5b5-4137-ae16-e8259001850d
+    trainingId: wifi-8
+    date: '2026-10-09'
+    startTime: '15:00'
+    durationMinutes: 30
+    status: active
+  - id: 0862f3e6-b645-4fe2-89b7-7626b5427d0f
+    trainingId: wifi-8
+    date: '2026-10-09'
+    startTime: '15:30'
+    durationMinutes: 30
+    status: active
+  - id: 23248e94-e73b-4af9-9165-505edbdfed28
+    trainingId: wifi-8
+    date: '2026-10-09'
+    startTime: '16:00'
+    durationMinutes: 30
+    status: active
+  - id: 91e0997b-5c7b-4fb3-9e9a-c9d2d2099c6b
+    trainingId: wifi-8
+    date: '2026-10-09'
+    startTime: '16:30'
+    durationMinutes: 30
+    status: active
+  - id: 38526e81-7e19-4f46-9290-3151c791645a
+    trainingId: wifi-8
+    date: '2026-10-09'
+    startTime: '17:00'
+    durationMinutes: 30
+    status: active
+  - id: a225e18c-bde4-4a1b-8986-65caf5d03333
+    trainingId: wifi-log
+    date: '2026-10-05'
+    startTime: '09:00'
+    durationMinutes: 30
+    status: active
+  - id: c6f299c2-8885-4559-9e17-1e110fe298be
+    trainingId: wifi-log
+    date: '2026-10-05'
+    startTime: '09:30'
+    durationMinutes: 30
+    status: active
+  - id: d9fce130-93e5-4b81-a93c-908dd2a7f9dc
+    trainingId: wifi-log
+    date: '2026-10-05'
+    startTime: '10:00'
+    durationMinutes: 30
+    status: active
+  - id: 656fa754-c5d5-405a-8155-31e1c48682be
+    trainingId: wifi-log
+    date: '2026-10-05'
+    startTime: '10:30'
+    durationMinutes: 30
+    status: active
+  - id: 9b4e9a77-733a-4a4f-92a7-d1cd174ad8b5
+    trainingId: wifi-log
+    date: '2026-10-05'
+    startTime: '11:00'
+    durationMinutes: 30
+    status: active
+  - id: 5a02a09c-da0f-4e15-86d3-23f3b4836cba
+    trainingId: wifi-log
+    date: '2026-10-05'
+    startTime: '11:30'
+    durationMinutes: 30
+    status: active
+  - id: b05ec873-eb40-4145-9912-c4636535dba7
+    trainingId: wifi-log
+    date: '2026-10-05'
+    startTime: '12:00'
+    durationMinutes: 30
+    status: active
+  - id: 319f65b7-0509-4d72-82de-ac0ad7078319
+    trainingId: wifi-log
+    date: '2026-10-05'
+    startTime: '12:30'
+    durationMinutes: 30
+    status: active
+  - id: e3f8170c-4464-419d-861b-fffdc58472a6
+    trainingId: wifi-log
+    date: '2026-10-05'
+    startTime: '13:00'
+    durationMinutes: 30
+    status: active
+  - id: 53899c67-c032-4a7c-ae87-6d9bc92bef13
+    trainingId: wifi-log
+    date: '2026-10-05'
+    startTime: '13:30'
+    durationMinutes: 30
+    status: active
+  - id: e0b44c7c-fc42-4ff1-9869-8621f3bc2a5d
+    trainingId: wifi-log
+    date: '2026-10-05'
+    startTime: '14:00'
+    durationMinutes: 30
+    status: active
+  - id: 42eb5fe1-8127-4777-9fc5-7d2fce600c17
+    trainingId: wifi-log
+    date: '2026-10-05'
+    startTime: '14:30'
+    durationMinutes: 30
+    status: active
+  - id: 6637e5bc-6209-495b-a0af-0f702c3e2ad1
+    trainingId: wifi-log
+    date: '2026-10-05'
+    startTime: '15:00'
+    durationMinutes: 30
+    status: active
+  - id: 17ce1a50-b2ba-43c0-85f7-05ec9a3d7153
+    trainingId: wifi-log
+    date: '2026-10-05'
+    startTime: '15:30'
+    durationMinutes: 30
+    status: active
+  - id: 7ab1ca3a-db4c-499a-81d4-1c197b1464ea
+    trainingId: wifi-log
+    date: '2026-10-05'
+    startTime: '16:00'
+    durationMinutes: 30
+    status: active
+  - id: 74fc18ee-d3d2-47ba-91a1-c096606920b9
+    trainingId: wifi-log
+    date: '2026-10-05'
+    startTime: '16:30'
+    durationMinutes: 30
+    status: active
+  - id: 24f61a41-da1b-46b3-905a-d065c11389df
+    trainingId: wifi-log
+    date: '2026-10-05'
+    startTime: '17:00'
+    durationMinutes: 30
+    status: active
+  - id: c774dcd8-f540-4a22-bed7-44a65df91a5b
+    trainingId: wifi-log
+    date: '2026-10-06'
+    startTime: '09:00'
+    durationMinutes: 30
+    status: active
+  - id: 9e8b1497-2df5-4907-9334-0b70082ca67f
+    trainingId: wifi-log
+    date: '2026-10-06'
+    startTime: '09:30'
+    durationMinutes: 30
+    status: active
+  - id: a33d0663-e106-4085-aee1-38b0d1cd4233
+    trainingId: wifi-log
+    date: '2026-10-06'
+    startTime: '10:00'
+    durationMinutes: 30
+    status: active
+  - id: 7f9ccf41-d466-4e92-9f0d-1bac2d35f1e0
+    trainingId: wifi-log
+    date: '2026-10-06'
+    startTime: '10:30'
+    durationMinutes: 30
+    status: active
+  - id: 608cf660-431a-463a-b3cb-9fc333503699
+    trainingId: wifi-log
+    date: '2026-10-06'
+    startTime: '11:00'
+    durationMinutes: 30
+    status: active
+  - id: 23eb573c-3760-491a-9ec5-6bcabe87c908
+    trainingId: wifi-log
+    date: '2026-10-06'
+    startTime: '11:30'
+    durationMinutes: 30
+    status: active
+  - id: 7e1eef8b-470e-43ec-ade9-33a865b1d345
+    trainingId: wifi-log
+    date: '2026-10-06'
+    startTime: '12:00'
+    durationMinutes: 30
+    status: active
+  - id: ef48f427-345e-420c-b789-56d955e6044b
+    trainingId: wifi-log
+    date: '2026-10-06'
+    startTime: '12:30'
+    durationMinutes: 30
+    status: active
+  - id: 51769fc8-d66c-42f3-ad68-a5a5e621d57e
+    trainingId: wifi-log
+    date: '2026-10-06'
+    startTime: '13:00'
+    durationMinutes: 30
+    status: active
+  - id: 96c02a02-77a1-404e-ab89-eeb3f87b59d3
+    trainingId: wifi-log
+    date: '2026-10-06'
+    startTime: '13:30'
+    durationMinutes: 30
+    status: active
+  - id: eaf1abd1-9033-4c1a-a10d-ff4b3c940714
+    trainingId: wifi-log
+    date: '2026-10-06'
+    startTime: '14:00'
+    durationMinutes: 30
+    status: active
+  - id: 463f1c12-d73a-45f3-aec2-191dfe06d72a
+    trainingId: wifi-log
+    date: '2026-10-06'
+    startTime: '14:30'
+    durationMinutes: 30
+    status: active
+  - id: 614aa84c-9a2d-4d4e-bcf1-9728c8b4db7a
+    trainingId: wifi-log
+    date: '2026-10-06'
+    startTime: '15:00'
+    durationMinutes: 30
+    status: active
+  - id: 1bc4895c-fdc3-4441-b5c5-ea5eeba50cf8
+    trainingId: wifi-log
+    date: '2026-10-06'
+    startTime: '15:30'
+    durationMinutes: 30
+    status: active
+  - id: fa92e5ad-21ef-4753-abbe-9fe92569cccb
+    trainingId: wifi-log
+    date: '2026-10-06'
+    startTime: '16:00'
+    durationMinutes: 30
+    status: active
+  - id: 6f960628-bdc9-43e0-8be7-d4bbbdecbe99
+    trainingId: wifi-log
+    date: '2026-10-06'
+    startTime: '16:30'
+    durationMinutes: 30
+    status: active
+  - id: 57e667c4-6d3d-4071-b608-644572336855
+    trainingId: wifi-log
+    date: '2026-10-06'
+    startTime: '17:00'
+    durationMinutes: 30
+    status: active
+  - id: 12067222-40bb-4d42-8f7f-77da0459ba73
+    trainingId: wifi-log
+    date: '2026-10-07'
+    startTime: '09:00'
+    durationMinutes: 30
+    status: active
+  - id: 2fc7ff57-e19d-4184-a668-574cb2dcb40f
+    trainingId: wifi-log
+    date: '2026-10-07'
+    startTime: '09:30'
+    durationMinutes: 30
+    status: active
+  - id: 4bc070be-4c3f-498c-846f-65002da4d380
+    trainingId: wifi-log
+    date: '2026-10-07'
+    startTime: '10:00'
+    durationMinutes: 30
+    status: active
+  - id: cb1a6e97-0d83-4f33-b206-7599a78b1d46
+    trainingId: wifi-log
+    date: '2026-10-07'
+    startTime: '10:30'
+    durationMinutes: 30
+    status: active
+  - id: bcdea3cf-84e6-4ee6-b656-4d7bda71f5f8
+    trainingId: wifi-log
+    date: '2026-10-07'
+    startTime: '11:00'
+    durationMinutes: 30
+    status: active
+  - id: 5b5eb824-3b9b-471b-9bbf-fb9f4239bbeb
+    trainingId: wifi-log
+    date: '2026-10-07'
+    startTime: '11:30'
+    durationMinutes: 30
+    status: active
+  - id: 5a60d150-b560-4e00-a9cd-c40a6863839b
+    trainingId: wifi-log
+    date: '2026-10-07'
+    startTime: '12:00'
+    durationMinutes: 30
+    status: active
+  - id: 989e6038-3654-4c12-b34c-a0035457b79c
+    trainingId: wifi-log
+    date: '2026-10-07'
+    startTime: '12:30'
+    durationMinutes: 30
+    status: active
+  - id: a8dcb6e0-f7b8-4a9c-bee6-c5cf880868fa
+    trainingId: wifi-log
+    date: '2026-10-07'
+    startTime: '13:00'
+    durationMinutes: 30
+    status: active
+  - id: ac18312e-c1eb-46af-ac2d-e6154b543689
+    trainingId: wifi-log
+    date: '2026-10-07'
+    startTime: '13:30'
+    durationMinutes: 30
+    status: active
+  - id: e0a3723a-4f75-4209-9f7d-2f2e04c30fab
+    trainingId: wifi-log
+    date: '2026-10-07'
+    startTime: '14:00'
+    durationMinutes: 30
+    status: active
+  - id: 487fa182-3ab7-453e-b315-55743d81c3fb
+    trainingId: wifi-log
+    date: '2026-10-07'
+    startTime: '14:30'
+    durationMinutes: 30
+    status: active
+  - id: 9d06c75d-8115-4841-9c82-af099792028c
+    trainingId: wifi-log
+    date: '2026-10-07'
+    startTime: '15:00'
+    durationMinutes: 30
+    status: active
+  - id: 22182fbd-5af7-4ad3-960f-ee48fc993a5a
+    trainingId: wifi-log
+    date: '2026-10-07'
+    startTime: '15:30'
+    durationMinutes: 30
+    status: active
+  - id: 6806274d-2867-40b4-b922-9dd0f3b4dccc
+    trainingId: wifi-log
+    date: '2026-10-07'
+    startTime: '16:00'
+    durationMinutes: 30
+    status: active
+  - id: 9bec1cc7-086f-4070-8614-7476eae236a0
+    trainingId: wifi-log
+    date: '2026-10-07'
+    startTime: '16:30'
+    durationMinutes: 30
+    status: active
+  - id: 44b0a244-ea75-43e9-85cd-baf4db012a5e
+    trainingId: wifi-log
+    date: '2026-10-07'
+    startTime: '17:00'
+    durationMinutes: 30
+    status: active
+  - id: be74f523-1a38-42d5-b253-03687390b1fe
+    trainingId: wifi-log
+    date: '2026-10-08'
+    startTime: '09:00'
+    durationMinutes: 30
+    status: active
+  - id: bff32827-f278-48ec-8c43-7783507a44fa
+    trainingId: wifi-log
+    date: '2026-10-08'
+    startTime: '09:30'
+    durationMinutes: 30
+    status: active
+  - id: 6e03e8ee-3a07-43cf-aa6c-741e4378343c
+    trainingId: wifi-log
+    date: '2026-10-08'
+    startTime: '10:00'
+    durationMinutes: 30
+    status: active
+  - id: 7f0710b3-a93f-414b-a730-cd1eee57a4b0
+    trainingId: wifi-log
+    date: '2026-10-08'
+    startTime: '10:30'
+    durationMinutes: 30
+    status: active
+  - id: e0f9d10d-2a0d-4880-8052-f01143e33b17
+    trainingId: wifi-log
+    date: '2026-10-08'
+    startTime: '11:00'
+    durationMinutes: 30
+    status: active
+  - id: 202ff003-13d7-466c-a8b7-b58e750dff61
+    trainingId: wifi-log
+    date: '2026-10-08'
+    startTime: '11:30'
+    durationMinutes: 30
+    status: active
+  - id: f4323ab7-df7f-4ee6-9149-d2af294c93a3
+    trainingId: wifi-log
+    date: '2026-10-08'
+    startTime: '12:00'
+    durationMinutes: 30
+    status: active
+  - id: 5abf5d57-3214-49ec-9577-a8141a8ba0fc
+    trainingId: wifi-log
+    date: '2026-10-08'
+    startTime: '12:30'
+    durationMinutes: 30
+    status: active
+  - id: 78d96130-15a3-4ac6-8997-b7fc216e78be
+    trainingId: wifi-log
+    date: '2026-10-08'
+    startTime: '13:00'
+    durationMinutes: 30
+    status: active
+  - id: fe0e41ee-6a8c-4e2a-afbb-31ac958de790
+    trainingId: wifi-log
+    date: '2026-10-08'
+    startTime: '13:30'
+    durationMinutes: 30
+    status: active
+  - id: f030ffb7-bd26-43a9-8d3b-61381fdabcdb
+    trainingId: wifi-log
+    date: '2026-10-08'
+    startTime: '14:00'
+    durationMinutes: 30
+    status: active
+  - id: ce65b5a7-29ee-433d-8ed6-b6761c1b2510
+    trainingId: wifi-log
+    date: '2026-10-08'
+    startTime: '14:30'
+    durationMinutes: 30
+    status: active
+  - id: 63c08a54-cd11-4cb1-9c74-99bcadd32386
+    trainingId: wifi-log
+    date: '2026-10-08'
+    startTime: '15:00'
+    durationMinutes: 30
+    status: active
+  - id: 3f6cddbb-5abc-4a35-b2a3-7e2dc600538b
+    trainingId: wifi-log
+    date: '2026-10-08'
+    startTime: '15:30'
+    durationMinutes: 30
+    status: active
+  - id: ad308de1-5271-44ad-b993-2de83d12c796
+    trainingId: wifi-log
+    date: '2026-10-08'
+    startTime: '16:00'
+    durationMinutes: 30
+    status: active
+  - id: 4d14f83b-68b8-4682-a89e-abd34d8c3192
+    trainingId: wifi-log
+    date: '2026-10-08'
+    startTime: '16:30'
+    durationMinutes: 30
+    status: active
+  - id: 21bea17c-074d-4bdf-844e-5b3ee40b474b
+    trainingId: wifi-log
+    date: '2026-10-08'
+    startTime: '17:00'
+    durationMinutes: 30
+    status: active
+  - id: ecf48a74-fda9-4117-bf9b-ff18f7ecdec6
+    trainingId: wifi-log
+    date: '2026-10-09'
+    startTime: '09:00'
+    durationMinutes: 30
+    status: active
+  - id: a8e51ce0-e5bd-432b-88e9-aef226b7a7f3
+    trainingId: wifi-log
+    date: '2026-10-09'
+    startTime: '09:30'
+    durationMinutes: 30
+    status: active
+  - id: a261224e-190d-4179-97d6-a07d20304849
+    trainingId: wifi-log
+    date: '2026-10-09'
+    startTime: '10:00'
+    durationMinutes: 30
+    status: active
+  - id: 4f82b212-cd01-4a3b-bb6b-856d792efb8c
+    trainingId: wifi-log
+    date: '2026-10-09'
+    startTime: '10:30'
+    durationMinutes: 30
+    status: active
+  - id: 50b730f2-2982-4d1d-b810-43c989159c8f
+    trainingId: wifi-log
+    date: '2026-10-09'
+    startTime: '11:00'
+    durationMinutes: 30
+    status: active
+  - id: 525cc2b7-ae89-4175-ba6a-8dd459ab5599
+    trainingId: wifi-log
+    date: '2026-10-09'
+    startTime: '11:30'
+    durationMinutes: 30
+    status: active
+  - id: f456e70d-012b-42c2-91a6-08b9a77c2155
+    trainingId: wifi-log
+    date: '2026-10-09'
+    startTime: '12:00'
+    durationMinutes: 30
+    status: active
+  - id: 58885071-d0ff-4241-864f-ee3c1c75788b
+    trainingId: wifi-log
+    date: '2026-10-09'
+    startTime: '12:30'
+    durationMinutes: 30
+    status: active
+  - id: c2782372-ca16-4328-88dc-20ebb41c3a0a
+    trainingId: wifi-log
+    date: '2026-10-09'
+    startTime: '13:00'
+    durationMinutes: 30
+    status: active
+  - id: fd3dff19-c67f-43ce-9c02-2bbd6127d3da
+    trainingId: wifi-log
+    date: '2026-10-09'
+    startTime: '13:30'
+    durationMinutes: 30
+    status: active
+  - id: 8d501abc-7e90-4953-8d2e-20ddb6f843db
+    trainingId: wifi-log
+    date: '2026-10-09'
+    startTime: '14:00'
+    durationMinutes: 30
+    status: active
+  - id: 1c3184e7-cdd1-44bf-9b23-6e5cb96eca75
+    trainingId: wifi-log
+    date: '2026-10-09'
+    startTime: '14:30'
+    durationMinutes: 30
+    status: active
+  - id: 1c17dc32-e8f2-4784-9a47-9cc1a0476d9a
+    trainingId: wifi-log
+    date: '2026-10-09'
+    startTime: '15:00'
+    durationMinutes: 30
+    status: active
+  - id: 63d8dfc0-1c15-423e-b473-bee614af7f01
+    trainingId: wifi-log
+    date: '2026-10-09'
+    startTime: '15:30'
+    durationMinutes: 30
+    status: active
+  - id: 649dda2c-3701-4936-b126-8a3ac093fe3d
+    trainingId: wifi-log
+    date: '2026-10-09'
+    startTime: '16:00'
+    durationMinutes: 30
+    status: active
+  - id: 0ca7df7f-237a-41a6-a37d-e4bb7791f6b9
+    trainingId: wifi-log
+    date: '2026-10-09'
+    startTime: '16:30'
+    durationMinutes: 30
+    status: active
+  - id: 114c1351-a48d-42b1-993e-21d8111cc5c7
+    trainingId: wifi-log
+    date: '2026-10-09'
+    startTime: '17:00'
+    durationMinutes: 30
+    status: active
+  - id: f79f7916-bd6c-4eab-b7a9-48965578b347
+    trainingId: bt-log
+    date: '2026-10-05'
+    startTime: '09:00'
+    durationMinutes: 30
+    status: active
+  - id: cf2a4c38-e3a8-40fd-9edd-05b9612ad634
+    trainingId: bt-log
+    date: '2026-10-05'
+    startTime: '09:30'
+    durationMinutes: 30
+    status: active
+  - id: b8383004-f049-469b-b1a8-1aa9c4d4e933
+    trainingId: bt-log
+    date: '2026-10-05'
+    startTime: '10:00'
+    durationMinutes: 30
+    status: active
+  - id: 55e1f88e-aa3c-4b1d-bd9b-12067a8cf24e
+    trainingId: bt-log
+    date: '2026-10-05'
+    startTime: '10:30'
+    durationMinutes: 30
+    status: active
+  - id: 29068381-119d-47b5-b2dd-9615591bca4e
+    trainingId: bt-log
+    date: '2026-10-05'
+    startTime: '11:00'
+    durationMinutes: 30
+    status: active
+  - id: 82b6917d-debc-4b63-bc1e-e9e137685f11
+    trainingId: bt-log
+    date: '2026-10-05'
+    startTime: '11:30'
+    durationMinutes: 30
+    status: active
+  - id: 459944f3-e6cb-4450-9702-2ea9ee0df3d9
+    trainingId: bt-log
+    date: '2026-10-05'
+    startTime: '12:00'
+    durationMinutes: 30
+    status: active
+  - id: fa86e915-3a95-4b03-ac2d-a29ca97895d0
+    trainingId: bt-log
+    date: '2026-10-05'
+    startTime: '12:30'
+    durationMinutes: 30
+    status: active
+  - id: 9eb19b3d-0d50-40d7-91f1-386ed41e840d
+    trainingId: bt-log
+    date: '2026-10-05'
+    startTime: '13:00'
+    durationMinutes: 30
+    status: active
+  - id: 1eda3255-827a-4487-9e5f-3948612efb16
+    trainingId: bt-log
+    date: '2026-10-05'
+    startTime: '13:30'
+    durationMinutes: 30
+    status: active
+  - id: ec2dc9cd-4181-41bf-916f-62676db2442e
+    trainingId: bt-log
+    date: '2026-10-05'
+    startTime: '14:00'
+    durationMinutes: 30
+    status: active
+  - id: c7dd6825-3b4f-4d46-8ed1-944a8e8fd491
+    trainingId: bt-log
+    date: '2026-10-05'
+    startTime: '14:30'
+    durationMinutes: 30
+    status: active
+  - id: caa598d6-0f32-4348-8d5b-d5076bef20a8
+    trainingId: bt-log
+    date: '2026-10-05'
+    startTime: '15:00'
+    durationMinutes: 30
+    status: active
+  - id: 212e8dc6-88f1-488b-a937-4d088526832b
+    trainingId: bt-log
+    date: '2026-10-05'
+    startTime: '15:30'
+    durationMinutes: 30
+    status: active
+  - id: ed0054c0-068a-4e1e-86a3-d9de36099021
+    trainingId: bt-log
+    date: '2026-10-05'
+    startTime: '16:00'
+    durationMinutes: 30
+    status: active
+  - id: e3e3b423-c45d-4cab-b045-088c911a4a7d
+    trainingId: bt-log
+    date: '2026-10-05'
+    startTime: '16:30'
+    durationMinutes: 30
+    status: active
+  - id: 60e6f27a-b727-4475-8cea-e8852c2f9a17
+    trainingId: bt-log
+    date: '2026-10-05'
+    startTime: '17:00'
+    durationMinutes: 30
+    status: active
+  - id: 5e25f230-9c0b-41f5-8976-89327807478e
+    trainingId: bt-log
+    date: '2026-10-06'
+    startTime: '09:00'
+    durationMinutes: 30
+    status: active
+  - id: 4e725c2c-795a-408a-9116-6be416dd00a4
+    trainingId: bt-log
+    date: '2026-10-06'
+    startTime: '09:30'
+    durationMinutes: 30
+    status: active
+  - id: b34d74d3-3af3-453e-b8ce-6961058c5684
+    trainingId: bt-log
+    date: '2026-10-06'
+    startTime: '10:00'
+    durationMinutes: 30
+    status: active
+  - id: 0dc3b987-e20a-48be-bd60-09f65a28c93f
+    trainingId: bt-log
+    date: '2026-10-06'
+    startTime: '10:30'
+    durationMinutes: 30
+    status: active
+  - id: 7a9eef28-f811-470a-9fee-fcf64e4f34a6
+    trainingId: bt-log
+    date: '2026-10-06'
+    startTime: '11:00'
+    durationMinutes: 30
+    status: active
+  - id: 5334e9ac-9c40-4314-91de-fe606d06dc59
+    trainingId: bt-log
+    date: '2026-10-06'
+    startTime: '11:30'
+    durationMinutes: 30
+    status: active
+  - id: 95f39f98-e5b9-4cc6-8f89-eecaf15d0b10
+    trainingId: bt-log
+    date: '2026-10-06'
+    startTime: '12:00'
+    durationMinutes: 30
+    status: active
+  - id: a24776d3-d0a3-46de-b88d-8a70787d56e7
+    trainingId: bt-log
+    date: '2026-10-06'
+    startTime: '12:30'
+    durationMinutes: 30
+    status: active
+  - id: 0341acc2-dacf-4ce3-892e-89f3ea21dbe5
+    trainingId: bt-log
+    date: '2026-10-06'
+    startTime: '13:00'
+    durationMinutes: 30
+    status: active
+  - id: 83a979bf-5c58-4a43-bf5d-536492ca6e5a
+    trainingId: bt-log
+    date: '2026-10-06'
+    startTime: '13:30'
+    durationMinutes: 30
+    status: active
+  - id: b669d2de-0dcb-445b-a545-7facf266c4cd
+    trainingId: bt-log
+    date: '2026-10-06'
+    startTime: '14:00'
+    durationMinutes: 30
+    status: active
+  - id: 46b12849-dce5-48c1-af0d-5f42e31e5d30
+    trainingId: bt-log
+    date: '2026-10-06'
+    startTime: '14:30'
+    durationMinutes: 30
+    status: active
+  - id: 4cafd3f3-e0e4-46f5-b278-420a7618f121
+    trainingId: bt-log
+    date: '2026-10-06'
+    startTime: '15:00'
+    durationMinutes: 30
+    status: active
+  - id: e82f64db-3754-46ec-802d-b96eed88983f
+    trainingId: bt-log
+    date: '2026-10-06'
+    startTime: '15:30'
+    durationMinutes: 30
+    status: active
+  - id: 8f9ce582-9e0b-4ad7-8c7c-ed5e34dd2660
+    trainingId: bt-log
+    date: '2026-10-06'
+    startTime: '16:00'
+    durationMinutes: 30
+    status: active
+  - id: ce3d5997-aaff-404b-a7fd-7a15e67c0753
+    trainingId: bt-log
+    date: '2026-10-06'
+    startTime: '16:30'
+    durationMinutes: 30
+    status: active
+  - id: 459fb22a-8836-467b-8c78-1f3eda10b328
+    trainingId: bt-log
+    date: '2026-10-06'
+    startTime: '17:00'
+    durationMinutes: 30
+    status: active
+  - id: 006e68bc-ae1e-4b3b-9f25-835c7e056188
+    trainingId: bt-log
+    date: '2026-10-07'
+    startTime: '09:00'
+    durationMinutes: 30
+    status: active
+  - id: 8580dfc2-f6b7-4a51-be7f-bf49a6ac4a97
+    trainingId: bt-log
+    date: '2026-10-07'
+    startTime: '09:30'
+    durationMinutes: 30
+    status: active
+  - id: b97e432d-b05e-4a1d-ac48-83dc27aede79
+    trainingId: bt-log
+    date: '2026-10-07'
+    startTime: '10:00'
+    durationMinutes: 30
+    status: active
+  - id: 38ee67c4-0a3c-490c-b497-73338c6242b7
+    trainingId: bt-log
+    date: '2026-10-07'
+    startTime: '10:30'
+    durationMinutes: 30
+    status: active
+  - id: c4e9fe59-e9c9-4999-8084-a77effcc40f3
+    trainingId: bt-log
+    date: '2026-10-07'
+    startTime: '11:00'
+    durationMinutes: 30
+    status: active
+  - id: 03e5c16c-17e5-4baf-b2ae-75bfa251e82a
+    trainingId: bt-log
+    date: '2026-10-07'
+    startTime: '11:30'
+    durationMinutes: 30
+    status: active
+  - id: 3ee1d54b-44c4-43c2-b0c3-e458184783bf
+    trainingId: bt-log
+    date: '2026-10-07'
+    startTime: '12:00'
+    durationMinutes: 30
+    status: active
+  - id: aa188829-5434-4f6c-b342-bb50eac148ef
+    trainingId: bt-log
+    date: '2026-10-07'
+    startTime: '12:30'
+    durationMinutes: 30
+    status: active
+  - id: 8d1f5337-09c8-49c8-8099-4d66286be722
+    trainingId: bt-log
+    date: '2026-10-07'
+    startTime: '13:00'
+    durationMinutes: 30
+    status: active
+  - id: a41f70b5-cd5d-4c63-a2e4-c8e33b50c547
+    trainingId: bt-log
+    date: '2026-10-07'
+    startTime: '13:30'
+    durationMinutes: 30
+    status: active
+  - id: ffd84777-9b1a-45cc-acb1-80caba7f1d80
+    trainingId: bt-log
+    date: '2026-10-07'
+    startTime: '14:00'
+    durationMinutes: 30
+    status: active
+  - id: f88b1a39-abe5-4d3f-a507-078784a0804f
+    trainingId: bt-log
+    date: '2026-10-07'
+    startTime: '14:30'
+    durationMinutes: 30
+    status: active
+  - id: ce454f42-b2f0-45ff-b4e9-f31d3ff5cd37
+    trainingId: bt-log
+    date: '2026-10-07'
+    startTime: '15:00'
+    durationMinutes: 30
+    status: active
+  - id: e1dc942b-b25c-4f7a-b39a-ebf6af5d0fc8
+    trainingId: bt-log
+    date: '2026-10-07'
+    startTime: '15:30'
+    durationMinutes: 30
+    status: active
+  - id: 79ba7c8d-f5e4-47f6-b3e4-50d6f97d3e33
+    trainingId: bt-log
+    date: '2026-10-07'
+    startTime: '16:00'
+    durationMinutes: 30
+    status: active
+  - id: 5ce5fd33-874a-4262-910d-83f6379c3870
+    trainingId: bt-log
+    date: '2026-10-07'
+    startTime: '16:30'
+    durationMinutes: 30
+    status: active
+  - id: 8792b8d7-96e3-4cbc-8196-9e4850cc8182
+    trainingId: bt-log
+    date: '2026-10-07'
+    startTime: '17:00'
+    durationMinutes: 30
+    status: active
+  - id: 8b0887cb-391d-4246-913a-5ce3f05c5876
+    trainingId: bt-log
+    date: '2026-10-08'
+    startTime: '09:00'
+    durationMinutes: 30
+    status: active
+  - id: be90410c-42f7-4c71-9a7f-c210e341ba98
+    trainingId: bt-log
+    date: '2026-10-08'
+    startTime: '09:30'
+    durationMinutes: 30
+    status: active
+  - id: cbc3d460-2f4b-449d-a830-03c25f1a8d7a
+    trainingId: bt-log
+    date: '2026-10-08'
+    startTime: '10:00'
+    durationMinutes: 30
+    status: active
+  - id: 00a46ea7-3895-46f5-a645-0a7529cf1c88
+    trainingId: bt-log
+    date: '2026-10-08'
+    startTime: '10:30'
+    durationMinutes: 30
+    status: active
+  - id: 84dcb396-e2ca-4332-9f18-2d0ab97847a7
+    trainingId: bt-log
+    date: '2026-10-08'
+    startTime: '11:00'
+    durationMinutes: 30
+    status: active
+  - id: a12baf02-57f8-475a-a03d-c3b12f990933
+    trainingId: bt-log
+    date: '2026-10-08'
+    startTime: '11:30'
+    durationMinutes: 30
+    status: active
+  - id: e2c7996f-de22-4327-b657-f188d84da2e1
+    trainingId: bt-log
+    date: '2026-10-08'
+    startTime: '12:00'
+    durationMinutes: 30
+    status: active
+  - id: 98642ac8-b0cb-4398-b72f-aba3bafdfdc5
+    trainingId: bt-log
+    date: '2026-10-08'
+    startTime: '12:30'
+    durationMinutes: 30
+    status: active
+  - id: ce92dd82-7b95-4d17-a1d1-bdb9fb6a98bb
+    trainingId: bt-log
+    date: '2026-10-08'
+    startTime: '13:00'
+    durationMinutes: 30
+    status: active
+  - id: ea122c0b-0025-4338-acb6-657158eeed0b
+    trainingId: bt-log
+    date: '2026-10-08'
+    startTime: '13:30'
+    durationMinutes: 30
+    status: active
+  - id: 99c85570-69b6-4c96-9f89-b24bbef76b72
+    trainingId: bt-log
+    date: '2026-10-08'
+    startTime: '14:00'
+    durationMinutes: 30
+    status: active
+  - id: 3beedcca-c979-4952-a8c8-a13eac756f3d
+    trainingId: bt-log
+    date: '2026-10-08'
+    startTime: '14:30'
+    durationMinutes: 30
+    status: active
+  - id: dcce0212-1959-438f-a173-5b79e3d616ea
+    trainingId: bt-log
+    date: '2026-10-08'
+    startTime: '15:00'
+    durationMinutes: 30
+    status: active
+  - id: 5dec97b3-2260-4eab-918f-68749b46d241
+    trainingId: bt-log
+    date: '2026-10-08'
+    startTime: '15:30'
+    durationMinutes: 30
+    status: active
+  - id: ca4c8159-3215-499c-93aa-478fae759e7f
+    trainingId: bt-log
+    date: '2026-10-08'
+    startTime: '16:00'
+    durationMinutes: 30
+    status: active
+  - id: 3a9738c2-6819-449f-9f48-8485d809b54f
+    trainingId: bt-log
+    date: '2026-10-08'
+    startTime: '16:30'
+    durationMinutes: 30
+    status: active
+  - id: e18e3e0e-8a4a-4e76-aa1c-8a4950432ee8
+    trainingId: bt-log
+    date: '2026-10-08'
+    startTime: '17:00'
+    durationMinutes: 30
+    status: active
+  - id: 0076ee65-3fbe-4a87-9dc6-a808152d80d9
+    trainingId: bt-log
+    date: '2026-10-09'
+    startTime: '09:00'
+    durationMinutes: 30
+    status: active
+  - id: 01ef9ec0-f939-4963-a5b5-7d79b277f6c9
+    trainingId: bt-log
+    date: '2026-10-09'
+    startTime: '09:30'
+    durationMinutes: 30
+    status: active
+  - id: ca8f791d-992e-46a9-a9fb-a8850cb30fbe
+    trainingId: bt-log
+    date: '2026-10-09'
+    startTime: '10:00'
+    durationMinutes: 30
+    status: active
+  - id: 738a9acd-51f7-4264-a536-7b4291451347
+    trainingId: bt-log
+    date: '2026-10-09'
+    startTime: '10:30'
+    durationMinutes: 30
+    status: active
+  - id: 1ddbda12-4fed-4530-8b32-448cc968690a
+    trainingId: bt-log
+    date: '2026-10-09'
+    startTime: '11:00'
+    durationMinutes: 30
+    status: active
+  - id: 1805bb1a-d495-4d22-8dee-6ba510662e19
+    trainingId: bt-log
+    date: '2026-10-09'
+    startTime: '11:30'
+    durationMinutes: 30
+    status: active
+  - id: e54c9071-395e-46b6-9515-572212c44430
+    trainingId: bt-log
+    date: '2026-10-09'
+    startTime: '12:00'
+    durationMinutes: 30
+    status: active
+  - id: e87659e4-29a7-497d-aee3-1085ecafb5d9
+    trainingId: bt-log
+    date: '2026-10-09'
+    startTime: '12:30'
+    durationMinutes: 30
+    status: active
+  - id: 4b68432b-dc40-4c4a-8d0c-ba3dc0453ff7
+    trainingId: bt-log
+    date: '2026-10-09'
+    startTime: '13:00'
+    durationMinutes: 30
+    status: active
+  - id: 1df3141b-0d33-476d-8d1e-4e1fdd290841
+    trainingId: bt-log
+    date: '2026-10-09'
+    startTime: '13:30'
+    durationMinutes: 30
+    status: active
+  - id: 4898a247-4276-4678-8a33-5e4b8f816e50
+    trainingId: bt-log
+    date: '2026-10-09'
+    startTime: '14:00'
+    durationMinutes: 30
+    status: active
+  - id: 134f8606-0083-42ec-b824-fbb9550501f7
+    trainingId: bt-log
+    date: '2026-10-09'
+    startTime: '14:30'
+    durationMinutes: 30
+    status: active
+  - id: e55678e7-2246-4a25-b879-4bfca10a2dcc
+    trainingId: bt-log
+    date: '2026-10-09'
+    startTime: '15:00'
+    durationMinutes: 30
+    status: active
+  - id: 41bff8bf-d280-440e-949a-359a514d368a
+    trainingId: bt-log
+    date: '2026-10-09'
+    startTime: '15:30'
+    durationMinutes: 30
+    status: active
+  - id: 5a367938-f9a1-40b4-9a22-2be50ff429c9
+    trainingId: bt-log
+    date: '2026-10-09'
+    startTime: '16:00'
+    durationMinutes: 30
+    status: active
+  - id: cfb8afe6-db59-47c9-9407-a19485706f66
+    trainingId: bt-log
+    date: '2026-10-09'
+    startTime: '16:30'
+    durationMinutes: 30
+    status: active
+  - id: 739a6074-a0f9-4e75-8989-99cb51213bed
+    trainingId: bt-log
+    date: '2026-10-09'
+    startTime: '17:00'
+    durationMinutes: 30
+    status: active
+  - id: c67b54ab-d139-4a27-a719-ae2abf4c14e7
+    trainingId: bt-hdt
+    date: '2026-10-05'
+    startTime: '09:00'
+    durationMinutes: 30
+    status: active
+  - id: 27f3b063-65e7-4aaf-a9eb-76a7c433452b
+    trainingId: bt-hdt
+    date: '2026-10-05'
+    startTime: '09:30'
+    durationMinutes: 30
+    status: active
+  - id: 11e8009e-09d0-4585-9bea-08097747d510
+    trainingId: bt-hdt
+    date: '2026-10-05'
+    startTime: '10:00'
+    durationMinutes: 30
+    status: active
+  - id: 76bc416c-4e7d-4baf-adf5-3646da624bf2
+    trainingId: bt-hdt
+    date: '2026-10-05'
+    startTime: '10:30'
+    durationMinutes: 30
+    status: active
+  - id: 83e23f35-ec1c-458a-9a9d-d29a52937b75
+    trainingId: bt-hdt
+    date: '2026-10-05'
+    startTime: '11:00'
+    durationMinutes: 30
+    status: active
+  - id: 44833887-2ad9-4a08-a10a-aff09d0defb1
+    trainingId: bt-hdt
+    date: '2026-10-05'
+    startTime: '11:30'
+    durationMinutes: 30
+    status: active
+  - id: a93fefd3-41fe-4c0a-8711-b715de48247e
+    trainingId: bt-hdt
+    date: '2026-10-05'
+    startTime: '12:00'
+    durationMinutes: 30
+    status: active
+  - id: 224f2bcd-4d39-4875-a196-7459173d0a0a
+    trainingId: bt-hdt
+    date: '2026-10-05'
+    startTime: '12:30'
+    durationMinutes: 30
+    status: active
+  - id: 5832ad2b-85e9-4325-a736-eacff38af1c9
+    trainingId: bt-hdt
+    date: '2026-10-05'
+    startTime: '13:00'
+    durationMinutes: 30
+    status: active
+  - id: 32b70c3a-6309-49f6-8f15-9e4094ba3b99
+    trainingId: bt-hdt
+    date: '2026-10-05'
+    startTime: '13:30'
+    durationMinutes: 30
+    status: active
+  - id: 672b564a-4f59-43ac-927b-bc29db40d833
+    trainingId: bt-hdt
+    date: '2026-10-05'
+    startTime: '14:00'
+    durationMinutes: 30
+    status: active
+  - id: b4898882-50e1-4297-b8d2-e487e9ee93b0
+    trainingId: bt-hdt
+    date: '2026-10-05'
+    startTime: '14:30'
+    durationMinutes: 30
+    status: active
+  - id: 2ce93ada-b908-4540-8983-3c0ae05fdab2
+    trainingId: bt-hdt
+    date: '2026-10-05'
+    startTime: '15:00'
+    durationMinutes: 30
+    status: active
+  - id: b013def8-483c-4f3b-884f-558853a7faba
+    trainingId: bt-hdt
+    date: '2026-10-05'
+    startTime: '15:30'
+    durationMinutes: 30
+    status: active
+  - id: 8ab462ef-f7b5-467b-a61f-837cad9f7e47
+    trainingId: bt-hdt
+    date: '2026-10-05'
+    startTime: '16:00'
+    durationMinutes: 30
+    status: active
+  - id: 906541e7-7164-455f-a83f-973d622a00e1
+    trainingId: bt-hdt
+    date: '2026-10-05'
+    startTime: '16:30'
+    durationMinutes: 30
+    status: active
+  - id: c5e753a3-3441-4c25-8432-278e7c3f99c5
+    trainingId: bt-hdt
+    date: '2026-10-05'
+    startTime: '17:00'
+    durationMinutes: 30
+    status: active
+  - id: cf71a8ec-4eae-47c3-b7fd-fb551c337202
+    trainingId: bt-hdt
+    date: '2026-10-06'
+    startTime: '09:00'
+    durationMinutes: 30
+    status: active
+  - id: e3bb69c5-a8e4-4f2a-9829-d88026aaee4b
+    trainingId: bt-hdt
+    date: '2026-10-06'
+    startTime: '09:30'
+    durationMinutes: 30
+    status: active
+  - id: b903c88e-49f8-4700-9ef7-710a1e2429b0
+    trainingId: bt-hdt
+    date: '2026-10-06'
+    startTime: '10:00'
+    durationMinutes: 30
+    status: active
+  - id: f95c372c-c4d2-40e9-8587-536f119f67e8
+    trainingId: bt-hdt
+    date: '2026-10-06'
+    startTime: '10:30'
+    durationMinutes: 30
+    status: active
+  - id: ab93ab22-9814-4ea8-b85e-9043b33f45b8
+    trainingId: bt-hdt
+    date: '2026-10-06'
+    startTime: '11:00'
+    durationMinutes: 30
+    status: active
+  - id: dd35a0a6-817b-4c26-aa94-08729da1297e
+    trainingId: bt-hdt
+    date: '2026-10-06'
+    startTime: '11:30'
+    durationMinutes: 30
+    status: active
+  - id: 75cd8478-9fbe-49fc-8a25-6e7497ba18d9
+    trainingId: bt-hdt
+    date: '2026-10-06'
+    startTime: '12:00'
+    durationMinutes: 30
+    status: active
+  - id: 92a860c1-295c-459e-a849-4130ccbac089
+    trainingId: bt-hdt
+    date: '2026-10-06'
+    startTime: '12:30'
+    durationMinutes: 30
+    status: active
+  - id: b3b27886-1bd1-473a-a3ca-d9c1152629a3
+    trainingId: bt-hdt
+    date: '2026-10-06'
+    startTime: '13:00'
+    durationMinutes: 30
+    status: active
+  - id: 75a37397-c514-4dff-b039-f147ecdb5280
+    trainingId: bt-hdt
+    date: '2026-10-06'
+    startTime: '13:30'
+    durationMinutes: 30
+    status: active
+  - id: 208a7dab-02f3-41cf-9f87-a48fbefbeb1b
+    trainingId: bt-hdt
+    date: '2026-10-06'
+    startTime: '14:00'
+    durationMinutes: 30
+    status: active
+  - id: 01bd7114-5e17-4af2-b832-1dc0c9eda20d
+    trainingId: bt-hdt
+    date: '2026-10-06'
+    startTime: '14:30'
+    durationMinutes: 30
+    status: active
+  - id: 33589f40-03fd-4eb1-a26a-939483fe011e
+    trainingId: bt-hdt
+    date: '2026-10-06'
+    startTime: '15:00'
+    durationMinutes: 30
+    status: active
+  - id: 48195cc6-28dd-418d-8ab1-6fe4dbde49c9
+    trainingId: bt-hdt
+    date: '2026-10-06'
+    startTime: '15:30'
+    durationMinutes: 30
+    status: active
+  - id: de67e32a-e788-4b90-bef0-f75cbc82d3b4
+    trainingId: bt-hdt
+    date: '2026-10-06'
+    startTime: '16:00'
+    durationMinutes: 30
+    status: active
+  - id: 81ec74c9-4ecd-4c58-a0da-42851a30cb58
+    trainingId: bt-hdt
+    date: '2026-10-06'
+    startTime: '16:30'
+    durationMinutes: 30
+    status: active
+  - id: 44918b53-01e9-4175-a7ff-f204c18750fb
+    trainingId: bt-hdt
+    date: '2026-10-06'
+    startTime: '17:00'
+    durationMinutes: 30
+    status: active
+  - id: 7af40cd7-9112-4e32-8144-a6ba7c7caf3d
+    trainingId: bt-hdt
+    date: '2026-10-07'
+    startTime: '09:00'
+    durationMinutes: 30
+    status: active
+  - id: 5cd84b31-a97b-420a-b34b-b25b7498c87f
+    trainingId: bt-hdt
+    date: '2026-10-07'
+    startTime: '09:30'
+    durationMinutes: 30
+    status: active
+  - id: e9ca8282-39bc-4089-ad2b-2b0f18a5e013
+    trainingId: bt-hdt
+    date: '2026-10-07'
+    startTime: '10:00'
+    durationMinutes: 30
+    status: active
+  - id: 50f13561-9cce-453b-b2a5-ddb366bb20fd
+    trainingId: bt-hdt
+    date: '2026-10-07'
+    startTime: '10:30'
+    durationMinutes: 30
+    status: active
+  - id: 6c4b4287-38e2-45b2-b6b7-bb9237f74482
+    trainingId: bt-hdt
+    date: '2026-10-07'
+    startTime: '11:00'
+    durationMinutes: 30
+    status: active
+  - id: 838c6b8f-a1ae-4005-9947-2bf71c513309
+    trainingId: bt-hdt
+    date: '2026-10-07'
+    startTime: '11:30'
+    durationMinutes: 30
+    status: active
+  - id: f472337c-271b-4388-aa43-9ca9d7e291fc
+    trainingId: bt-hdt
+    date: '2026-10-07'
+    startTime: '12:00'
+    durationMinutes: 30
+    status: active
+  - id: 0f010c9a-c2d3-4d81-8978-0cfd6f24ee7f
+    trainingId: bt-hdt
+    date: '2026-10-07'
+    startTime: '12:30'
+    durationMinutes: 30
+    status: active
+  - id: 07edb207-89f4-4655-ab62-85131904c95a
+    trainingId: bt-hdt
+    date: '2026-10-07'
+    startTime: '13:00'
+    durationMinutes: 30
+    status: active
+  - id: c49e9b7f-c8d0-4437-b654-87b891135338
+    trainingId: bt-hdt
+    date: '2026-10-07'
+    startTime: '13:30'
+    durationMinutes: 30
+    status: active
+  - id: 028b72f2-f996-49d8-9e4e-5e8b730de1bc
+    trainingId: bt-hdt
+    date: '2026-10-07'
+    startTime: '14:00'
+    durationMinutes: 30
+    status: active
+  - id: 3edb23ef-c988-4c99-8d0f-425f15868b8d
+    trainingId: bt-hdt
+    date: '2026-10-07'
+    startTime: '14:30'
+    durationMinutes: 30
+    status: active
+  - id: 3d199a7b-f677-4339-9f8b-bafb260c2967
+    trainingId: bt-hdt
+    date: '2026-10-07'
+    startTime: '15:00'
+    durationMinutes: 30
+    status: active
+  - id: 464e2cac-efdc-4987-999b-27cd0dae99ad
+    trainingId: bt-hdt
+    date: '2026-10-07'
+    startTime: '15:30'
+    durationMinutes: 30
+    status: active
+  - id: f69d422e-fb10-4113-8b74-2ce39ee6f3e8
+    trainingId: bt-hdt
+    date: '2026-10-07'
+    startTime: '16:00'
+    durationMinutes: 30
+    status: active
+  - id: 16ce0a39-af9f-4b98-af10-612be9c69a59
+    trainingId: bt-hdt
+    date: '2026-10-07'
+    startTime: '16:30'
+    durationMinutes: 30
+    status: active
+  - id: d47a7ecc-115e-4b68-8957-7b6be5eb3841
+    trainingId: bt-hdt
+    date: '2026-10-07'
+    startTime: '17:00'
+    durationMinutes: 30
+    status: active
+  - id: acdb7865-c49f-4a99-93f9-f991ad6434f2
+    trainingId: bt-hdt
+    date: '2026-10-08'
+    startTime: '09:00'
+    durationMinutes: 30
+    status: active
+  - id: 61e0cb66-e382-4e38-8e2a-bc37d27e7262
+    trainingId: bt-hdt
+    date: '2026-10-08'
+    startTime: '09:30'
+    durationMinutes: 30
+    status: active
+  - id: 2d0b24db-e925-481b-a4f5-f48907f1363a
+    trainingId: bt-hdt
+    date: '2026-10-08'
+    startTime: '10:00'
+    durationMinutes: 30
+    status: active
+  - id: 7e902d6a-98e2-45aa-bcec-8bdf45b5fc1e
+    trainingId: bt-hdt
+    date: '2026-10-08'
+    startTime: '10:30'
+    durationMinutes: 30
+    status: active
+  - id: 582f6c23-8c8b-4a6d-967b-505883dfd6c0
+    trainingId: bt-hdt
+    date: '2026-10-08'
+    startTime: '11:00'
+    durationMinutes: 30
+    status: active
+  - id: 8e706233-a38f-4fc9-81f6-3e5dea4a2e79
+    trainingId: bt-hdt
+    date: '2026-10-08'
+    startTime: '11:30'
+    durationMinutes: 30
+    status: active
+  - id: c81da964-e76d-49cc-8362-1d5121a5f111
+    trainingId: bt-hdt
+    date: '2026-10-08'
+    startTime: '12:00'
+    durationMinutes: 30
+    status: active
+  - id: 3998e01e-a53c-434b-bcf3-0d14b8865c72
+    trainingId: bt-hdt
+    date: '2026-10-08'
+    startTime: '12:30'
+    durationMinutes: 30
+    status: active
+  - id: b5a9769c-cdc7-4462-9436-e74d935d2a9f
+    trainingId: bt-hdt
+    date: '2026-10-08'
+    startTime: '13:00'
+    durationMinutes: 30
+    status: active
+  - id: e0af1c35-1d43-41c2-9045-3fa1d453b9c5
+    trainingId: bt-hdt
+    date: '2026-10-08'
+    startTime: '13:30'
+    durationMinutes: 30
+    status: active
+  - id: c52644e5-2253-45c1-97a3-ee34c0d79180
+    trainingId: bt-hdt
+    date: '2026-10-08'
+    startTime: '14:00'
+    durationMinutes: 30
+    status: active
+  - id: b26ede90-d0fe-410d-a714-13336a8e2f90
+    trainingId: bt-hdt
+    date: '2026-10-08'
+    startTime: '14:30'
+    durationMinutes: 30
+    status: active
+  - id: a84cf73c-bae4-44b5-8d58-f8535faa64cd
+    trainingId: bt-hdt
+    date: '2026-10-08'
+    startTime: '15:00'
+    durationMinutes: 30
+    status: active
+  - id: 55175e8e-fd32-4f9d-8b2a-06a63b633760
+    trainingId: bt-hdt
+    date: '2026-10-08'
+    startTime: '15:30'
+    durationMinutes: 30
+    status: active
+  - id: c391bfb5-3735-4ce1-91ae-aa3b231106e3
+    trainingId: bt-hdt
+    date: '2026-10-08'
+    startTime: '16:00'
+    durationMinutes: 30
+    status: active
+  - id: d0d89a66-d0cd-4fac-a629-a3d52144f32b
+    trainingId: bt-hdt
+    date: '2026-10-08'
+    startTime: '16:30'
+    durationMinutes: 30
+    status: active
+  - id: 43ca6df1-eecc-4e33-bdb7-85f8cdaff0db
+    trainingId: bt-hdt
+    date: '2026-10-08'
+    startTime: '17:00'
+    durationMinutes: 30
+    status: active
+  - id: 0ae45c8f-0047-4b9a-94c0-5777d18cea80
+    trainingId: bt-hdt
+    date: '2026-10-09'
+    startTime: '09:00'
+    durationMinutes: 30
+    status: active
+  - id: 0ce3048e-0e47-4831-89ea-2eb28af81582
+    trainingId: bt-hdt
+    date: '2026-10-09'
+    startTime: '09:30'
+    durationMinutes: 30
+    status: active
+  - id: 52b48033-d2ab-45aa-8317-9e80bdd8c0b3
+    trainingId: bt-hdt
+    date: '2026-10-09'
+    startTime: '10:00'
+    durationMinutes: 30
+    status: active
+  - id: 12a5d6db-3efa-4702-9742-1fbcb75b455e
+    trainingId: bt-hdt
+    date: '2026-10-09'
+    startTime: '10:30'
+    durationMinutes: 30
+    status: active
+  - id: a07c3fac-ed96-408e-a7d1-76b3fc971ded
+    trainingId: bt-hdt
+    date: '2026-10-09'
+    startTime: '11:00'
+    durationMinutes: 30
+    status: active
+  - id: 623d7459-7500-4178-a0f4-b9499bcee809
+    trainingId: bt-hdt
+    date: '2026-10-09'
+    startTime: '11:30'
+    durationMinutes: 30
+    status: active
+  - id: a0575b21-f69a-4515-96f2-cf0931243381
+    trainingId: bt-hdt
+    date: '2026-10-09'
+    startTime: '12:00'
+    durationMinutes: 30
+    status: active
+  - id: 5e99143a-11c3-49f0-abc5-5a273aa9153c
+    trainingId: bt-hdt
+    date: '2026-10-09'
+    startTime: '12:30'
+    durationMinutes: 30
+    status: active
+  - id: 0716a3b5-6a47-4ef5-b055-e8e627d29278
+    trainingId: bt-hdt
+    date: '2026-10-09'
+    startTime: '13:00'
+    durationMinutes: 30
+    status: active
+  - id: 31665365-422a-48fd-bad3-636303b9b0c8
+    trainingId: bt-hdt
+    date: '2026-10-09'
+    startTime: '13:30'
+    durationMinutes: 30
+    status: active
+  - id: 9ef9fa3d-eae1-4960-b79f-278a64bc0ff6
+    trainingId: bt-hdt
+    date: '2026-10-09'
+    startTime: '14:00'
+    durationMinutes: 30
+    status: active
+  - id: f5fabcd5-072c-4020-b097-ccf14ada8915
+    trainingId: bt-hdt
+    date: '2026-10-09'
+    startTime: '14:30'
+    durationMinutes: 30
+    status: active
+  - id: aa537c8e-4520-428a-904d-eab5252926b0
+    trainingId: bt-hdt
+    date: '2026-10-09'
+    startTime: '15:00'
+    durationMinutes: 30
+    status: active
+  - id: 51843116-f536-41c7-976c-c2b4f2d11818
+    trainingId: bt-hdt
+    date: '2026-10-09'
+    startTime: '15:30'
+    durationMinutes: 30
+    status: active
+  - id: ab7d181e-721d-4eb3-8e1e-8e57378d0002
+    trainingId: bt-hdt
+    date: '2026-10-09'
+    startTime: '16:00'
+    durationMinutes: 30
+    status: active
+  - id: df75c60b-ec46-40cb-a1f8-86e14964613e
+    trainingId: bt-hdt
+    date: '2026-10-09'
+    startTime: '16:30'
+    durationMinutes: 30
+    status: active
+  - id: 7fddc269-8c36-4c8f-b3fb-811131f9863b
+    trainingId: bt-hdt
+    date: '2026-10-09'
+    startTime: '17:00'
+    durationMinutes: 30
+    status: active
+  - id: ccdb0fa9-d360-4a7c-af39-ca91dfdac55c
+    trainingId: wifi-8-asus
+    date: '2026-10-05'
+    startTime: '09:00'
+    durationMinutes: 30
+    status: active
+  - id: 69667727-94b4-4641-bf99-b1cd5a8aa4da
+    trainingId: wifi-8-asus
+    date: '2026-10-05'
+    startTime: '09:30'
+    durationMinutes: 30
+    status: active
+  - id: 563c008c-3229-41f7-a270-739ba90b053a
+    trainingId: wifi-8-asus
+    date: '2026-10-05'
+    startTime: '10:00'
+    durationMinutes: 30
+    status: active
+  - id: c27e654b-0c46-4891-9a38-b2f188b78f2d
+    trainingId: wifi-8-asus
+    date: '2026-10-05'
+    startTime: '10:30'
+    durationMinutes: 30
+    status: active
+  - id: 7f61bc20-dbd9-48a5-aceb-4547e488b78f
+    trainingId: wifi-8-asus
+    date: '2026-10-05'
+    startTime: '11:00'
+    durationMinutes: 30
+    status: active
+  - id: abe0406a-e01a-46ea-9557-395ee016fcc3
+    trainingId: wifi-8-asus
+    date: '2026-10-05'
+    startTime: '11:30'
+    durationMinutes: 30
+    status: active
+  - id: 7150ef4a-b27d-4493-89c3-c7e42e71c563
+    trainingId: wifi-8-asus
+    date: '2026-10-05'
+    startTime: '12:00'
+    durationMinutes: 30
+    status: active
+  - id: fa1cf9a6-e747-4a35-b86e-c1297259d4d4
+    trainingId: wifi-8-asus
+    date: '2026-10-05'
+    startTime: '12:30'
+    durationMinutes: 30
+    status: active
+  - id: 9397bb06-3ccb-4646-97a3-90ff82d07034
+    trainingId: wifi-8-asus
+    date: '2026-10-05'
+    startTime: '13:00'
+    durationMinutes: 30
+    status: active
+  - id: abd6d129-1bbd-4ab1-943a-335f1cbd27ef
+    trainingId: wifi-8-asus
+    date: '2026-10-05'
+    startTime: '13:30'
+    durationMinutes: 30
+    status: active
+  - id: 4f49fcc3-a93d-44b5-8909-01c94a95831c
+    trainingId: wifi-8-asus
+    date: '2026-10-05'
+    startTime: '14:00'
+    durationMinutes: 30
+    status: active
+  - id: 3121cefe-1a2f-4217-a9a0-d3563c3dcff9
+    trainingId: wifi-8-asus
+    date: '2026-10-05'
+    startTime: '14:30'
+    durationMinutes: 30
+    status: active
+  - id: b83db582-9ced-40e7-8a7a-1d7cd0833f8a
+    trainingId: wifi-8-asus
+    date: '2026-10-05'
+    startTime: '15:00'
+    durationMinutes: 30
+    status: active
+  - id: ef2ca6b2-8da0-439f-84f0-1d119c5000a3
+    trainingId: wifi-8-asus
+    date: '2026-10-05'
+    startTime: '15:30'
+    durationMinutes: 30
+    status: active
+  - id: d31d1eef-5f04-4344-964d-1a87d68d3e1b
+    trainingId: wifi-8-asus
+    date: '2026-10-05'
+    startTime: '16:00'
+    durationMinutes: 30
+    status: active
+  - id: 54a8c6da-9c50-4391-88e3-f7e910b81de6
+    trainingId: wifi-8-asus
+    date: '2026-10-05'
+    startTime: '16:30'
+    durationMinutes: 30
+    status: active
+  - id: 5bc3578b-9bf9-4da4-8715-4c545d84e668
+    trainingId: wifi-8-asus
+    date: '2026-10-05'
+    startTime: '17:00'
+    durationMinutes: 30
+    status: active
+  - id: 142b7512-c7e2-4fd8-a7fb-eb28886c3950
+    trainingId: wifi-8-asus
+    date: '2026-10-06'
+    startTime: '09:00'
+    durationMinutes: 30
+    status: active
+  - id: 5af42c28-3930-42e6-8350-cc31122fe362
+    trainingId: wifi-8-asus
+    date: '2026-10-06'
+    startTime: '09:30'
+    durationMinutes: 30
+    status: active
+  - id: b0bbace5-57a3-41b8-9b48-0f854e7f1936
+    trainingId: wifi-8-asus
+    date: '2026-10-06'
+    startTime: '10:00'
+    durationMinutes: 30
+    status: active
+  - id: c9b93721-d419-4c8c-86c6-012ecc597223
+    trainingId: wifi-8-asus
+    date: '2026-10-06'
+    startTime: '10:30'
+    durationMinutes: 30
+    status: active
+  - id: 98649c9f-74a4-48e0-9108-2544db6d174d
+    trainingId: wifi-8-asus
+    date: '2026-10-06'
+    startTime: '11:00'
+    durationMinutes: 30
+    status: active
+  - id: a2ba430a-923c-4988-964c-b3e75e3fb626
+    trainingId: wifi-8-asus
+    date: '2026-10-06'
+    startTime: '11:30'
+    durationMinutes: 30
+    status: active
+  - id: e9f4c7e2-f5d9-47ab-be31-aaaa69adb58f
+    trainingId: wifi-8-asus
+    date: '2026-10-06'
+    startTime: '12:00'
+    durationMinutes: 30
+    status: active
+  - id: f6ccc1a6-af02-4d64-89bc-bcc41e4106fd
+    trainingId: wifi-8-asus
+    date: '2026-10-06'
+    startTime: '12:30'
+    durationMinutes: 30
+    status: active
+  - id: 54a0b15d-1788-471a-8df2-72e5b6479a55
+    trainingId: wifi-8-asus
+    date: '2026-10-06'
+    startTime: '13:00'
+    durationMinutes: 30
+    status: active
+  - id: d2c815e2-2cca-446e-b4c2-b1d8e0fe833f
+    trainingId: wifi-8-asus
+    date: '2026-10-06'
+    startTime: '13:30'
+    durationMinutes: 30
+    status: active
+  - id: cd21bb06-7c68-433e-be61-28c796769d35
+    trainingId: wifi-8-asus
+    date: '2026-10-06'
+    startTime: '14:00'
+    durationMinutes: 30
+    status: active
+  - id: e06162a5-1d1b-40f5-98ec-d6b59c188162
+    trainingId: wifi-8-asus
+    date: '2026-10-06'
+    startTime: '14:30'
+    durationMinutes: 30
+    status: active
+  - id: 77d68dca-3edf-4127-8a6b-5408601c4078
+    trainingId: wifi-8-asus
+    date: '2026-10-06'
+    startTime: '15:00'
+    durationMinutes: 30
+    status: active
+  - id: 39604033-1be0-45b9-a23e-148264fad329
+    trainingId: wifi-8-asus
+    date: '2026-10-06'
+    startTime: '15:30'
+    durationMinutes: 30
+    status: active
+  - id: 5106d458-bede-4224-ad68-3bd09384aeb0
+    trainingId: wifi-8-asus
+    date: '2026-10-06'
+    startTime: '16:00'
+    durationMinutes: 30
+    status: active
+  - id: 02ca0722-e657-4503-8e29-9aed0c97e18b
+    trainingId: wifi-8-asus
+    date: '2026-10-06'
+    startTime: '16:30'
+    durationMinutes: 30
+    status: active
+  - id: 1edbd7ee-d718-4b96-b629-e06a388870ec
+    trainingId: wifi-8-asus
+    date: '2026-10-06'
+    startTime: '17:00'
+    durationMinutes: 30
+    status: active
+  - id: ea36609d-08b4-4d9f-8969-68a04720414d
+    trainingId: wifi-8-asus
+    date: '2026-10-07'
+    startTime: '09:00'
+    durationMinutes: 30
+    status: active
+  - id: 1fe68e9e-174e-4c0b-8907-c645eb864e53
+    trainingId: wifi-8-asus
+    date: '2026-10-07'
+    startTime: '09:30'
+    durationMinutes: 30
+    status: active
+  - id: 5594a460-863f-42eb-b997-bec9ebe784d1
+    trainingId: wifi-8-asus
+    date: '2026-10-07'
+    startTime: '10:00'
+    durationMinutes: 30
+    status: active
+  - id: 4c3c24a4-fd08-4eaf-b79a-5c916d244964
+    trainingId: wifi-8-asus
+    date: '2026-10-07'
+    startTime: '10:30'
+    durationMinutes: 30
+    status: active
+  - id: 416b2de1-5fed-4413-9e7c-cd6420176759
+    trainingId: wifi-8-asus
+    date: '2026-10-07'
+    startTime: '11:00'
+    durationMinutes: 30
+    status: active
+  - id: 2ac987dd-6b74-41c7-83e9-38e694617cc7
+    trainingId: wifi-8-asus
+    date: '2026-10-07'
+    startTime: '11:30'
+    durationMinutes: 30
+    status: active
+  - id: c450b15c-40a8-463a-9556-d057c943ee62
+    trainingId: wifi-8-asus
+    date: '2026-10-07'
+    startTime: '12:00'
+    durationMinutes: 30
+    status: active
+  - id: a9bc1b1c-607a-4fcb-b087-7a0086dbdd57
+    trainingId: wifi-8-asus
+    date: '2026-10-07'
+    startTime: '12:30'
+    durationMinutes: 30
+    status: active
+  - id: c6056f87-8d34-46e7-84b3-b08fa0971628
+    trainingId: wifi-8-asus
+    date: '2026-10-07'
+    startTime: '13:00'
+    durationMinutes: 30
+    status: active
+  - id: a8b7f83b-8524-477a-9333-fb0484767a6e
+    trainingId: wifi-8-asus
+    date: '2026-10-07'
+    startTime: '13:30'
+    durationMinutes: 30
+    status: active
+  - id: dcc9e51f-723a-4fb4-a7fa-eb7a32a9888b
+    trainingId: wifi-8-asus
+    date: '2026-10-07'
+    startTime: '14:00'
+    durationMinutes: 30
+    status: active
+  - id: b9e77c93-7b67-4726-ba11-f189c8a1f2c3
+    trainingId: wifi-8-asus
+    date: '2026-10-07'
+    startTime: '14:30'
+    durationMinutes: 30
+    status: active
+  - id: 8a73470b-61ad-43d7-8176-2e7ea4b89a10
+    trainingId: wifi-8-asus
+    date: '2026-10-07'
+    startTime: '15:00'
+    durationMinutes: 30
+    status: active
+  - id: 027d7180-1d4a-4048-9f96-6768a8921238
+    trainingId: wifi-8-asus
+    date: '2026-10-07'
+    startTime: '15:30'
+    durationMinutes: 30
+    status: active
+  - id: b5b18b44-8477-438b-ac66-8cf3647d9db0
+    trainingId: wifi-8-asus
+    date: '2026-10-07'
+    startTime: '16:00'
+    durationMinutes: 30
+    status: active
+  - id: 84a0d6fb-0fb5-491e-9407-b545e994313d
+    trainingId: wifi-8-asus
+    date: '2026-10-07'
+    startTime: '16:30'
+    durationMinutes: 30
+    status: active
+  - id: da1ade70-8980-4d1f-b71b-06d2b4d8a935
+    trainingId: wifi-8-asus
+    date: '2026-10-07'
+    startTime: '17:00'
+    durationMinutes: 30
+    status: active
+  - id: 0d438216-23ae-4844-a2f4-47ba2a3a25d5
+    trainingId: wifi-8-asus
+    date: '2026-10-08'
+    startTime: '09:00'
+    durationMinutes: 30
+    status: active
+  - id: f934dc6f-09a4-4f97-8d6d-f5b1249baade
+    trainingId: wifi-8-asus
+    date: '2026-10-08'
+    startTime: '09:30'
+    durationMinutes: 30
+    status: active
+  - id: db89b010-944c-4f30-a9ef-5b7d201ce53b
+    trainingId: wifi-8-asus
+    date: '2026-10-08'
+    startTime: '10:00'
+    durationMinutes: 30
+    status: active
+  - id: b677180a-e25e-41d2-ab70-0f58a528a223
+    trainingId: wifi-8-asus
+    date: '2026-10-08'
+    startTime: '10:30'
+    durationMinutes: 30
+    status: active
+  - id: 6adffff0-16df-4661-b588-a2cb333d0dcd
+    trainingId: wifi-8-asus
+    date: '2026-10-08'
+    startTime: '11:00'
+    durationMinutes: 30
+    status: active
+  - id: 71baf3b3-2181-4f76-b991-45047ea48afd
+    trainingId: wifi-8-asus
+    date: '2026-10-08'
+    startTime: '11:30'
+    durationMinutes: 30
+    status: active
+  - id: ed7c8dfc-22ce-4584-b108-65907b71464a
+    trainingId: wifi-8-asus
+    date: '2026-10-08'
+    startTime: '12:00'
+    durationMinutes: 30
+    status: active
+  - id: b040ade1-b3fc-4be3-8f12-a521ae354fcd
+    trainingId: wifi-8-asus
+    date: '2026-10-08'
+    startTime: '12:30'
+    durationMinutes: 30
+    status: active
+  - id: e0043f87-94a2-4e1e-940e-2c606cd7e869
+    trainingId: wifi-8-asus
+    date: '2026-10-08'
+    startTime: '13:00'
+    durationMinutes: 30
+    status: active
+  - id: 4d12b091-2165-4cc3-8803-2cf4dc2cfeb1
+    trainingId: wifi-8-asus
+    date: '2026-10-08'
+    startTime: '13:30'
+    durationMinutes: 30
+    status: active
+  - id: a3f669ae-8ade-4813-8186-d02d8baf9b1b
+    trainingId: wifi-8-asus
+    date: '2026-10-08'
+    startTime: '14:00'
+    durationMinutes: 30
+    status: active
+  - id: 9028892b-a8f1-4ee7-9e1c-f394f241a318
+    trainingId: wifi-8-asus
+    date: '2026-10-08'
+    startTime: '14:30'
+    durationMinutes: 30
+    status: active
+  - id: c9561df7-daeb-4175-9819-fdc99d631b05
+    trainingId: wifi-8-asus
+    date: '2026-10-08'
+    startTime: '15:00'
+    durationMinutes: 30
+    status: active
+  - id: 7c9eaac2-4764-41b5-bdf3-01e2b7deceb5
+    trainingId: wifi-8-asus
+    date: '2026-10-08'
+    startTime: '15:30'
+    durationMinutes: 30
+    status: active
+  - id: 790c302a-9db9-4fff-8a06-bc10e78738cc
+    trainingId: wifi-8-asus
+    date: '2026-10-08'
+    startTime: '16:00'
+    durationMinutes: 30
+    status: active
+  - id: afd548b4-b276-4e3a-84e5-67d12e30e43d
+    trainingId: wifi-8-asus
+    date: '2026-10-08'
+    startTime: '16:30'
+    durationMinutes: 30
+    status: active
+  - id: ba12ee7d-0a44-4c9c-b06d-64a759e7bc33
+    trainingId: wifi-8-asus
+    date: '2026-10-08'
+    startTime: '17:00'
+    durationMinutes: 30
+    status: active
+  - id: 442d7b7f-ad72-4ca3-a4db-b9362a53fd26
+    trainingId: wifi-8-asus
+    date: '2026-10-09'
+    startTime: '09:00'
+    durationMinutes: 30
+    status: active
+  - id: db2de358-bbcb-4075-aa93-9f48bfb09ec6
+    trainingId: wifi-8-asus
+    date: '2026-10-09'
+    startTime: '09:30'
+    durationMinutes: 30
+    status: active
+  - id: 95b49969-6e97-481e-a632-ec72826a7327
+    trainingId: wifi-8-asus
+    date: '2026-10-09'
+    startTime: '10:00'
+    durationMinutes: 30
+    status: active
+  - id: 20813bfa-e244-4e45-9ca3-e9976f4ca14e
+    trainingId: wifi-8-asus
+    date: '2026-10-09'
+    startTime: '10:30'
+    durationMinutes: 30
+    status: active
+  - id: 11b71df7-805f-4ee0-a2b3-35b86aab9bc5
+    trainingId: wifi-8-asus
+    date: '2026-10-09'
+    startTime: '11:00'
+    durationMinutes: 30
+    status: active
+  - id: 4a050a0c-d68f-49b8-8a1b-d0d35ebb2a96
+    trainingId: wifi-8-asus
+    date: '2026-10-09'
+    startTime: '11:30'
+    durationMinutes: 30
+    status: active
+  - id: b60ba1bf-0509-4264-9478-c3498398caf3
+    trainingId: wifi-8-asus
+    date: '2026-10-09'
+    startTime: '12:00'
+    durationMinutes: 30
+    status: active
+  - id: 3cedf3cf-75ac-4e19-9d2d-28141c8cc166
+    trainingId: wifi-8-asus
+    date: '2026-10-09'
+    startTime: '12:30'
+    durationMinutes: 30
+    status: active
+  - id: 6d16252a-0c1a-457d-94e6-67b24be1c367
+    trainingId: wifi-8-asus
+    date: '2026-10-09'
+    startTime: '13:00'
+    durationMinutes: 30
+    status: active
+  - id: 5a860631-847c-42a6-8019-31f4fd17ec6b
+    trainingId: wifi-8-asus
+    date: '2026-10-09'
+    startTime: '13:30'
+    durationMinutes: 30
+    status: active
+  - id: ac7908be-dcff-41ad-8e57-8b814ed63dc5
+    trainingId: wifi-8-asus
+    date: '2026-10-09'
+    startTime: '14:00'
+    durationMinutes: 30
+    status: active
+  - id: 8c99ac21-4e3d-4e66-9d86-5da0a7275dd5
+    trainingId: wifi-8-asus
+    date: '2026-10-09'
+    startTime: '14:30'
+    durationMinutes: 30
+    status: active
+  - id: f6f0fa43-7ade-4ed4-99a1-f63a41ecb5f5
+    trainingId: wifi-8-asus
+    date: '2026-10-09'
+    startTime: '15:00'
+    durationMinutes: 30
+    status: active
+  - id: d56f7360-849b-4cb4-af9d-ccf1cc262d38
+    trainingId: wifi-8-asus
+    date: '2026-10-09'
+    startTime: '15:30'
+    durationMinutes: 30
+    status: active
+  - id: ecc282e9-b64f-4e11-83de-1110bb34631d
+    trainingId: wifi-8-asus
+    date: '2026-10-09'
+    startTime: '16:00'
+    durationMinutes: 30
+    status: active
+  - id: b5790686-035d-4f74-a5b6-c8ac8c5befd5
+    trainingId: wifi-8-asus
+    date: '2026-10-09'
+    startTime: '16:30'
+    durationMinutes: 30
+    status: active
+  - id: d727d24a-ce47-4313-8a3d-371b4e5f735d
+    trainingId: wifi-8-asus
+    date: '2026-10-09'
+    startTime: '17:00'
+    durationMinutes: 30
+    status: active
+  - id: 06ec9d25-84fb-4cbe-8490-0d4872daadbc
+    trainingId: bt-hdt-asus
+    date: '2026-10-05'
+    startTime: '09:00'
+    durationMinutes: 30
+    status: active
+  - id: bf84e6e4-581c-40de-b5a5-e70cb505c8cc
+    trainingId: bt-hdt-asus
+    date: '2026-10-05'
+    startTime: '09:30'
+    durationMinutes: 30
+    status: active
+  - id: eeb1aead-f30e-44cc-9b26-f1737b19d2e9
+    trainingId: bt-hdt-asus
+    date: '2026-10-05'
+    startTime: '10:00'
+    durationMinutes: 30
+    status: active
+  - id: f84cab31-cc66-42d1-82ef-643d3910a5b0
+    trainingId: bt-hdt-asus
+    date: '2026-10-05'
+    startTime: '10:30'
+    durationMinutes: 30
+    status: active
+  - id: 903e2385-3054-49b5-a7d8-80b6bfe93568
+    trainingId: bt-hdt-asus
+    date: '2026-10-05'
+    startTime: '11:00'
+    durationMinutes: 30
+    status: active
+  - id: 45d4c5b2-00f3-48e2-a2d9-20f63665769a
+    trainingId: bt-hdt-asus
+    date: '2026-10-05'
+    startTime: '11:30'
+    durationMinutes: 30
+    status: active
+  - id: 2ffe58c2-19d9-4e32-b9b0-d4af57987ef2
+    trainingId: bt-hdt-asus
+    date: '2026-10-05'
+    startTime: '12:00'
+    durationMinutes: 30
+    status: active
+  - id: 799fd631-91e3-45f6-a234-3893cbdf4f7c
+    trainingId: bt-hdt-asus
+    date: '2026-10-05'
+    startTime: '12:30'
+    durationMinutes: 30
+    status: active
+  - id: 8c30049e-b8cd-4d0b-9b06-b0b5b03e6203
+    trainingId: bt-hdt-asus
+    date: '2026-10-05'
+    startTime: '13:00'
+    durationMinutes: 30
+    status: active
+  - id: ff3161a0-813f-437c-9b41-2acfd4ee940b
+    trainingId: bt-hdt-asus
+    date: '2026-10-05'
+    startTime: '13:30'
+    durationMinutes: 30
+    status: active
+  - id: 5d146b23-426b-4a67-b3a9-44207d0da3a8
+    trainingId: bt-hdt-asus
+    date: '2026-10-05'
+    startTime: '14:00'
+    durationMinutes: 30
+    status: active
+  - id: 15af0405-189d-4ca0-9525-c83c5ac47c43
+    trainingId: bt-hdt-asus
+    date: '2026-10-05'
+    startTime: '14:30'
+    durationMinutes: 30
+    status: active
+  - id: eaee123d-ec04-4687-afb2-fc1668c33f3d
+    trainingId: bt-hdt-asus
+    date: '2026-10-05'
+    startTime: '15:00'
+    durationMinutes: 30
+    status: active
+  - id: 88ceccdc-55ed-4081-9e04-8a3adeae7416
+    trainingId: bt-hdt-asus
+    date: '2026-10-05'
+    startTime: '15:30'
+    durationMinutes: 30
+    status: active
+  - id: 7ab96449-cb86-4a37-bfd3-5eee6add1926
+    trainingId: bt-hdt-asus
+    date: '2026-10-05'
+    startTime: '16:00'
+    durationMinutes: 30
+    status: active
+  - id: c891f03f-5279-4f3f-a6da-9fcf39d6a07b
+    trainingId: bt-hdt-asus
+    date: '2026-10-05'
+    startTime: '16:30'
+    durationMinutes: 30
+    status: active
+  - id: cf41bf70-f55b-4119-95b4-b7ff0f1c1c2c
+    trainingId: bt-hdt-asus
+    date: '2026-10-05'
+    startTime: '17:00'
+    durationMinutes: 30
+    status: active
+  - id: c154fd7f-4ed9-4d78-8a2a-bdf60067c2ce
+    trainingId: bt-hdt-asus
+    date: '2026-10-06'
+    startTime: '09:00'
+    durationMinutes: 30
+    status: active
+  - id: fb3d4113-de1c-4008-96a0-b4b86ee3cd2f
+    trainingId: bt-hdt-asus
+    date: '2026-10-06'
+    startTime: '09:30'
+    durationMinutes: 30
+    status: active
+  - id: 38d14f50-759a-4068-bf64-c85ed9163edc
+    trainingId: bt-hdt-asus
+    date: '2026-10-06'
+    startTime: '10:00'
+    durationMinutes: 30
+    status: active
+  - id: cdc72666-1266-4594-b2a8-8516356bc1a2
+    trainingId: bt-hdt-asus
+    date: '2026-10-06'
+    startTime: '10:30'
+    durationMinutes: 30
+    status: active
+  - id: 0f130052-39e3-4825-800b-967b7f7d1b47
+    trainingId: bt-hdt-asus
+    date: '2026-10-06'
+    startTime: '11:00'
+    durationMinutes: 30
+    status: active
+  - id: 3116d285-96b9-4716-b852-05347eb8d05f
+    trainingId: bt-hdt-asus
+    date: '2026-10-06'
+    startTime: '11:30'
+    durationMinutes: 30
+    status: active
+  - id: 6760d55e-2681-4bd8-bec3-bf366e12b6a4
+    trainingId: bt-hdt-asus
+    date: '2026-10-06'
+    startTime: '12:00'
+    durationMinutes: 30
+    status: active
+  - id: 1161270b-e4a7-425f-9205-91909a659f58
+    trainingId: bt-hdt-asus
+    date: '2026-10-06'
+    startTime: '12:30'
+    durationMinutes: 30
+    status: active
+  - id: 6bbaf754-fab4-4ea1-9b7a-c6e581632521
+    trainingId: bt-hdt-asus
+    date: '2026-10-06'
+    startTime: '13:00'
+    durationMinutes: 30
+    status: active
+  - id: a89a7c31-e830-47e6-978c-a6d2e4bff938
+    trainingId: bt-hdt-asus
+    date: '2026-10-06'
+    startTime: '13:30'
+    durationMinutes: 30
+    status: active
+  - id: 27aa1539-0830-458b-87e7-2dc237d42af3
+    trainingId: bt-hdt-asus
+    date: '2026-10-06'
+    startTime: '14:00'
+    durationMinutes: 30
+    status: active
+  - id: 3be5f542-00bd-444c-9899-0b073897b9a5
+    trainingId: bt-hdt-asus
+    date: '2026-10-06'
+    startTime: '14:30'
+    durationMinutes: 30
+    status: active
+  - id: 3db7189a-74ae-4407-9ac6-1214262c34d4
+    trainingId: bt-hdt-asus
+    date: '2026-10-06'
+    startTime: '15:00'
+    durationMinutes: 30
+    status: active
+  - id: 00cc0a82-c0d4-410c-900f-45acf388c65a
+    trainingId: bt-hdt-asus
+    date: '2026-10-06'
+    startTime: '15:30'
+    durationMinutes: 30
+    status: active
+  - id: 38f01846-2d06-4bdf-ba74-3c7aa8d61e8a
+    trainingId: bt-hdt-asus
+    date: '2026-10-06'
+    startTime: '16:00'
+    durationMinutes: 30
+    status: active
+  - id: 537cad31-12cc-4048-8b8e-a447e97e6efd
+    trainingId: bt-hdt-asus
+    date: '2026-10-06'
+    startTime: '16:30'
+    durationMinutes: 30
+    status: active
+  - id: 7b3122d8-6b53-4b97-acbb-688733b4ae27
+    trainingId: bt-hdt-asus
+    date: '2026-10-06'
+    startTime: '17:00'
+    durationMinutes: 30
+    status: active
+  - id: 05b0c499-e7fd-4593-92fa-5738384f754d
+    trainingId: bt-hdt-asus
+    date: '2026-10-07'
+    startTime: '09:00'
+    durationMinutes: 30
+    status: active
+  - id: 2cb69d77-e594-4fae-9de2-8d3e91fbc533
+    trainingId: bt-hdt-asus
+    date: '2026-10-07'
+    startTime: '09:30'
+    durationMinutes: 30
+    status: active
+  - id: 1652e6ba-c143-4b69-a72a-69f803332e83
+    trainingId: bt-hdt-asus
+    date: '2026-10-07'
+    startTime: '10:00'
+    durationMinutes: 30
+    status: active
+  - id: dffc8da8-36b8-4457-9249-821914b29ef2
+    trainingId: bt-hdt-asus
+    date: '2026-10-07'
+    startTime: '10:30'
+    durationMinutes: 30
+    status: active
+  - id: ed3aa8f2-bcad-419f-9a71-3922c8a503b3
+    trainingId: bt-hdt-asus
+    date: '2026-10-07'
+    startTime: '11:00'
+    durationMinutes: 30
+    status: active
+  - id: 58966018-2306-42ec-9514-8c807b048ddd
+    trainingId: bt-hdt-asus
+    date: '2026-10-07'
+    startTime: '11:30'
+    durationMinutes: 30
+    status: active
+  - id: 50ef67df-e046-4014-a28f-b454347fd711
+    trainingId: bt-hdt-asus
+    date: '2026-10-07'
+    startTime: '12:00'
+    durationMinutes: 30
+    status: active
+  - id: 70be1932-2916-4645-b06b-9ab0159dbb2e
+    trainingId: bt-hdt-asus
+    date: '2026-10-07'
+    startTime: '12:30'
+    durationMinutes: 30
+    status: active
+  - id: 158c4a94-d5b2-4c0a-bf7a-293681b4e1d3
+    trainingId: bt-hdt-asus
+    date: '2026-10-07'
+    startTime: '13:00'
+    durationMinutes: 30
+    status: active
+  - id: 7e430788-7729-49a8-911c-7db99f23b5d6
+    trainingId: bt-hdt-asus
+    date: '2026-10-07'
+    startTime: '13:30'
+    durationMinutes: 30
+    status: active
+  - id: c1395ce1-f876-463c-9f7b-c3fc73030679
+    trainingId: bt-hdt-asus
+    date: '2026-10-07'
+    startTime: '14:00'
+    durationMinutes: 30
+    status: active
+  - id: 3a8a6412-5b6a-478c-b316-d9da9a773413
+    trainingId: bt-hdt-asus
+    date: '2026-10-07'
+    startTime: '14:30'
+    durationMinutes: 30
+    status: active
+  - id: 48670e27-8bde-491c-909d-89593d052a47
+    trainingId: bt-hdt-asus
+    date: '2026-10-07'
+    startTime: '15:00'
+    durationMinutes: 30
+    status: active
+  - id: cb1c1c8a-369e-4637-a9be-a958ede5deb3
+    trainingId: bt-hdt-asus
+    date: '2026-10-07'
+    startTime: '15:30'
+    durationMinutes: 30
+    status: active
+  - id: ca133cee-6360-46e3-8dcf-fb4b54aaaf66
+    trainingId: bt-hdt-asus
+    date: '2026-10-07'
+    startTime: '16:00'
+    durationMinutes: 30
+    status: active
+  - id: 8089981e-404d-446c-9556-ffeca4022e1d
+    trainingId: bt-hdt-asus
+    date: '2026-10-07'
+    startTime: '16:30'
+    durationMinutes: 30
+    status: active
+  - id: 358daa31-ac2f-4514-97c0-8bd9d3211421
+    trainingId: bt-hdt-asus
+    date: '2026-10-07'
+    startTime: '17:00'
+    durationMinutes: 30
+    status: active
+  - id: 9bef6e12-46f4-4663-b68d-5f09f3c6a9ca
+    trainingId: bt-hdt-asus
+    date: '2026-10-08'
+    startTime: '09:00'
+    durationMinutes: 30
+    status: active
+  - id: 6a3edb81-43f2-47fc-b42e-bbd0c29a811f
+    trainingId: bt-hdt-asus
+    date: '2026-10-08'
+    startTime: '09:30'
+    durationMinutes: 30
+    status: active
+  - id: fa4b433b-73a9-4fec-b6d4-fdea3d5db608
+    trainingId: bt-hdt-asus
+    date: '2026-10-08'
+    startTime: '10:00'
+    durationMinutes: 30
+    status: active
+  - id: e5e0e66a-3a68-4b66-9f96-213f1e24fe97
+    trainingId: bt-hdt-asus
+    date: '2026-10-08'
+    startTime: '10:30'
+    durationMinutes: 30
+    status: active
+  - id: 5a521744-3c87-489e-a495-61f5ac22b457
+    trainingId: bt-hdt-asus
+    date: '2026-10-08'
+    startTime: '11:00'
+    durationMinutes: 30
+    status: active
+  - id: aa2c49de-6ef4-4325-99ed-28adb9ee0942
+    trainingId: bt-hdt-asus
+    date: '2026-10-08'
+    startTime: '11:30'
+    durationMinutes: 30
+    status: active
+  - id: 8377eeb8-d29a-4a52-863a-68358ebd2065
+    trainingId: bt-hdt-asus
+    date: '2026-10-08'
+    startTime: '12:00'
+    durationMinutes: 30
+    status: active
+  - id: 6c03efeb-f166-471d-83f0-f2dc0c255fa1
+    trainingId: bt-hdt-asus
+    date: '2026-10-08'
+    startTime: '12:30'
+    durationMinutes: 30
+    status: active
+  - id: 11115f30-fe37-4609-a80e-03554d13bd71
+    trainingId: bt-hdt-asus
+    date: '2026-10-08'
+    startTime: '13:00'
+    durationMinutes: 30
+    status: active
+  - id: 4626b85e-c966-42f0-8890-8144ba04f81f
+    trainingId: bt-hdt-asus
+    date: '2026-10-08'
+    startTime: '13:30'
+    durationMinutes: 30
+    status: active
+  - id: bcd9da04-8789-483d-b823-d6de77c9e34f
+    trainingId: bt-hdt-asus
+    date: '2026-10-08'
+    startTime: '14:00'
+    durationMinutes: 30
+    status: active
+  - id: 568dd53a-7177-444f-875a-e332ee6975d3
+    trainingId: bt-hdt-asus
+    date: '2026-10-08'
+    startTime: '14:30'
+    durationMinutes: 30
+    status: active
+  - id: 7c7816fd-0456-414d-8417-0ba87aeabfe5
+    trainingId: bt-hdt-asus
+    date: '2026-10-08'
+    startTime: '15:00'
+    durationMinutes: 30
+    status: active
+  - id: 9aba0f2f-fc6a-41f2-8a2a-21901b05ffad
+    trainingId: bt-hdt-asus
+    date: '2026-10-08'
+    startTime: '15:30'
+    durationMinutes: 30
+    status: active
+  - id: 689439dc-a81f-45a5-a110-e342853d0530
+    trainingId: bt-hdt-asus
+    date: '2026-10-08'
+    startTime: '16:00'
+    durationMinutes: 30
+    status: active
+  - id: 6298b1a9-e419-4e26-b435-4d7229afa2fd
+    trainingId: bt-hdt-asus
+    date: '2026-10-08'
+    startTime: '16:30'
+    durationMinutes: 30
+    status: active
+  - id: 5444550a-0650-4f49-b7a2-f7d37a73f777
+    trainingId: bt-hdt-asus
+    date: '2026-10-08'
+    startTime: '17:00'
+    durationMinutes: 30
+    status: active
+  - id: d1abeced-5887-440a-b4f0-a6e024af6552
+    trainingId: bt-hdt-asus
+    date: '2026-10-09'
+    startTime: '09:00'
+    durationMinutes: 30
+    status: active
+  - id: e569c057-cbcb-4fe3-a856-2d17ad5230b2
+    trainingId: bt-hdt-asus
+    date: '2026-10-09'
+    startTime: '09:30'
+    durationMinutes: 30
+    status: active
+  - id: 9575a2eb-d7fa-4343-a0f7-1baef30e1c6f
+    trainingId: bt-hdt-asus
+    date: '2026-10-09'
+    startTime: '10:00'
+    durationMinutes: 30
+    status: active
+  - id: d1f7b799-72ea-44c4-a8b8-7992c127538d
+    trainingId: bt-hdt-asus
+    date: '2026-10-09'
+    startTime: '10:30'
+    durationMinutes: 30
+    status: active
+  - id: 29c7af0e-e1f9-4572-899b-1a67aec903c8
+    trainingId: bt-hdt-asus
+    date: '2026-10-09'
+    startTime: '11:00'
+    durationMinutes: 30
+    status: active
+  - id: 21bd3024-ff17-424b-9cea-fecf3598c376
+    trainingId: bt-hdt-asus
+    date: '2026-10-09'
+    startTime: '11:30'
+    durationMinutes: 30
+    status: active
+  - id: 3300b99e-7ec0-4c15-8de9-314a3df6de98
+    trainingId: bt-hdt-asus
+    date: '2026-10-09'
+    startTime: '12:00'
+    durationMinutes: 30
+    status: active
+  - id: 80037897-eb75-461a-8071-8b78eb47c975
+    trainingId: bt-hdt-asus
+    date: '2026-10-09'
+    startTime: '12:30'
+    durationMinutes: 30
+    status: active
+  - id: 533fb234-632a-4101-9f2b-ff7717c802d3
+    trainingId: bt-hdt-asus
+    date: '2026-10-09'
+    startTime: '13:00'
+    durationMinutes: 30
+    status: active
+  - id: beed278c-0383-4b9a-b5a3-890cc2880205
+    trainingId: bt-hdt-asus
+    date: '2026-10-09'
+    startTime: '13:30'
+    durationMinutes: 30
+    status: active
+  - id: 7670a206-63da-4701-86d1-cb19721091c0
+    trainingId: bt-hdt-asus
+    date: '2026-10-09'
+    startTime: '14:00'
+    durationMinutes: 30
+    status: active
+  - id: 9059a723-5b56-4120-b572-e88c5ab238db
+    trainingId: bt-hdt-asus
+    date: '2026-10-09'
+    startTime: '14:30'
+    durationMinutes: 30
+    status: active
+  - id: bbbb9605-76d3-4801-98d3-870543e76491
+    trainingId: bt-hdt-asus
+    date: '2026-10-09'
+    startTime: '15:00'
+    durationMinutes: 30
+    status: active
+  - id: a2da1824-9275-4c9f-818d-ba7979561bcd
+    trainingId: bt-hdt-asus
+    date: '2026-10-09'
+    startTime: '15:30'
+    durationMinutes: 30
+    status: active
+  - id: d9b83017-7e82-4383-a849-5b9d82282e4a
+    trainingId: bt-hdt-asus
+    date: '2026-10-09'
+    startTime: '16:00'
+    durationMinutes: 30
+    status: active
+  - id: 04650147-8890-438c-a68f-80b30b09675b
+    trainingId: bt-hdt-asus
+    date: '2026-10-09'
+    startTime: '16:30'
+    durationMinutes: 30
+    status: active
+  - id: 31438092-f0b1-40dc-b89e-1f4a9d1092b0
+    trainingId: bt-hdt-asus
+    date: '2026-10-09'
+    startTime: '17:00'
+    durationMinutes: 30
+    status: active
+  - id: ada0876c-c621-4a06-a993-6fdc12d23a62
+    trainingId: wifi-8-honor
+    date: '2026-10-05'
+    startTime: '09:00'
+    durationMinutes: 30
+    status: active
+  - id: 93db26f4-ff72-47d1-8947-bed85cd8f218
+    trainingId: wifi-8-honor
+    date: '2026-10-05'
+    startTime: '09:30'
+    durationMinutes: 30
+    status: active
+  - id: be7aee27-fb97-42c7-89fc-80c9d8bf45c0
+    trainingId: wifi-8-honor
+    date: '2026-10-05'
+    startTime: '10:00'
+    durationMinutes: 30
+    status: active
+  - id: e3a9b59b-9c14-4115-ad68-425d6e105a16
+    trainingId: wifi-8-honor
+    date: '2026-10-05'
+    startTime: '10:30'
+    durationMinutes: 30
+    status: active
+  - id: 877d4b76-b5cc-4750-a441-6f3babe4c8aa
+    trainingId: wifi-8-honor
+    date: '2026-10-05'
+    startTime: '11:00'
+    durationMinutes: 30
+    status: active
+  - id: 090c03da-0d9a-40e1-ada3-6286f68cbdda
+    trainingId: wifi-8-honor
+    date: '2026-10-05'
+    startTime: '11:30'
+    durationMinutes: 30
+    status: active
+  - id: 0902e580-f71b-4a26-bd44-633ad919b694
+    trainingId: wifi-8-honor
+    date: '2026-10-05'
+    startTime: '12:00'
+    durationMinutes: 30
+    status: active
+  - id: 8b13687c-a909-484c-9255-6f1ef6a38f46
+    trainingId: wifi-8-honor
+    date: '2026-10-05'
+    startTime: '12:30'
+    durationMinutes: 30
+    status: active
+  - id: b53f50e6-52bb-46a3-9949-51ad36a1aabe
+    trainingId: wifi-8-honor
+    date: '2026-10-05'
+    startTime: '13:00'
+    durationMinutes: 30
+    status: active
+  - id: a381ad87-d977-41bd-ad16-15947e4b7fdc
+    trainingId: wifi-8-honor
+    date: '2026-10-05'
+    startTime: '13:30'
+    durationMinutes: 30
+    status: active
+  - id: 675f834d-c8ae-4b0f-8eac-fe70c9a79e63
+    trainingId: wifi-8-honor
+    date: '2026-10-05'
+    startTime: '14:00'
+    durationMinutes: 30
+    status: active
+  - id: d60d6cb8-dee1-481e-aadf-5be1dde4c665
+    trainingId: wifi-8-honor
+    date: '2026-10-05'
+    startTime: '14:30'
+    durationMinutes: 30
+    status: active
+  - id: 1f6c4c72-5d1b-4567-9324-406a53e8b13a
+    trainingId: wifi-8-honor
+    date: '2026-10-05'
+    startTime: '15:00'
+    durationMinutes: 30
+    status: active
+  - id: 4090817a-420f-47d8-a814-fe18de4ce4aa
+    trainingId: wifi-8-honor
+    date: '2026-10-05'
+    startTime: '15:30'
+    durationMinutes: 30
+    status: active
+  - id: 7bd27593-13f9-4684-8a40-05332c437ab0
+    trainingId: wifi-8-honor
+    date: '2026-10-05'
+    startTime: '16:00'
+    durationMinutes: 30
+    status: active
+  - id: ab2cab63-c007-4ec5-8378-c03a0232eb66
+    trainingId: wifi-8-honor
+    date: '2026-10-05'
+    startTime: '16:30'
+    durationMinutes: 30
+    status: active
+  - id: 359b2fc0-ca54-4ca8-bcb4-d5c762429c5a
+    trainingId: wifi-8-honor
+    date: '2026-10-05'
+    startTime: '17:00'
+    durationMinutes: 30
+    status: active
+  - id: 739c8604-3aa8-43fe-b672-f6be778a2c4d
+    trainingId: wifi-8-honor
+    date: '2026-10-06'
+    startTime: '09:00'
+    durationMinutes: 30
+    status: active
+  - id: fad17bed-953e-4899-96d2-1221be517e97
+    trainingId: wifi-8-honor
+    date: '2026-10-06'
+    startTime: '09:30'
+    durationMinutes: 30
+    status: active
+  - id: 60c11f04-cd8c-4589-8928-cfb4303409b3
+    trainingId: wifi-8-honor
+    date: '2026-10-06'
+    startTime: '10:00'
+    durationMinutes: 30
+    status: active
+  - id: 64daaa56-77b9-4904-ba02-c7898bcd46ca
+    trainingId: wifi-8-honor
+    date: '2026-10-06'
+    startTime: '10:30'
+    durationMinutes: 30
+    status: active
+  - id: b97a626d-71ef-4325-846f-647f48b8af8d
+    trainingId: wifi-8-honor
+    date: '2026-10-06'
+    startTime: '11:00'
+    durationMinutes: 30
+    status: active
+  - id: 8dbf62c2-473f-40a8-a989-aff5f6ab4898
+    trainingId: wifi-8-honor
+    date: '2026-10-06'
+    startTime: '11:30'
+    durationMinutes: 30
+    status: active
+  - id: 9e84b633-26ec-4ec9-a9a5-53f01e883d18
+    trainingId: wifi-8-honor
+    date: '2026-10-06'
+    startTime: '12:00'
+    durationMinutes: 30
+    status: active
+  - id: 239340d2-c1d4-475a-8800-f97075cb8de2
+    trainingId: wifi-8-honor
+    date: '2026-10-06'
+    startTime: '12:30'
+    durationMinutes: 30
+    status: active
+  - id: 98635433-5cbe-44fd-ab70-5eeea18f453b
+    trainingId: wifi-8-honor
+    date: '2026-10-06'
+    startTime: '13:00'
+    durationMinutes: 30
+    status: active
+  - id: 38b26106-fc64-4e01-8965-01d1d0ad3029
+    trainingId: wifi-8-honor
+    date: '2026-10-06'
+    startTime: '13:30'
+    durationMinutes: 30
+    status: active
+  - id: ae4fecd1-d0ff-4990-85b5-2f1ef6295716
+    trainingId: wifi-8-honor
+    date: '2026-10-06'
+    startTime: '14:00'
+    durationMinutes: 30
+    status: active
+  - id: 8939f813-850e-41ea-83de-abdef57faf03
+    trainingId: wifi-8-honor
+    date: '2026-10-06'
+    startTime: '14:30'
+    durationMinutes: 30
+    status: active
+  - id: 326dff6f-31bd-4c98-976d-98e3db15822c
+    trainingId: wifi-8-honor
+    date: '2026-10-06'
+    startTime: '15:00'
+    durationMinutes: 30
+    status: active
+  - id: 5c3eb5b1-578f-49e1-8121-a9af5249fda5
+    trainingId: wifi-8-honor
+    date: '2026-10-06'
+    startTime: '15:30'
+    durationMinutes: 30
+    status: active
+  - id: a0f82a07-88d0-4444-b69d-7a9363486162
+    trainingId: wifi-8-honor
+    date: '2026-10-06'
+    startTime: '16:00'
+    durationMinutes: 30
+    status: active
+  - id: 34f361d7-1d6f-4a5a-92b1-3d17042e28ab
+    trainingId: wifi-8-honor
+    date: '2026-10-06'
+    startTime: '16:30'
+    durationMinutes: 30
+    status: active
+  - id: ceef77df-ed89-45a7-b156-8f42f1071cdc
+    trainingId: wifi-8-honor
+    date: '2026-10-06'
+    startTime: '17:00'
+    durationMinutes: 30
+    status: active
+  - id: 424c25ef-1ac6-4abf-9b46-263ea424f661
+    trainingId: wifi-8-honor
+    date: '2026-10-07'
+    startTime: '09:00'
+    durationMinutes: 30
+    status: active
+  - id: 556ed50d-ba92-426c-bb6d-eaf9256b00ee
+    trainingId: wifi-8-honor
+    date: '2026-10-07'
+    startTime: '09:30'
+    durationMinutes: 30
+    status: active
+  - id: ab899c26-7845-4e26-99b4-8edb9656043e
+    trainingId: wifi-8-honor
+    date: '2026-10-07'
+    startTime: '10:00'
+    durationMinutes: 30
+    status: active
+  - id: 94710ef5-4a05-4cf3-b3c6-5908deefb2c1
+    trainingId: wifi-8-honor
+    date: '2026-10-07'
+    startTime: '10:30'
+    durationMinutes: 30
+    status: active
+  - id: 3529b15d-8723-4be8-8272-faa8b97a4bb9
+    trainingId: wifi-8-honor
+    date: '2026-10-07'
+    startTime: '11:00'
+    durationMinutes: 30
+    status: active
+  - id: 2b3b1456-c480-49a9-91f2-bf6cd6812051
+    trainingId: wifi-8-honor
+    date: '2026-10-07'
+    startTime: '11:30'
+    durationMinutes: 30
+    status: active
+  - id: 094edbb4-d8e3-4567-b37e-48883c4a6407
+    trainingId: wifi-8-honor
+    date: '2026-10-07'
+    startTime: '12:00'
+    durationMinutes: 30
+    status: active
+  - id: c07ff46c-e229-4390-9f77-861e9fb39905
+    trainingId: wifi-8-honor
+    date: '2026-10-07'
+    startTime: '12:30'
+    durationMinutes: 30
+    status: active
+  - id: 15089eb5-45aa-43d0-866e-a208b87d316d
+    trainingId: wifi-8-honor
+    date: '2026-10-07'
+    startTime: '13:00'
+    durationMinutes: 30
+    status: active
+  - id: e05cade5-6aa0-4844-80b7-898ae871312c
+    trainingId: wifi-8-honor
+    date: '2026-10-07'
+    startTime: '13:30'
+    durationMinutes: 30
+    status: active
+  - id: 47c5d659-4ae7-402a-9938-81047d01efa8
+    trainingId: wifi-8-honor
+    date: '2026-10-07'
+    startTime: '14:00'
+    durationMinutes: 30
+    status: active
+  - id: 739556fa-9919-478b-b97c-ab0e6f47d285
+    trainingId: wifi-8-honor
+    date: '2026-10-07'
+    startTime: '14:30'
+    durationMinutes: 30
+    status: active
+  - id: aa84bdd1-0b00-4024-a003-9edf5e964500
+    trainingId: wifi-8-honor
+    date: '2026-10-07'
+    startTime: '15:00'
+    durationMinutes: 30
+    status: active
+  - id: fd2f8d3b-d2f4-4018-8218-04919025b5da
+    trainingId: wifi-8-honor
+    date: '2026-10-07'
+    startTime: '15:30'
+    durationMinutes: 30
+    status: active
+  - id: 3b13a315-eb86-422b-96b9-1269ba58a547
+    trainingId: wifi-8-honor
+    date: '2026-10-07'
+    startTime: '16:00'
+    durationMinutes: 30
+    status: active
+  - id: 8d1bf6d2-45de-4d21-bd15-aa1757d7491b
+    trainingId: wifi-8-honor
+    date: '2026-10-07'
+    startTime: '16:30'
+    durationMinutes: 30
+    status: active
+  - id: 7ae5215e-72c0-4679-8971-638e3cb5a705
+    trainingId: wifi-8-honor
+    date: '2026-10-07'
+    startTime: '17:00'
+    durationMinutes: 30
+    status: active
+  - id: dd3f954f-3a2b-4801-8e5f-fe7b3c304562
+    trainingId: wifi-8-honor
+    date: '2026-10-08'
+    startTime: '09:00'
+    durationMinutes: 30
+    status: active
+  - id: 43442bf6-8d0d-489a-8693-8598ae299fee
+    trainingId: wifi-8-honor
+    date: '2026-10-08'
+    startTime: '09:30'
+    durationMinutes: 30
+    status: active
+  - id: e82c8f47-4bed-42d1-84cb-a5ac2fc6fb6d
+    trainingId: wifi-8-honor
+    date: '2026-10-08'
+    startTime: '10:00'
+    durationMinutes: 30
+    status: active
+  - id: c02810bd-fa7a-4a0c-bda3-e47b135c29a5
+    trainingId: wifi-8-honor
+    date: '2026-10-08'
+    startTime: '10:30'
+    durationMinutes: 30
+    status: active
+  - id: d0f0e008-703f-4937-9eac-a3791bb71c17
+    trainingId: wifi-8-honor
+    date: '2026-10-08'
+    startTime: '11:00'
+    durationMinutes: 30
+    status: active
+  - id: 78c58b69-b34e-4f73-b222-bc5169e82be5
+    trainingId: wifi-8-honor
+    date: '2026-10-08'
+    startTime: '11:30'
+    durationMinutes: 30
+    status: active
+  - id: 7f4d4533-72ae-4fac-adef-4a71e446cc83
+    trainingId: wifi-8-honor
+    date: '2026-10-08'
+    startTime: '12:00'
+    durationMinutes: 30
+    status: active
+  - id: 33ca78d1-beed-48e6-8bd9-78c3ae65b2f7
+    trainingId: wifi-8-honor
+    date: '2026-10-08'
+    startTime: '12:30'
+    durationMinutes: 30
+    status: active
+  - id: b394bee3-0514-4f02-acf8-131d5a0a7e0f
+    trainingId: wifi-8-honor
+    date: '2026-10-08'
+    startTime: '13:00'
+    durationMinutes: 30
+    status: active
+  - id: d53f6e97-8588-405a-90e3-5d10fe3fbd27
+    trainingId: wifi-8-honor
+    date: '2026-10-08'
+    startTime: '13:30'
+    durationMinutes: 30
+    status: active
+  - id: f41b96f3-4e9b-4efd-a244-40aa01acf110
+    trainingId: wifi-8-honor
+    date: '2026-10-08'
+    startTime: '14:00'
+    durationMinutes: 30
+    status: active
+  - id: 4df86239-842c-413a-96cb-e2af48d04aa8
+    trainingId: wifi-8-honor
+    date: '2026-10-08'
+    startTime: '14:30'
+    durationMinutes: 30
+    status: active
+  - id: ef039a15-2dec-4c85-8860-ee38fcbcf61e
+    trainingId: wifi-8-honor
+    date: '2026-10-08'
+    startTime: '15:00'
+    durationMinutes: 30
+    status: active
+  - id: af305e8e-7660-48e8-a40f-a420e6b6bc64
+    trainingId: wifi-8-honor
+    date: '2026-10-08'
+    startTime: '15:30'
+    durationMinutes: 30
+    status: active
+  - id: 711d94ce-1364-4c5c-a8e7-2852fe168655
+    trainingId: wifi-8-honor
+    date: '2026-10-08'
+    startTime: '16:00'
+    durationMinutes: 30
+    status: active
+  - id: 626b9024-1aa8-4701-80c4-541cdad0bbf8
+    trainingId: wifi-8-honor
+    date: '2026-10-08'
+    startTime: '16:30'
+    durationMinutes: 30
+    status: active
+  - id: f4e5f93c-b946-4e3b-8362-ebcb049857e8
+    trainingId: wifi-8-honor
+    date: '2026-10-08'
+    startTime: '17:00'
+    durationMinutes: 30
+    status: active
+  - id: fe0e979c-82ae-4357-be74-b673accd70b7
+    trainingId: wifi-8-honor
+    date: '2026-10-09'
+    startTime: '09:00'
+    durationMinutes: 30
+    status: active
+  - id: 51c61e41-1714-4508-ae20-f903dbcf8cb7
+    trainingId: wifi-8-honor
+    date: '2026-10-09'
+    startTime: '09:30'
+    durationMinutes: 30
+    status: active
+  - id: 616205fd-b3f5-42a7-bb31-a6f8c4e0887c
+    trainingId: wifi-8-honor
+    date: '2026-10-09'
+    startTime: '10:00'
+    durationMinutes: 30
+    status: active
+  - id: ca399139-cc81-4361-ac7f-998018a4e995
+    trainingId: wifi-8-honor
+    date: '2026-10-09'
+    startTime: '10:30'
+    durationMinutes: 30
+    status: active
+  - id: 04940cc8-b8f2-4c6a-ad30-842ada1fbe54
+    trainingId: wifi-8-honor
+    date: '2026-10-09'
+    startTime: '11:00'
+    durationMinutes: 30
+    status: active
+  - id: dc07b2b8-4334-49e2-bc06-c78fb9f778f1
+    trainingId: wifi-8-honor
+    date: '2026-10-09'
+    startTime: '11:30'
+    durationMinutes: 30
+    status: active
+  - id: f0f80c2e-e076-417e-9e80-d216f65c8ecd
+    trainingId: wifi-8-honor
+    date: '2026-10-09'
+    startTime: '12:00'
+    durationMinutes: 30
+    status: active
+  - id: 09c93a3c-da4d-444f-bd8c-d2ab3fe35d4c
+    trainingId: wifi-8-honor
+    date: '2026-10-09'
+    startTime: '12:30'
+    durationMinutes: 30
+    status: active
+  - id: a84b03d4-c86a-46ff-916e-490eafc5fdf4
+    trainingId: wifi-8-honor
+    date: '2026-10-09'
+    startTime: '13:00'
+    durationMinutes: 30
+    status: active
+  - id: 9d68c278-d2ee-4183-8445-d30773e7162e
+    trainingId: wifi-8-honor
+    date: '2026-10-09'
+    startTime: '13:30'
+    durationMinutes: 30
+    status: active
+  - id: 3f1dd846-eb66-48cc-a7bc-cc8bd0660b7a
+    trainingId: wifi-8-honor
+    date: '2026-10-09'
+    startTime: '14:00'
+    durationMinutes: 30
+    status: active
+  - id: f4438216-a055-4360-8ea1-374e5864e762
+    trainingId: wifi-8-honor
+    date: '2026-10-09'
+    startTime: '14:30'
+    durationMinutes: 30
+    status: active
+  - id: 68e46052-d7d6-4a13-ae55-5579284a2822
+    trainingId: wifi-8-honor
+    date: '2026-10-09'
+    startTime: '15:00'
+    durationMinutes: 30
+    status: active
+  - id: a7eb53ba-f8eb-4689-933b-7d0f254ce9ba
+    trainingId: wifi-8-honor
+    date: '2026-10-09'
+    startTime: '15:30'
+    durationMinutes: 30
+    status: active
+  - id: 8de43e7a-a3cd-4375-9823-e8302e3c0686
+    trainingId: wifi-8-honor
+    date: '2026-10-09'
+    startTime: '16:00'
+    durationMinutes: 30
+    status: active
+  - id: 4febe882-5e26-4a37-a64d-2a05fa0fb1eb
+    trainingId: wifi-8-honor
+    date: '2026-10-09'
+    startTime: '16:30'
+    durationMinutes: 30
+    status: active
+  - id: fce5b8b3-e2e0-4e4b-8ffe-c772d14b1b89
+    trainingId: wifi-8-honor
+    date: '2026-10-09'
+    startTime: '17:00'
+    durationMinutes: 30
+    status: active
 bookings:
   - id: f866eb1e-6f83-4b8e-9179-d98a24d20d12
     sessionId: 1ed8bd6b-7d8f-485a-ae62-988473f83f96
@@ -9401,7 +12971,602 @@ bookings:
     requesterEmail: jonathan.tsao@intel.com
     createdAt: '2026-08-26T17:07:33.459Z'
     status: confirmed
-version: 30
+  - id: 0f2fbdec-802f-443d-a4c6-a7960a5a9f83
+    sessionId: 00ad4cfe-35df-45da-ac89-4124c3809629
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: cc060c1c-f415-4c2c-b37e-42f2ded74eb0
+    sessionId: 02bdad4b-4210-4b9a-b86f-43cceb241631
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: 3211e561-6fde-4ff8-bd76-5bd162ae18f2
+    sessionId: 0953da8b-f880-4a17-8ae8-87c19319dca2
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: b7d5fe29-f309-4089-9385-8bf35ab5837c
+    sessionId: 0bc071cf-4828-4fd4-8342-455a8b63c8a0
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: a205c7eb-8a0e-4919-b174-405f19f80daf
+    sessionId: 10ed3c66-217a-4e23-b539-e45fe90e171c
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: ba3241e2-cfaa-4bf0-a998-fa26339eb397
+    sessionId: 153e8b7c-f791-45ce-bc4c-cfe3a5098666
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: 36d43ce0-a5e6-4247-9ef6-d062fc9526d5
+    sessionId: 17a0270f-6df7-48b5-bf3f-1de0b79c3c0a
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: da20d573-1ee1-4540-a19a-001927a3f18b
+    sessionId: 17d2ebb1-d4c0-475a-8f12-5729d57fe108
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: c3229dc1-a1d0-44a8-8778-7236e673a88d
+    sessionId: 1dd1cd9c-118b-435f-a731-79a039ad61c5
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: a7e8983f-fbbc-4074-8359-f9ac6d39aac2
+    sessionId: 1e03047b-64b1-40c2-a2af-2059c14f7554
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: 2be4761a-c8ff-4b32-adb2-ac5cd3ba2eb7
+    sessionId: 2ae1922b-6198-4839-b8ad-7c0bda5af01e
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: 57291640-0ea0-4b85-a1cf-c2612bcf25cf
+    sessionId: 2be4bdbf-cfd3-4a31-958b-297a45bca993
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: 580d4f85-e0b4-4046-a9d7-cdcedb4a23a9
+    sessionId: 327d4b8f-19ec-46db-a91f-6c335b6f3745
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: c788a878-f9ed-44a5-a550-40813a64e339
+    sessionId: 409e6e73-d45e-443b-8d9f-ecce5b83f7cd
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: df20e813-458a-46be-abb3-f7d4bb43707c
+    sessionId: 42480737-bab1-481d-a753-3732d3245ae5
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: 3682bf64-e067-49c4-8a2f-a1ad8b20d2c6
+    sessionId: 4a7ad3ca-580c-49b1-9150-d002b85223f2
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: b36baf93-cd7d-460f-8399-087ae1732257
+    sessionId: 4ac68246-acca-4a72-bcce-334150903f1a
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: 88779c89-77e1-4a13-99a5-e2b020fc7a73
+    sessionId: 51938ff7-681f-4b96-a0d9-47cfb5ebcd3b
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: 40f486e5-9d9b-4078-bc8c-98bf5a44e5ee
+    sessionId: 5194a4bc-6c8a-4d5f-8dd2-c27b5af2d19b
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: 1b1c2fbc-e5ce-4ec1-a201-6966b7736cce
+    sessionId: 534eaed3-754b-4262-8531-2f454fd48d19
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: c3eb91b5-876f-409a-aa82-553165f331e2
+    sessionId: 56f6ee66-983e-4ea6-a449-ea04f03d8749
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: f6feb511-a51a-4423-94c0-ff4c3a0506f6
+    sessionId: 592b4343-8d5a-4460-b395-c8826b961aa8
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: f76961c5-c277-49cf-b878-bb9f2b78f07f
+    sessionId: 598e509d-de51-4d32-84e6-cae27fec3bd9
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: ccc949da-4bca-479d-832a-d1bd511e7521
+    sessionId: 5daf3aa9-62d3-4270-bbef-8ac69434c2ca
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: c31b8eaf-742c-49d5-aab8-f865c1a27b26
+    sessionId: 5e479d7f-0318-40c9-9018-6c667d3c471a
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: ce5e35d4-368d-44aa-a53b-80af37678cdb
+    sessionId: 6022d1e7-fa48-492d-9c42-7f157cfbbd1e
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: d7c5169d-6d08-4d6f-ad6e-b8da3c752906
+    sessionId: 60f004db-a176-4bd0-8fc4-5109b7c05417
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: 7516960c-ea60-4ed7-9402-490358afbdbc
+    sessionId: 635cfbe6-2e43-49f0-936f-016be1ab9cf4
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: de28283c-8791-45d5-8d6a-2427b023c44e
+    sessionId: 6501f94e-e821-4faf-a1ab-e454a8368ab9
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: 27a21c45-9d48-4003-b078-07c1004805e4
+    sessionId: 689439dc-a81f-45a5-a110-e342853d0530
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: b1e63054-7b75-4966-9538-5039d801520d
+    sessionId: 6ada37b5-ce0e-4665-b05c-c484c4803b2c
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: f5a20804-e8be-4584-9b68-1c1e1de2cf42
+    sessionId: 76e42705-4e2b-4481-831d-9f50e05093b8
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: b07b87c0-25b6-40ea-a305-e0579c464c5f
+    sessionId: 7719d42b-8d80-4b37-aee5-4f34a0e0743f
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: fa805803-53a9-4178-b4f6-6f87c83f32cd
+    sessionId: 790b5bad-1eb5-4294-ad84-fa65bd7a1e59
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: a89ca3b7-94fb-4845-96c0-7e23ad14c15d
+    sessionId: 7a1192d3-23fa-49f8-bd73-159bb5e3cd17
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: 2e7e207c-3103-4cf5-ada3-8f1842cf06b2
+    sessionId: 7dcb2cb8-7582-4412-8026-fb12b8527173
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: 8b317313-57b1-4e71-8f45-ba7ec92ad0dd
+    sessionId: 7e76e4e7-6393-4cb6-b3b8-742b765d43ee
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: 23bdb31a-7b33-4c08-ab0b-e6ddb94770b6
+    sessionId: 7f6d6421-ff64-4619-8888-f4a13de8c85e
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: f016df39-f4c7-4362-baca-c3bd1f8f8c4a
+    sessionId: 87fb8f49-2c21-4b42-8c60-955446cf77d6
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: 797416fb-70a1-4220-89e2-0bd9df312d7a
+    sessionId: 8939f813-850e-41ea-83de-abdef57faf03
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: f355e18e-7fee-49aa-a228-beba985aec22
+    sessionId: 8a434784-d202-473d-b9cd-2e4e813cd9c8
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: ffcc3c4c-0a58-432c-ac3d-9b5d7ea12294
+    sessionId: 8e85055b-44b0-4b80-953c-6be00d29ec01
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: 03be8485-17b4-48bb-a490-86749a0e97ff
+    sessionId: 8fe8d4ed-f147-4d28-bc66-f09026b2e6e3
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: e1836429-cd65-4527-af43-92067e7d5006
+    sessionId: 963c6ac6-adf6-40de-a0a7-e8d02f24c15d
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: 5297d329-d31a-495e-bb33-51dcc3b19220
+    sessionId: a173d5fe-d9ca-4116-b524-ee533fef722d
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: a65485ae-150d-4a63-9b96-b48f741c00fa
+    sessionId: a18ab2cb-75eb-4182-a1ef-352c3f2085bb
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: 724d074f-d357-4b84-882c-ca36d1db587d
+    sessionId: a1dddac5-8152-4356-9288-21e1a3f46631
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: 5da1df9b-feb0-4e2c-b282-297922ea5045
+    sessionId: a2b88019-7357-47a0-abdd-77370d1d0e13
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: 2dfb2242-9f1a-4da5-9c33-a165b4873b68
+    sessionId: a317e4fb-a5b6-4120-9c79-a667189d3944
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: 7e7c0c1a-b04d-4049-9dcc-e34ea6960ec9
+    sessionId: aa99550f-6194-4a36-bcaa-957dbc4d7ba6
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: 2978eac4-b235-4558-a120-e8b1caa2de94
+    sessionId: ab962b36-c5e5-45c7-aa17-ccfe59a48744
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: 0c320e3d-8f3c-4cd6-85ab-136a650c2a39
+    sessionId: af3205da-b410-4718-b1f3-5d0695ee1bb0
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: bdab3132-5c6b-4469-8892-640d36fb1363
+    sessionId: b3cbd950-03f3-49f2-b30d-1980834669a2
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: faebe8c8-a3b5-460f-a27e-fd42a09a94b1
+    sessionId: b5e93d11-a215-4972-96d8-87da5ea888be
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: 63bccab5-7ded-4444-a3d8-22b4adf96448
+    sessionId: b6b3f811-cc4a-49f7-b85b-092908f3beba
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: eb725e8a-25a8-4c7d-8b26-4128f27c8932
+    sessionId: b938d711-ec6e-44a8-b191-f6c4c65aa8c0
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: ce4a50da-0a05-49c8-a732-9b235dc1a1e9
+    sessionId: b9757ea2-24f9-41c5-ad4b-c108f3b625a8
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: 6e3947e6-04d4-4cff-9588-fa23f3bb495a
+    sessionId: bc950bb8-63c8-4394-9dbb-aa5303930b15
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: 4b33a869-2021-4c41-a426-052c8454c855
+    sessionId: bdc4033c-062c-4e25-901c-87071dc0fa23
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: 4b48ddca-1c62-4e73-a11b-07d72ae00c11
+    sessionId: c34e1468-b089-4cf7-905b-58b32f3d196d
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: c3254ee8-36b1-4c77-b684-7cf3283e570c
+    sessionId: c3869ce2-546b-43c1-acb4-6aea37f8c4da
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: ac98a859-ac99-467d-b104-d0c29bc19099
+    sessionId: c391bfb5-3735-4ce1-91ae-aa3b231106e3
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: 1c45b69f-13a0-48a3-a696-6fde68d139c0
+    sessionId: c4a7003c-e543-448e-a378-9a15b651ddf9
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: 983f2d3c-75f7-4bd5-a0b4-7269dddbb1d0
+    sessionId: c6e42ae0-45bc-4390-bac2-38261319d166
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: 1e1df3b1-cfd6-4a62-abc5-d5834f74dd90
+    sessionId: c798bd02-3861-454f-9535-58ba6904c4bd
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: eee721f3-4f1e-49ad-9f21-7ff2f2738ee9
+    sessionId: c992a3e9-8d89-4a7a-b30c-b2196e19a489
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: faebf83c-a170-44bd-b6a7-ac5f391a65c6
+    sessionId: cb4971a9-5a6d-45ee-adc5-5de47259c1b1
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: 4df8f24b-35bd-4760-b0c0-3ad7bd3a669d
+    sessionId: cfa1ac25-a7c8-47f0-b938-169ef541646f
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: 9e90c5db-347e-424e-aec9-a7e56c1ae9a8
+    sessionId: d934ce77-68e2-407b-bda2-3af51736e381
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: 93a07812-c464-44ea-8de2-cc44dc8d7a74
+    sessionId: db378eb5-082b-4194-b513-a9ea58d4787c
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: 00b1f4e3-4e25-4f20-b8e3-5218825fe62e
+    sessionId: dc3b53b9-cc91-4a00-88ad-9249f5ac2686
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: 9cd2cc7c-d920-4545-a753-6b55dc047745
+    sessionId: e06162a5-1d1b-40f5-98ec-d6b59c188162
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: e3f703fa-cad5-4e94-95dd-d9506df88483
+    sessionId: e13237a1-b461-4395-a078-82094763261c
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: d71cd7d7-eb15-4b8b-a896-91f1a16ce3f6
+    sessionId: e36b417a-904c-481f-8fb4-49f88d6e877e
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: eb9d124c-c1df-4b14-a96c-eaf4c35c1279
+    sessionId: e881319a-1fcf-4cd2-8b2d-c31582238666
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: 8f201a8f-dff5-43eb-afc1-e9e5ce3e3051
+    sessionId: e9c2b589-609b-4d01-b0af-b1685f026fca
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: d914cfbc-073e-4d9a-abd4-7a45f858ff40
+    sessionId: ec371a62-be10-423e-8072-96967804fbe2
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: e6812997-a645-4e02-8a50-53f1aa05b3f5
+    sessionId: f189f7c1-494e-4c6d-9d4e-fd55d4a8b8f7
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: 28556b2a-2054-4553-a813-cfd9aa8fd0ee
+    sessionId: f4f05dfa-0ca6-4ca5-a42c-9635317a5210
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: 83b8945d-d8d6-450f-802e-9eae1f7ef3dd
+    sessionId: f63adb69-fae6-4d61-887a-541b4775ccd7
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: 5f9ec28e-24f0-4451-b062-cff313ed52ae
+    sessionId: f6ba3b24-4d26-4513-98fb-1edcccbe8576
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: db164b9e-b2b7-452c-9c53-3b7effc2755c
+    sessionId: f72fbaec-e464-4eea-81ec-c7a8a3211a3a
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: c5eaf2a7-19b1-4e3a-9fc8-0371a539599f
+    sessionId: f850a946-8610-44c9-95b9-1d949f92eb23
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: 69b94b8f-aa45-4bb0-b23e-75fddaf2e86c
+    sessionId: f89267a0-9e1d-4714-8e54-c9aeefd90e32
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+  - id: f448a355-20e3-4668-9926-44cb16caccb2
+    sessionId: faa14156-e6ca-4ca6-b4dc-aaaaf4d26326
+    oem: Not available
+    requesterName: System Block
+    requesterEmail: scheduler-block@local
+    createdAt: '2026-09-01T08:56:39.668Z'
+    status: confirmed
+version: 35
 unavailableDays:
   - date: '2026-09-14'
     label: WiFi 8 Asus

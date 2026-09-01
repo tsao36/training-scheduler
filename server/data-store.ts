@@ -27,6 +27,7 @@ export type Booking = {
   sessionId: string
   oem: string
   odm?: string
+  trainingFormat?: 'with-video' | 'without-video'
   requesterName: string
   requesterEmail: string
   createdAt: string

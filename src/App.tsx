@@ -48,6 +48,7 @@ type Booking = {
   sessionId: string;
   oem: string;
   odm?: string;
+  trainingFormat?: TrainingFormat;
   requesterName: string;
   requesterEmail: string;
   createdAt: string;
@@ -88,16 +89,27 @@ const weekdays: Day[] = [
   ["2026-09-30", "Wed"],
   ["2026-10-01", "Thu"],
   ["2026-10-02", "Fri"],
+  ["2026-10-05", "Mon"],
+  ["2026-10-06", "Tue"],
+  ["2026-10-07", "Wed"],
+  ["2026-10-08", "Thu"],
+  ["2026-10-09", "Fri"],
 ].map(([date, weekday]) => ({ date, day: date.slice(-2), weekday }));
 const weekGroups: { label: string; days: Day[] }[] = [
   { label: "14–18 SEP", days: weekdays.slice(0, 5) },
   { label: "21–25 SEP", days: weekdays.slice(5, 10) },
   { label: "28 SEP–02 OCT", days: weekdays.slice(10, 15) },
+  { label: "05–09 OCT", days: weekdays.slice(15, 20) },
 ];
 const OEM_OPTIONS = ["Dell", "HP", "Asus", "Acer", "Fujitsu", "VAIO", "Panasonic", "NEC", "Samsung", "LG", "Honor", "Wiko", "Dynabook", "Google", "Microsoft", "MSFT Surface", "MSI", "Xiaomi", "Lenovo China", "Lenovo Japan", "NA"] as const;
 const ODM_OPTIONS = ["Quanta", "Pegatron", "Wistron", "Inventec", "Compal", "LCFC", "Luxshare", "Huaqin", "Longcheer", "NA"] as const;
+const TRAINING_FORMAT_OPTIONS = [
+  { value: "with-video", label: "Training with video: Instructor play online video and answer QnA in person" },
+  { value: "without-video", label: "Training without video: Instructor do live training, no video" },
+] as const;
 type OemOption = (typeof OEM_OPTIONS)[number];
 type OdmOption = (typeof ODM_OPTIONS)[number];
+type TrainingFormat = (typeof TRAINING_FORMAT_OPTIONS)[number]["value"];
 type OemFilterOption = "" | OemOption;
 type OdmFilterOption = "" | OdmOption;
 type TrainingVideoEntry = { title: string; url: string };
@@ -109,6 +121,7 @@ const userError = (code: string) =>
     INVALID_PASSWORD: "The scheduler password is incorrect.",
     REQUIRED_FIELDS_MISSING: "Please complete all required fields.",
     INVALID_CUSTOMER_SELECTION: "Please choose a valid OEM and ODM.",
+    INVALID_TRAINING_FORMAT: "Please choose a valid training type.",
     SESSION_NOT_FOUND: "This session is no longer available.",
     DUPLICATE_SESSION: "This course already has a session at that time.",
     INSTRUCTOR_CONFLICT: "This instructor already has a session at that time.",
@@ -161,6 +174,7 @@ const api = async <T,>(url: string, options?: RequestInit): Promise<T> => {
     headers: { "Content-Type": "application/json" },
     ...options,
   });
+  if (response.ok && response.status === 204) return undefined as T;
   const contentType = response.headers.get("content-type") ?? "";
   if (!contentType.includes("application/json")) {
     const bodyText = await response.text();
@@ -174,7 +188,7 @@ const api = async <T,>(url: string, options?: RequestInit): Promise<T> => {
     const payload = (await response.json()) as { error?: string };
     throw new Error(userError(payload.error ?? "REQUEST_FAILED"));
   }
-  return response.status === 204 ? (undefined as T) : response.json();
+  return response.json();
 };
 const slotTop = (startTime: string) => {
   const [hours, minutes] = startTime.split(":").map(Number);
@@ -190,6 +204,8 @@ const deriveRequesterName = (email: string) => {
   const parts = local.split(/[._-]+/).filter(Boolean).map((part) => part.charAt(0).toUpperCase() + part.slice(1));
   return parts.length > 0 ? parts.join(" ") : email;
 };
+const SCHEDULE_START_MINUTES = 9 * 60;
+const SCHEDULE_END_MINUTES = 17 * 60 + 30;
 // Session start times are the Taiwan wall-clock time customers book; just relabel with an AM/PM indicator.
 const twTimeLabel = (_date: string, time: string) => {
   const [hours, minutes] = time.split(":").map(Number);
@@ -198,10 +214,57 @@ const twTimeLabel = (_date: string, time: string) => {
   return `${hour12}:${String(minutes).padStart(2, "0")} ${period}`;
 };
 const timeFromRow = (row: number) => {
-  const totalMinutes = 9 * 60 + row * 30;
+  const totalMinutes = SCHEDULE_START_MINUTES + row * 30;
   const hours = String(Math.floor(totalMinutes / 60)).padStart(2, "0");
   const minutes = String(totalMinutes % 60).padStart(2, "0");
   return `${hours}:${minutes}`;
+};
+const minutesFromTime = (time: string) => {
+  const [hours, minutes] = time.split(":").map(Number);
+  return hours * 60 + minutes;
+};
+const timeFromMinutes = (totalMinutes: number) => {
+  const hours = String(Math.floor(totalMinutes / 60)).padStart(2, "0");
+  const minutes = String(totalMinutes % 60).padStart(2, "0");
+  return `${hours}:${minutes}`;
+};
+const nextDate = (date: string) => {
+  const cursor = new Date(`${date}T00:00:00Z`);
+  cursor.setUTCDate(cursor.getUTCDate() + 1);
+  return cursor.toISOString().slice(0, 10);
+};
+const compactDateList = (dates: string[]) => {
+  const sorted = Array.from(new Set(dates)).sort();
+  const ranges: string[] = [];
+  let start = sorted[0];
+  let previous = sorted[0];
+  sorted.slice(1).forEach((date) => {
+    if (nextDate(previous) === date) {
+      previous = date;
+      return;
+    }
+    ranges.push(start === previous ? start : `${start} to ${previous}`);
+    start = date;
+    previous = date;
+  });
+  if (start) ranges.push(start === previous ? start : `${start} to ${previous}`);
+  return ranges.join(", ");
+};
+const unavailableTrainingLabel = (training?: Training) => {
+  const label = training?.shortTitle ?? training?.title ?? "Training session";
+  return training?.title.match(/\s+for\s+/i) ? label : `${label} for all`;
+};
+const unavailableTimeLabel = (startMinutes: number, endMinutes: number) =>
+  startMinutes === SCHEDULE_START_MINUTES && endMinutes === SCHEDULE_END_MINUTES
+    ? "All day"
+    : `${timeFromMinutes(startMinutes)}-${timeFromMinutes(endMinutes)} PT`;
+const unavailableScheduleLabel = (sessions: Session[]) => {
+  const firstSession = sessions[0];
+  if (!firstSession) return "";
+  const weekday = new Date(`${firstSession.date}T12:00:00Z`).getUTCDay();
+  if (weekday === 2 && firstSession.startTime === "14:30" && sessions.some((session) => session.trainingId.startsWith("wifi-8"))) return "WiFi CIRM";
+  if (weekday === 4 && firstSession.startTime === "16:00" && sessions.some((session) => session.trainingId.startsWith("bt-hdt"))) return "BT CIRM";
+  return "";
 };
 const CALENDAR_ROW_HEIGHT = 25.5;
 const CALENDAR_ROW_COUNT = 17;
@@ -220,6 +283,8 @@ const unavailableLabel = (training?: Training) =>
   training?.title.replace(/\s+for\s+/i, " ") ?? "Not available";
 const customerLabel = (booking: Booking) =>
   booking.odm ? `${booking.oem} / ${booking.odm}` : booking.oem;
+const trainingFormatLabel = (format?: TrainingFormat) =>
+  TRAINING_FORMAT_OPTIONS.find((option) => option.value === format)?.label;
 type AgendaItem = { text: string; children?: string[] };
 const COURSE_AGENDAS: Record<string, { title: string; items: AgendaItem[] }> = {
   "wifi-8-major": {
@@ -304,15 +369,18 @@ function App() {
   const [bookingDraft, setBookingDraft] = useState<{
     oem: OemOption;
     odm: OdmOption;
+    trainingFormat: TrainingFormat;
     requesterEmail: string;
   }>({
     oem: OEM_OPTIONS[0],
     odm: ODM_OPTIONS[0],
+    trainingFormat: "with-video",
     requesterEmail: "",
   });
   const [authenticated, setAuthenticated] = useState(false);
   const [error, setError] = useState("");
   const [bookingInProgress, setBookingInProgress] = useState(false);
+  const [cancellingBookingId, setCancellingBookingId] = useState<string | null>(null);
   const [lookupEmail, setLookupEmail] = useState("");
   const [lookupResults, setLookupResults] = useState<BookingLookup[] | null>(null);
   const [selectedOemFilter, setSelectedOemFilter] = useState<OemFilterOption>("");
@@ -464,10 +532,10 @@ function App() {
       '<div class="guide-modal" role="dialog" aria-modal="true"><button class="guide-close" type="button" aria-label="Close user guide">×</button><div class="guide-kicker">TRAINING SCHEDULER</div><h2>User guide</h2><div class="guide-tabs"><button class="active" data-language="en">English</button><button data-language="zh">繁體中文</button><button data-language="ko">한국어</button><button data-language="ja">日本語</button></div><div class="guide-content"></div></div>';
     document.body.append(guide);
     const content: Record<string, string> = {
-      en: "<h3>Find a session</h3><p>Use the week arrows to browse weekdays from September 14 through October 2. Hover over a session to see course, instructor, delivery, and booking details.</p><h3>Book a session</h3><p>Select an open session and click <b>Book this session</b>. Enter the customer or team name, requester name, and requester email. Booking is confirmed immediately and the session shows the customer name.</p><h3>View bookings</h3><p>Click <b>My bookings</b>, enter the same requester email, and select <b>Find my bookings</b>.</p><h3>Scheduler operations</h3><p>Enter Scheduler mode with the scheduler password. Click an empty half-hour to create a 30-minute session, or select a session and use <b>Delete session</b>. Sessions must be weekdays, start between 09:00 and 17:00 PT, and use 30-minute increments.</p><h3>Time zones</h3><p>Schedule times use Pacific Time (PT). The header clocks show TW/CN, JP/KR, and U.S. West Coast local time.</p>",
-      zh: "<h3>尋找場次</h3><p>使用週次箭頭瀏覽 9 月 14 日至 10 月 2 日的平日。將滑鼠移到場次上，可查看課程、講師、授課方式與預約資訊。</p><h3>預約場次</h3><p>選擇開放場次並點擊「Book this session」。填寫客戶或團隊名稱、預約人姓名與 email。預約會立即確認，場次會顯示客戶名稱。</p><h3>查看預約</h3><p>點擊「My bookings」，輸入相同的預約人 email，再點擊「Find my bookings」。</p><h3>Scheduler 操作</h3><p>使用管理密碼進入 Scheduler mode。點擊空白半小時建立 30 分鐘場次，或選擇場次後使用「Delete session」。場次必須是平日、Pacific Time 09:00 至 17:00 開始，並使用 30 分鐘間隔。</p><h3>時區</h3><p>排程時間使用 Pacific Time（PT）。頁首時鐘顯示台灣／中國、日韓與美國西岸時間。</p>",
-      ko: "<h3>세션 찾기</h3><p>주간 화살표를 사용해 9월 14일부터 10월 2일까지의 평일을 확인하세요. 세션 위에 마우스를 올리면 과정, 강사, 진행 방식과 예약 정보를 볼 수 있습니다.</p><h3>세션 예약</h3><p>열린 세션을 선택하고 “Book this session”을 클릭하세요. 고객 또는 팀 이름, 신청자 이름과 이메일을 입력합니다. 예약은 즉시 확정되며 세션에 고객 이름이 표시됩니다.</p><h3>예약 확인</h3><p>“My bookings”를 클릭하고 예약에 사용한 이메일을 입력한 뒤 “Find my bookings”를 선택하세요.</p><h3>Scheduler 작업</h3><p>Scheduler password로 Scheduler mode에 들어가세요. 빈 30분 구간을 클릭해 30분 세션을 만들거나 세션을 선택해 “Delete session”을 사용하세요. 세션은 평일, Pacific Time 09:00~17:00 시작 시간, 30분 단위여야 합니다.</p><h3>시간대</h3><p>일정 시간은 Pacific Time(PT)을 사용합니다. 상단 시계는 TW/CN, JP/KR 및 미국 서부 시간을 표시합니다.</p>",
-      ja: "<h3>セッションを探す</h3><p>週の矢印で、9月14日から10月2日までの平日を確認できます。セッションにカーソルを合わせると、コース、講師、配信方法、予約情報が表示されます。</p><h3>セッションを予約</h3><p>空いているセッションを選び、「Book this session」をクリックします。顧客またはチーム名、申請者名、メールアドレスを入力してください。予約はすぐに確定し、セッションに顧客名が表示されます。</p><h3>予約の確認</h3><p>「My bookings」をクリックし、予約時のメールアドレスを入力して「Find my bookings」を選択します。</p><h3>Scheduler の操作</h3><p>Scheduler passwordでScheduler modeに入ります。空いている30分枠をクリックしてセッションを作成するか、セッションを選択して「Delete session」を使用します。平日、Pacific Timeの09:00〜17:00開始、30分単位で設定してください。</p><h3>タイムゾーン</h3><p>スケジュールはPacific Time（PT）を使用します。ヘッダーにはTW/CN、JP/KR、米国西海岸の現在時刻が表示されます。</p>",
+      en: "<h3>Find a session</h3><p>Use the week arrows to browse weekdays from September 14 through October 9. Hover over a session to see course, instructor, delivery, and booking details. Light colored slots are unavailable training sessions.</p><h3>Book a session</h3><p>Select an open session and click <b>Book this session</b>. Enter OEM, ODM, training type, and requester email. Booking is confirmed immediately and the session shows the customer name.</p><h3>View bookings</h3><p>Click <b>My bookings</b>, enter the same requester email, and select <b>Find my bookings</b>.</p><h3>Scheduler operations</h3><p>Enter Scheduler mode with the scheduler password. Click an empty half-hour to create a 30-minute session, or select a session and use <b>Delete session</b>. Sessions must be weekdays, start between 09:00 and 17:00 PT, and use 30-minute increments.</p><h3>Time zones</h3><p>Schedule times use Pacific Time (PT). The header clocks show TW/CN, JP/KR, and U.S. West Coast local time.</p>",
+      zh: "<h3>尋找場次</h3><p>使用週次箭頭瀏覽 9 月 14 日至 10 月 9 日的平日。將滑鼠移到場次上，可查看課程、講師、授課方式與預約資訊。淺色時段代表該 training session 不可預約。</p><h3>預約場次</h3><p>選擇開放場次並點擊「Book this session」。填寫 OEM、ODM、training type 與 requester email。預約會立即確認，場次會顯示客戶名稱。</p><h3>查看預約</h3><p>點擊「My bookings」，輸入相同的預約人 email，再點擊「Find my bookings」。</p><h3>Scheduler 操作</h3><p>使用管理密碼進入 Scheduler mode。點擊空白半小時建立 30 分鐘場次，或選擇場次後使用「Delete session」。場次必須是平日、Pacific Time 09:00 至 17:00 開始，並使用 30 分鐘間隔。</p><h3>時區</h3><p>排程時間使用 Pacific Time（PT）。頁首時鐘顯示台灣／中國、日韓與美國西岸時間。</p>",
+      ko: "<h3>세션 찾기</h3><p>주간 화살표를 사용해 9월 14일부터 10월 9일까지의 평일을 확인하세요. 세션 위에 마우스를 올리면 과정, 강사, 진행 방식과 예약 정보를 볼 수 있습니다. 연한 색상의 슬롯은 예약할 수 없는 교육 세션입니다.</p><h3>세션 예약</h3><p>열린 세션을 선택하고 “Book this session”을 클릭하세요. OEM, ODM, training type과 requester email을 입력합니다. 예약은 즉시 확정되며 세션에 고객 이름이 표시됩니다.</p><h3>예약 확인</h3><p>“My bookings”를 클릭하고 예약에 사용한 이메일을 입력한 뒤 “Find my bookings”를 선택하세요.</p><h3>Scheduler 작업</h3><p>Scheduler password로 Scheduler mode에 들어가세요. 빈 30분 구간을 클릭해 30분 세션을 만들거나 세션을 선택해 “Delete session”을 사용하세요. 세션은 평일, Pacific Time 09:00~17:00 시작 시간, 30분 단위여야 합니다.</p><h3>시간대</h3><p>일정 시간은 Pacific Time(PT)을 사용합니다. 상단 시계는 TW/CN, JP/KR 및 미국 서부 시간을 표시합니다.</p>",
+      ja: "<h3>セッションを探す</h3><p>週の矢印で、9月14日から10月9日までの平日を確認できます。セッションにカーソルを合わせると、コース、講師、配信方法、予約情報が表示されます。薄い色の枠は予約できないトレーニングセッションです。</p><h3>セッションを予約</h3><p>空いているセッションを選び、「Book this session」をクリックします。OEM、ODM、training type、requester email を入力してください。予約はすぐに確定し、セッションに顧客名が表示されます。</p><h3>予約の確認</h3><p>「My bookings」をクリックし、予約時のメールアドレスを入力して「Find my bookings」を選択します。</p><h3>Scheduler の操作</h3><p>Scheduler passwordでScheduler modeに入ります。空いている30分枠をクリックしてセッションを作成するか、セッションを選択して「Delete session」を使用します。平日、Pacific Timeの09:00〜17:00開始、30分単位で設定してください。</p><h3>タイムゾーン</h3><p>スケジュールはPacific Time（PT）を使用します。ヘッダーにはTW/CN、JP/KR、米国西海岸の現在時刻が表示されます。</p>",
     };
     const contentElement = guide.querySelector<HTMLElement>(".guide-content");
     const tabs = Array.from(
@@ -515,19 +583,38 @@ function App() {
         ),
     [data],
   );
-  const rawBookings = data?.bookings ?? [];
-  const blockedSessionIds = new Set(
-    rawBookings
-      .filter((booking) => booking.status === "confirmed" && isSystemUnavailableBooking(booking))
-      .map((booking) => booking.sessionId),
+  const rawBookings = useMemo(() => data?.bookings ?? [], [data?.bookings]);
+  const blockedSessionIds = useMemo(
+    () =>
+      new Set(
+        rawBookings
+          .filter((booking) => booking.status === "confirmed" && isSystemUnavailableBooking(booking))
+          .map((booking) => booking.sessionId),
+      ),
+    [rawBookings],
   );
-  const sessions =
-    data?.sessions.filter(
-      (session) =>
-        session.status === "active" && !blockedSessionIds.has(session.id),
-    ) ?? [];
-  const bookings = rawBookings.filter(
-    (booking) => !isSystemUnavailableBooking(booking),
+  const sessions = useMemo(
+    () =>
+      data?.sessions.filter(
+        (session) =>
+          session.status === "active" && !blockedSessionIds.has(session.id),
+      ) ?? [],
+    [blockedSessionIds, data?.sessions],
+  );
+  const unavailableSlotSessions = useMemo(
+    () =>
+      data?.sessions.filter(
+        (session) =>
+          session.status === "active" && blockedSessionIds.has(session.id),
+      ) ?? [],
+    [blockedSessionIds, data?.sessions],
+  );
+  const bookings = useMemo(
+    () =>
+      rawBookings.filter(
+        (booking) => !isSystemUnavailableBooking(booking),
+      ),
+    [rawBookings],
   );
   const bookedSessionIds = useMemo(
     () =>
@@ -545,6 +632,54 @@ function App() {
   const availableSessions = useMemo(
     () => sessions.filter((session) => !bookedSessionIds.has(session.id)),
     [sessions, bookedSessionIds],
+  );
+  const unavailableSlotSummary = useMemo(
+    () => {
+      const byLabel = unavailableSlotSessions.reduce<Map<string, Map<string, number[]>>>((groups, session) => {
+        const label = unavailableTrainingLabel(session.training);
+        const byDate = groups.get(label) ?? new Map<string, number[]>();
+        byDate.set(session.date, [...(byDate.get(session.date) ?? []), minutesFromTime(session.startTime)]);
+        groups.set(label, byDate);
+        return groups;
+      }, new Map());
+
+      const byLabelAndTime = new Map<string, { label: string; startMinutes: number; endMinutes: number; dates: string[] }>();
+      byLabel.forEach((byDate, label) => {
+        byDate.forEach((times, date) => {
+          const sortedTimes = Array.from(new Set(times)).sort((left, right) => left - right);
+          let startMinutes = sortedTimes[0];
+          let endMinutes = startMinutes + 30;
+          sortedTimes.slice(1).forEach((time) => {
+            if (time === endMinutes) {
+              endMinutes = time + 30;
+              return;
+            }
+            const key = `${label}|${startMinutes}|${endMinutes}`;
+            const entry = byLabelAndTime.get(key) ?? { label, startMinutes, endMinutes, dates: [] };
+            entry.dates.push(date);
+            byLabelAndTime.set(key, entry);
+            startMinutes = time;
+            endMinutes = time + 30;
+          });
+          const key = `${label}|${startMinutes}|${endMinutes}`;
+          const entry = byLabelAndTime.get(key) ?? { label, startMinutes, endMinutes, dates: [] };
+          entry.dates.push(date);
+          byLabelAndTime.set(key, entry);
+        });
+      });
+
+      return Array.from(byLabelAndTime.values())
+        .map((entry) => ({
+          ...entry,
+          dateLabel: compactDateList(entry.dates),
+          timeLabel: unavailableTimeLabel(entry.startMinutes, entry.endMinutes),
+        }))
+        .sort((left, right) => {
+          const firstDate = left.dates.slice().sort()[0].localeCompare(right.dates.slice().sort()[0]);
+          return firstDate || left.startMinutes - right.startMinutes || left.label.localeCompare(right.label);
+        });
+    },
+    [unavailableSlotSessions],
   );
   const courseCatalog = useMemo(() => {
     const grouped = new Map<string, Training[]>();
@@ -744,7 +879,7 @@ function App() {
       });
       setBookingConfirmation({ bookingId: result.id, email: result.requesterEmail, instructorEmail: result.instructorEmail });
       setModal("booking-confirmation");
-      setBookingDraft({ oem: OEM_OPTIONS[0], odm: ODM_OPTIONS[0], requesterEmail: "" });
+      setBookingDraft({ oem: OEM_OPTIONS[0], odm: ODM_OPTIONS[0], trainingFormat: "with-video", requesterEmail: "" });
       await refresh();
     } catch (cause) {
       setError((cause as Error).message);
@@ -809,6 +944,29 @@ function App() {
       setLookupResults(result.bookings);
     } catch (cause) {
       setError((cause as Error).message);
+    }
+  };
+  const cancelBooking = async (bookingId: string, requesterEmail = lookupEmail) => {
+    if (cancellingBookingId) return;
+    const cancellationEmail = requesterEmail.trim();
+    if (!cancellationEmail) {
+      setError("Enter the requester email used for this booking.");
+      return;
+    }
+    const confirmed = window.confirm("Cancel this booked session?");
+    if (!confirmed) return;
+    setCancellingBookingId(bookingId);
+    try {
+      await api(`/api/bookings/${bookingId}`, {
+        method: "DELETE",
+        body: JSON.stringify({ requesterEmail: cancellationEmail }),
+      });
+      setLookupResults((current) => current?.filter((booking) => booking.id !== bookingId) ?? null);
+      await refresh({ focusLatestBooking: false });
+    } catch (cause) {
+      setError((cause as Error).message);
+    } finally {
+      setCancellingBookingId(null);
     }
   };
   const createUnavailableDay = async () => {
@@ -908,7 +1066,7 @@ function App() {
               <CalendarDays size={19} />
             </span>
             <div>
-              <strong>Sep 14 — Oct 02</strong>
+              <strong>Sep 14 — Oct 09</strong>
               <span>Active window</span>
             </div>
           </div>
@@ -992,7 +1150,7 @@ function App() {
               <div>
                 <span className="section-kicker">SCHEDULE VIEW</span>
                 <div className="month-title">
-                  <h2>September 2026</h2>
+                  <h2>September - October 2026</h2>
                   <span className="current-chip">{currentWeek.label}</span>
                 </div>
               </div>
@@ -1129,6 +1287,54 @@ function App() {
                       <span className="hour-line" key={index} />
                     ))}
                     {Object.values(
+                      unavailableSlotSessions
+                        .filter((session) => session.date === day.date)
+                        .reduce<Record<string, Session[]>>((groups, session) => {
+                          (groups[session.startTime] ??= []).push(session);
+                          return groups;
+                        }, {}),
+                    ).map((sameTimeSessions) => {
+                      const firstSession = sameTimeSessions[0];
+                      const scheduleLabel = unavailableScheduleLabel(sameTimeSessions);
+                      return (
+                        <span
+                          className="unavailable-time-block"
+                          key={`${firstSession.date}-${firstSession.startTime}`}
+                          style={{
+                            top: slotTop(firstSession.startTime),
+                          }}
+                          onMouseEnter={(event) => {
+                            event.stopPropagation();
+                            setActiveDayWarnings(
+                              sameTimeSessions.map((session) => ({
+                                date: session.date,
+                                label: session.training?.shortTitle ?? "Training session",
+                                warning: `${session.training?.shortTitle ?? "Training session"} is unavailable at ${session.startTime} PT.`,
+                              })),
+                            );
+                            requestAnimationFrame(() => {
+                              if (!dayWarningTooltipRef.current) return;
+                              dayWarningTooltipRef.current.style.left = `${Math.max(8, Math.min(window.innerWidth - 236, event.clientX + 14))}px`;
+                              dayWarningTooltipRef.current.style.top = `${Math.max(8, Math.min(window.innerHeight - 132, event.clientY + 14))}px`;
+                            });
+                          }}
+                          onMouseMove={(event) => {
+                            event.stopPropagation();
+                            if (!dayWarningTooltipRef.current) return;
+                            dayWarningTooltipRef.current.style.left = `${Math.max(8, Math.min(window.innerWidth - 236, event.clientX + 14))}px`;
+                            dayWarningTooltipRef.current.style.top = `${Math.max(8, Math.min(window.innerHeight - 132, event.clientY + 14))}px`;
+                          }}
+                          onMouseLeave={(event) => {
+                            event.stopPropagation();
+                            setActiveDayWarnings(null);
+                          }}
+                          onClick={(event) => event.stopPropagation()}
+                        >
+                          {scheduleLabel}
+                        </span>
+                      );
+                    })}
+                    {Object.values(
                       visibleSessions
                         .filter((session) => session.date === day.date)
                         .reduce<Record<string, Session[]>>((groups, session) => {
@@ -1144,9 +1350,7 @@ function App() {
                         const pendingCount = sessionBookings.filter((b) => b.status === "pending").length;
                         const bookingCount = sessionBookings.length;
                         const hasPending = pendingCount > 0;
-                        const slotStateClass = blockedSessionIds.has(session.id)
-                          ? "closed-slot"
-                          : bookingCount > 0
+                        const slotStateClass = bookingCount > 0
                             ? "shared-slot"
                             : "open-slot";
                         return (
@@ -1198,6 +1402,18 @@ function App() {
             <div className="calendar-footer">
               <span className="footer-note">Weekdays · 09:00–17:30 PT</span>
             </div>
+            {unavailableSlotSummary.length > 0 && (
+              <div className="unavailable-slot-list">
+                <strong>Unavailable training sessions</strong>
+                <div>
+                  {unavailableSlotSummary.map((entry) => (
+                    <span key={`${entry.label}-${entry.dateLabel}-${entry.timeLabel}`}>
+                      <b>{entry.label}:</b> {entry.dateLabel} · {entry.timeLabel}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
             {activeDayWarnings && (
               <div
                 ref={dayWarningTooltipRef}
@@ -1288,10 +1504,22 @@ function App() {
                     <div className="booking-record" key={booking.id}>
                       <span>
                         <strong>{customerLabel(booking)}</strong>
+                        {trainingFormatLabel(booking.trainingFormat) && <small>{trainingFormatLabel(booking.trainingFormat)}</small>}
                         {booking.requesterName}
                         <small>{booking.requesterEmail}</small>
                         <code>{booking.id}</code>
                       </span>
+                      <button
+                        className="cancel-booking-button"
+                        type="button"
+                        disabled={cancellingBookingId === booking.id}
+                        onClick={() => {
+                          const requesterEmail = window.prompt("Enter the requester email used for this booking.");
+                          if (requesterEmail) cancelBooking(booking.id, requesterEmail);
+                        }}
+                      >
+                        <Trash2 size={13} /> {cancellingBookingId === booking.id ? "Cancelling..." : "Cancel booking"}
+                      </button>
                     </div>
                   ))}
                 </div>
@@ -1368,7 +1596,7 @@ function App() {
             <label className="form-label">Requester email<input type="email" value={lookupEmail} onChange={(event) => setLookupEmail(event.target.value)} placeholder="name@example.com" required autoFocus /></label>
             <button className="book-button" type="submit"><Search size={17} /> Find my bookings</button>
           </form>
-          {lookupResults && <div className="lookup-results">{lookupResults.length === 0 ? <p className="empty-list">No active bookings found for this email.</p> : lookupResults.map((booking) => <div className="lookup-booking" key={booking.id}><strong>{booking.training?.title ?? "Training session"}</strong><span>{booking.session?.date} · {booking.session?.startTime} PT · {booking.session?.durationMinutes} min</span><span>Customer: {customerLabel(booking)}</span><code>{booking.id}</code></div>)}</div>}
+          {lookupResults && <div className="lookup-results">{lookupResults.length === 0 ? <p className="empty-list">No active bookings found for this email.</p> : lookupResults.map((booking) => <div className="lookup-booking" key={booking.id}><strong>{booking.training?.title ?? "Training session"}</strong><span>{booking.session?.date} · {booking.session?.startTime} PT · {booking.session?.durationMinutes} min</span><span>Customer: {customerLabel(booking)}</span>{trainingFormatLabel(booking.trainingFormat) && <span>{trainingFormatLabel(booking.trainingFormat)}</span>}<code>{booking.id}</code>{booking.status === "confirmed" && <button className="cancel-booking-button" type="button" disabled={cancellingBookingId === booking.id} onClick={() => cancelBooking(booking.id)}><Trash2 size={13} /> {cancellingBookingId === booking.id ? "Cancelling..." : "Cancel booking"}</button>}</div>)}</div>}
         </Modal>
       )}
       {modal === "topic-customer" && (
@@ -1714,6 +1942,25 @@ function App() {
               {ODM_OPTIONS.map((odm) => (
                 <option value={odm} key={odm}>
                   {odm}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="form-label">
+            Training type
+            <select
+              value={bookingDraft.trainingFormat}
+              disabled={bookingInProgress}
+              onChange={(event) =>
+                setBookingDraft({
+                  ...bookingDraft,
+                  trainingFormat: event.target.value as TrainingFormat,
+                })
+              }
+            >
+              {TRAINING_FORMAT_OPTIONS.map((option) => (
+                <option value={option.value} key={option.value}>
+                  {option.label}
                 </option>
               ))}
             </select>

@@ -71,6 +71,56 @@ const transporter = nodemailer.createTransport({
 })
 
 export type EmailRecipientConfig = Record<string, Record<string, string>>
+type BookingEmailDetails = {
+  bookingId: string
+  sessionId: string
+  trainingId: string
+  trainingTitle: string
+  sessionDate: string
+  sessionTime: string
+  durationMinutes: number
+  oem: string
+  odm?: string
+  trainingFormat?: 'with-video' | 'without-video'
+  requesterName: string
+  requesterEmail: string
+  createdAt: string
+  instructorEmail?: string | null
+}
+type AgendaItem = { text: string; children?: string[] }
+
+const trainingFormatLabels: Record<NonNullable<BookingEmailDetails['trainingFormat']>, string> = {
+  'with-video': 'Training with video: Instructor play online video and answer QnA in person',
+  'without-video': 'Training without video: Instructor do live training, no video',
+}
+
+const courseAgendas: Record<string, { title: string; items: AgendaItem[] }> = {
+  'wifi-8': {
+    title: 'WiFi 8 Training agenda',
+    items: [
+      { text: 'Introduction: why Wi-Fi 8 UHR matters' },
+      {
+        text: 'The Key Pillars of Wi-Fi 8',
+        children: [
+          'Real-World Performance: higher speed, improved latency, and network capacity',
+          'Trusted & Secured: security, privacy, and connection continuity',
+          'Power Saving: longer battery life and lower power consumption',
+        ],
+      },
+    ],
+  },
+  'bt-hdt': {
+    title: 'BT HDT Training agenda',
+    items: [
+      { text: 'Why HDT, and why now - the market forces behind the specification' },
+      { text: "What HDT is, and where it fits in Bluetooth's evolution" },
+      { text: 'Key characteristics in plain language' },
+      { text: 'Application scenarios on a notebook platform' },
+      { text: 'Specification status and a realistic view of the timeline' },
+      { text: 'What this means for your platform roadmap, and what to plan for now' },
+    ],
+  },
+}
 
 export async function readEmailRecipientConfig(): Promise<EmailRecipientConfig> {
   try {
@@ -118,28 +168,33 @@ export async function getBookingNotificationRecipients(trainingId: string, reque
 }
 
 export async function sendBookingNotificationEmail(
-  requesterEmail: string,
-  requesterName: string,
-  trainingTitle: string,
-  sessionDate: string,
-  sessionTime: string,
+  details: BookingEmailDetails,
   instructorEmail?: string,
 ): Promise<void> {
-  const subject = `Training Scheduler booking confirmed: ${trainingTitle}`
+  const subject = `Training Scheduler booking confirmed: ${details.trainingTitle}`
   const html = `
-    <p>Hi ${escapeHtml(requesterName)},</p>
-    <p>Your booking for <strong>${escapeHtml(trainingTitle)}</strong> has been confirmed for ${sessionDate} at ${sessionTime} PT.</p>
+    <p>Hi ${escapeHtml(details.requesterName)},</p>
+    <p>Your booking for <strong>${escapeHtml(details.trainingTitle)}</strong> has been confirmed for ${escapeHtml(details.sessionDate)} at ${escapeHtml(details.sessionTime)} PT.</p>
+    ${bookingDetailsHtml(details)}
+    ${agendaHtml(details.trainingId)}
     <p>The corresponding engineering contact has also been notified for this session.</p>
     <p>Best regards,<br>Training Scheduler</p>
   `
 
   await transporter.sendMail({
     from: smtpFrom,
-    to: requesterEmail,
+    to: details.requesterEmail,
     cc: instructorEmail,
     subject,
     html,
   })
+}
+
+export function buildBookingNotificationPreview(details: BookingEmailDetails): string {
+  return `
+    ${bookingDetailsHtml(details)}
+    ${agendaHtml(details.trainingId)}
+  `
 }
 
 export async function sendBookingCancellationNotificationEmail(
@@ -176,4 +231,53 @@ function escapeHtml(text: string): string {
     "'": '&#039;',
   }
   return text.replace(/[&<>"']/g, (char) => map[char])
+}
+
+function bookingDetailsHtml(details: BookingEmailDetails): string {
+  const rows = [
+    ['Booking ID', details.bookingId],
+    ['Session ID', details.sessionId],
+    ['Training ID', details.trainingId],
+    ['Training class', details.trainingTitle],
+    ['Date', details.sessionDate],
+    ['Start time', `${details.sessionTime} PT`],
+    ['Duration', `${details.durationMinutes} minutes`],
+    ['OEM', details.oem],
+    ['ODM', details.odm ?? 'NA'],
+    ['Training type', details.trainingFormat ? trainingFormatLabels[details.trainingFormat] : 'Not specified'],
+    ['Requester email', details.requesterEmail],
+    ['Engineering contact', details.instructorEmail ?? 'Not configured'],
+    ['Created at', details.createdAt],
+  ]
+
+  return `
+    <h3>Booking details</h3>
+    <table cellpadding="6" cellspacing="0" style="border-collapse: collapse; border: 1px solid #d9d9d9;">
+      <tbody>
+        ${rows.map(([label, value]) => `<tr><th align="left" style="border: 1px solid #d9d9d9; background: #f6f6f6;">${escapeHtml(label)}</th><td style="border: 1px solid #d9d9d9;">${escapeHtml(value)}</td></tr>`).join('')}
+      </tbody>
+    </table>
+  `
+}
+
+function agendaHtml(trainingId: string): string {
+  const agenda = courseAgendas[baseTrainingId(trainingId)]
+  if (!agenda) return ''
+  return `
+    <h3>${escapeHtml(agenda.title)}</h3>
+    <ol>
+      ${agenda.items.map(agendaItemHtml).join('')}
+    </ol>
+  `
+}
+
+function agendaItemHtml(item: AgendaItem): string {
+  const children = item.children?.length ? `<ul>${item.children.map((child) => `<li>${escapeHtml(child)}</li>`).join('')}</ul>` : ''
+  return `<li>${escapeHtml(item.text)}${children}</li>`
+}
+
+function baseTrainingId(trainingId: string): string {
+  if (trainingId.startsWith('wifi-8')) return 'wifi-8'
+  if (trainingId.startsWith('bt-hdt')) return 'bt-hdt'
+  return trainingId
 }

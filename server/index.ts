@@ -16,6 +16,7 @@ const port = Number(process.env.PORT ?? 3001)
 const staticRoot = path.resolve('dist')
 const OEM_OPTIONS = new Set(['Dell', 'HP', 'Asus', 'Acer', 'Fujitsu', 'VAIO', 'Panasonic', 'NEC', 'Samsung', 'LG', 'Honor', 'Wiko', 'Dynabook', 'Google', 'Microsoft', 'MSFT Surface', 'MSI', 'Xiaomi', 'Lenovo China', 'Lenovo Japan', 'NA'])
 const ODM_OPTIONS = new Set(['Quanta', 'Pegatron', 'Wistron', 'Inventec', 'Compal', 'LCFC', 'Luxshare', 'Huaqin', 'Longcheer', 'NA'])
+const TRAINING_FORMAT_OPTIONS = new Set(['with-video', 'without-video'])
 const isDate = (value: unknown) => typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)
 const trainingUnavailableLabel = (trainingId: string, title: string) => {
   if (trainingId === 'wifi-log') return 'WiFi Debug Training'
@@ -95,7 +96,7 @@ app.post('/api/sessions', requireScheduler, async (request, response) => {
     if (!training) throw new Error('TRAINING_NOT_FOUND')
     const startMinutes = Number(startTime?.slice(0, 2)) * 60 + Number(startTime?.slice(3, 5))
     const weekday = new Date(`${date}T12:00:00Z`).getUTCDay()
-    if (!/^2026-(09-(1[4-9]|2[0-9])|10-0[12])$/.test(date) || weekday === 0 || weekday === 6 || !/^\d{2}:(00|30)$/.test(startTime) || startMinutes < 540 || startMinutes > 1020) throw new Error('INVALID_SESSION_TIME')
+    if (!/^2026-(09-(1[4-9]|2[0-9])|10-0[1-9])$/.test(date) || weekday === 0 || weekday === 6 || !/^\d{2}:(00|30)$/.test(startTime) || startMinutes < 540 || startMinutes > 1020) throw new Error('INVALID_SESSION_TIME')
     if (current.sessions.some((session) => session.status === 'active' && session.trainingId === trainingId && session.date === date && session.startTime === startTime)) throw new Error('DUPLICATE_SESSION')
     if (current.sessions.some((session) => session.status === 'active' && session.date === date && session.startTime === startTime && current.trainings.find((item) => item.id === session.trainingId)?.instructor === training.instructor)) throw new Error('INSTRUCTOR_CONFLICT')
     current.sessions.push({ id: crypto.randomUUID(), trainingId, date, startTime, durationMinutes: current.window.durationMinutes, status: 'active' })
@@ -115,11 +116,13 @@ app.delete('/api/sessions/:id', requireScheduler, async (request, response) => {
 })
 
 app.post('/api/bookings', async (request, response) => {
-  const { sessionId, oem, odm, requesterName, requesterEmail } = request.body ?? {}
-  if (!sessionId || !oem || !odm || !requesterName || !requesterEmail) return response.status(400).json({ error: 'REQUIRED_FIELDS_MISSING' })
+  const { sessionId, oem, odm, trainingFormat, requesterName, requesterEmail } = request.body ?? {}
+  if (!sessionId || !oem || !odm || !trainingFormat || !requesterName || !requesterEmail) return response.status(400).json({ error: 'REQUIRED_FIELDS_MISSING' })
   const selectedOem = String(oem)
   const selectedOdm = String(odm)
+  const selectedTrainingFormat = String(trainingFormat)
   if (!OEM_OPTIONS.has(selectedOem) || !ODM_OPTIONS.has(selectedOdm)) return response.status(400).json({ error: 'INVALID_CUSTOMER_SELECTION' })
+  if (!TRAINING_FORMAT_OPTIONS.has(selectedTrainingFormat)) return response.status(400).json({ error: 'INVALID_TRAINING_FORMAT' })
   let booking: Booking | undefined
   let session: Awaited<ReturnType<typeof store.read>>['sessions'][0] | undefined
   let training: Awaited<ReturnType<typeof store.read>>['trainings'][0] | undefined
@@ -145,6 +148,7 @@ app.post('/api/bookings', async (request, response) => {
       sessionId,
       oem: selectedOem,
       odm: selectedOdm,
+      trainingFormat: selectedTrainingFormat as Booking['trainingFormat'],
       requesterName,
       requesterEmail: requesterEmail.toLowerCase(),
       createdAt: new Date().toISOString(),
@@ -158,11 +162,22 @@ app.post('/api/bookings', async (request, response) => {
     if (booking && session && training) {
       instructorEmail = await getCFEContactEmail(training.id, selectedOem, selectedOdm)
       await sendBookingNotificationEmail(
-        booking.requesterEmail,
-        booking.requesterName,
-        training.title,
-        session.date,
-        session.startTime,
+        {
+          bookingId: booking.id,
+          sessionId: booking.sessionId,
+          trainingId: training.id,
+          trainingTitle: training.title,
+          sessionDate: session.date,
+          sessionTime: session.startTime,
+          durationMinutes: session.durationMinutes,
+          oem: booking.oem,
+          odm: booking.odm,
+          trainingFormat: booking.trainingFormat,
+          requesterName: booking.requesterName,
+          requesterEmail: booking.requesterEmail,
+          createdAt: booking.createdAt,
+          instructorEmail,
+        },
         instructorEmail ?? undefined,
       )
     }

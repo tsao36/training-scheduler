@@ -115,6 +115,11 @@ button { font: inherit; cursor: pointer; }
 .booking-block-item strong { display: block; color: var(--navy); font-size: 12px; }
 .booking-block-item span { display: block; margin-top: 2px; color: var(--muted); font-size: 10px; }
 .booking-block-item .cancel-booking-button { width: auto; min-width: 74px; margin: 0; padding: 6px 8px; font-size: 10px; }
+.unavailable-slot-list { margin-top: 12px; border-top: 1px solid var(--line); padding-top: 10px; color: var(--navy); }
+.unavailable-slot-list strong { display: block; font-size: 11px; }
+.unavailable-slot-list div { display: grid; gap: 4px; margin-top: 6px; }
+.unavailable-slot-list span { color: var(--muted); font-size: 10px; line-height: 1.35; }
+.unavailable-slot-list b { color: var(--navy); font-weight: 700; }
 .topic-summary-total {
 	margin-top: 8px;
 	padding: 9px 10px;
@@ -309,6 +314,7 @@ button { font: inherit; cursor: pointer; }
 .day-column > .slot strong, .day-column > .slot small { height: auto; min-width: 0; margin: 0; line-height: 1; }
 .day-column > .slot strong { flex: 1 1 auto; }
 .day-column > .slot small { flex: 0 1 auto; }
+.unavailable-time-block { position: absolute; z-index: 1; left: 0; right: 0; display: flex; height: 25.5px; box-sizing: border-box; align-items: center; justify-content: center; background: rgba(240,235,221,.72); color: #7A6C4D; font-size: 9px; font-weight: 700; line-height: 1; pointer-events: auto; }
 .slot-tooltip { position: fixed; z-index: 40; display: flex; width: min(240px, calc(100vw - 16px)); max-height: calc(100vh - 16px); overflow: auto; flex-direction: column; gap: 4px; padding: 10px 11px; border: 1px solid var(--blue); background: var(--navy); color: #F3F4EF; box-shadow: 0 8px 20px rgba(50,82,106,.24); pointer-events: none; white-space: normal; text-align: left; }
 .slot-tooltip b { color: var(--blue); font-size: 11px; line-height: 1.25; }
 .slot-tooltip span { color: #DDE5E8; font-size: 10px; line-height: 1.3; }
