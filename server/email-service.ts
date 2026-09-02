@@ -19,6 +19,7 @@ const defaultRecipientConfig = {
     Honor: 'charles.p.chu@intel.com',
     Samsung: 'kj.fang@intel.com',
     LG: 'kj.fang@intel.com',
+    Acer: 'kj.fang@intel.com',
     HP: 'frank.lee@intel.com',
     Dell: 'frank.fc.yang@intel.com',
     Asus: 'brenton.wu@intel.com',
