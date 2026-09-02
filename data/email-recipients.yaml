@@ -11,7 +11,7 @@ wifi-8:
   Dell: frank.fc.yang@intel.com
   Asus: brenton.wu@intel.com
   MSFT Surface: timdaway.lai@intel.com
-  Microsoft: zhiqiang.cai@intel.com
+  Lenovo ThinkPad: timdaway.lai@intel.com
   NA / Luxshare: zhiqiang.cai@intel.com
   NA / Huaqin: zhiqiang.cai@intel.com
   NA / Longcheer: zhiqiang.cai@intel.com
@@ -20,6 +20,8 @@ wifi-8:
   NEC: jackx.lee@intel.com
   Fujitsu: jackx.lee@intel.com
   Panasonic: jackx.lee@intel.com
+  MSI: jackx.lee@intel.com
+  GIGABYTE: jackx.lee@intel.com
   NA / Compal: henryx.su@intel.com
   NA / Pegatron: henryx.su@intel.com
   NA / Quanta: henryx.su@intel.com
@@ -35,8 +37,13 @@ bt-hdt:
   MSFT Surface: steven1.chen@intel.com
   Asus: yu-wei.chen@intel.com
   Dell: wesley.kuo@intel.com
+  LG: wesley.kuo@intel.com
+  MSI: wesley.kuo@intel.com
   Samsung: bingyue.sun@intel.com
-  LG: bingyue.sun@intel.com
+  Honor: bingyue.sun@intel.com
+  Xiaomi: bingyue.sun@intel.com
+  Aistone: bingyue.sun@intel.com
+  PRC CTE: bingyue.sun@intel.com
   Dynabook: brenton.wu@intel.com
   VAIO: brenton.wu@intel.com
   NEC: brenton.wu@intel.com

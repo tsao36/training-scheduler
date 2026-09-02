@@ -101,7 +101,7 @@ const weekGroups: { label: string; days: Day[] }[] = [
   { label: "28 SEP–02 OCT", days: weekdays.slice(10, 15) },
   { label: "05–09 OCT", days: weekdays.slice(15, 20) },
 ];
-const OEM_OPTIONS = ["Dell", "HP", "Asus", "Acer", "Fujitsu", "VAIO", "Panasonic", "NEC", "Samsung", "LG", "Honor", "Wiko", "Dynabook", "Google", "Microsoft", "MSFT Surface", "MSI", "Xiaomi", "Lenovo Ideapad", "Lenovo ThinkPad", "NA"] as const;
+const OEM_OPTIONS = ["Dell", "HP", "Asus", "Acer", "Fujitsu", "VAIO", "Panasonic", "NEC", "Samsung", "LG", "Honor", "Wiko", "Dynabook", "Google", "Microsoft", "MSFT Surface", "MSI", "GIGABYTE", "Xiaomi", "Aistone", "PRC CTE", "Lenovo Ideapad", "Lenovo ThinkPad", "NA"] as const;
 const ODM_OPTIONS = ["Quanta", "Pegatron", "Wistron", "Inventec", "Compal", "LCFC", "Luxshare", "Huaqin", "Longcheer", "NA"] as const;
 const TRAINING_FORMAT_OPTIONS = [
   { value: "with-video", label: "Training with video: Instructor play online video and answer QnA in person" },
@@ -953,7 +953,7 @@ function App() {
     setRecipientRows((current) => current.map((row) => row.id === id ? { ...row, ...updates } : row));
   };
   const addRecipientRow = () => {
-    setRecipientRows((current) => [...current, createRecipientRow(data?.trainings[0]?.id ?? "wifi-log")]);
+    setRecipientRows((current) => [...current, createRecipientRow(data?.trainings[0]?.id ?? "wifi-log", "")]);
   };
   const deleteRecipientRow = (id: string) => {
     setRecipientRows((current) => current.filter((row) => row.id !== id));
@@ -1776,18 +1776,23 @@ function App() {
                   value={row.trainingId}
                   onChange={(event) => updateRecipientRow(row.id, { trainingId: event.target.value })}
                 />
-                <input
+                <select
                   aria-label="OEM or default rule"
-                  list="recipient-oem-options"
                   value={row.oem}
                   onChange={(event) => updateRecipientRow(row.id, { oem: event.target.value })}
-                />
-                <input
+                >
+                  <option value="" disabled>Select OEM</option>
+                  <option value="default">Default</option>
+                  {OEM_OPTIONS.map((oem) => <option value={oem} key={oem}>{oem}</option>)}
+                </select>
+                <select
                   aria-label="ODM rule"
-                  list="recipient-odm-options"
                   value={row.odm}
                   onChange={(event) => updateRecipientRow(row.id, { odm: event.target.value })}
-                />
+                >
+                  <option value="">(any ODM)</option>
+                  {ODM_OPTIONS.map((odm) => <option value={odm} key={odm}>{odm}</option>)}
+                </select>
                 <input
                   aria-label="Recipient email"
                   type="email"
@@ -1802,13 +1807,6 @@ function App() {
           </div>
           <datalist id="recipient-training-options">
             {data?.trainings.map((training) => <option value={training.id} key={training.id}>{training.title}</option>)}
-          </datalist>
-          <datalist id="recipient-oem-options">
-            <option value="default">Default</option>
-            {OEM_OPTIONS.map((oem) => <option value={oem} key={oem} />)}
-          </datalist>
-          <datalist id="recipient-odm-options">
-            {ODM_OPTIONS.map((odm) => <option value={odm} key={odm} />)}
           </datalist>
           <div className="modal-actions">
             <button className="secondary-button" type="button" onClick={addRecipientRow}>
