@@ -135,8 +135,19 @@ const userError = (code: string) =>
       "This OEM/ODM already has a booking for the same training topic.",
     INVALID_EMAIL_RECIPIENTS_YAML: "Please check the recipient table for missing or invalid values.",
   })[code] ?? "Something went wrong. Please try again.";
+// crypto.randomUUID requires a secure context (HTTPS/localhost); fall back to getRandomValues over plain HTTP.
+const generateId = (): string => {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") return crypto.randomUUID();
+  const bytes = new Uint8Array(16);
+  if (typeof crypto !== "undefined" && typeof crypto.getRandomValues === "function") crypto.getRandomValues(bytes);
+  else for (let index = 0; index < bytes.length; index += 1) bytes[index] = Math.floor(Math.random() * 256);
+  bytes[6] = (bytes[6] & 0x0f) | 0x40;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+  const hex = Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0"));
+  return `${hex.slice(0, 4).join("")}-${hex.slice(4, 6).join("")}-${hex.slice(6, 8).join("")}-${hex.slice(8, 10).join("")}-${hex.slice(10, 16).join("")}`;
+};
 const createRecipientRow = (trainingId = "", oem = "default", odm = "", email = ""): RecipientRow => ({
-  id: crypto.randomUUID(),
+  id: generateId(),
   trainingId,
   oem,
   odm,
