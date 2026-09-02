@@ -101,7 +101,7 @@ const weekGroups: { label: string; days: Day[] }[] = [
   { label: "28 SEP–02 OCT", days: weekdays.slice(10, 15) },
   { label: "05–09 OCT", days: weekdays.slice(15, 20) },
 ];
-const OEM_OPTIONS = ["Dell", "HP", "Asus", "Acer", "Fujitsu", "VAIO", "Panasonic", "NEC", "Samsung", "LG", "Honor", "Wiko", "Dynabook", "Google", "Microsoft", "MSFT Surface", "MSI", "Xiaomi", "Lenovo China", "Lenovo Japan", "NA"] as const;
+const OEM_OPTIONS = ["Dell", "HP", "Asus", "Acer", "Fujitsu", "VAIO", "Panasonic", "NEC", "Samsung", "LG", "Honor", "Wiko", "Dynabook", "Google", "Microsoft", "MSFT Surface", "MSI", "Xiaomi", "Lenovo Ideapad", "Lenovo ThinkPad", "NA"] as const;
 const ODM_OPTIONS = ["Quanta", "Pegatron", "Wistron", "Inventec", "Compal", "LCFC", "Luxshare", "Huaqin", "Longcheer", "NA"] as const;
 const TRAINING_FORMAT_OPTIONS = [
   { value: "with-video", label: "Training with video: Instructor play online video and answer QnA in person" },

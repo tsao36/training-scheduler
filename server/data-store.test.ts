@@ -87,7 +87,7 @@ test('maps wifi and bt bookings to engineering notification recipients', async (
     'requester@example.com',
     'hannahx.hung@intel.com',
   ])
-  assert.deepEqual(await getBookingNotificationRecipients('wifi-8', 'requester@example.com', 'Lenovo China'), [
+  assert.deepEqual(await getBookingNotificationRecipients('wifi-8', 'requester@example.com', 'Lenovo Ideapad'), [
     'requester@example.com',
     'zhiqiang.cai@intel.com',
   ])
