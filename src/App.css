@@ -205,6 +205,8 @@ button { font: inherit; cursor: pointer; }
 .booking-record code { margin-top: 4px; color: var(--gold); font-size: 8px; word-break: break-all; }
 .cancel-booking-button { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; box-sizing: border-box; margin: 0 0 8px; border: 1px solid var(--coral); background: transparent; color: var(--coral); padding: 8px; font-size: 10px; }
 .cancel-booking-button:hover { background: #F0E4E6; }
+.booking-record-actions { display: flex; gap: 6px; }
+.booking-record-actions .secondary-button, .booking-record-actions .cancel-booking-button { flex: 1; width: auto; margin: 0 0 8px; padding: 8px; font-size: 10px; }
 .cancel-summary { display: grid; gap: 3px; padding: 11px; background: #F0E4E6; color: var(--navy); }
 .cancel-summary strong { font-size: 12px; }
 .cancel-summary span { color: var(--muted); font-size: 10px; }

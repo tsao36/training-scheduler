@@ -254,6 +254,27 @@ export async function sendBookingCancellationNotificationEmail(
   })
 }
 
+export async function sendInstructorUpdateNotificationEmail(
+  details: BookingEmailDetails,
+  newInstructorEmail: string,
+): Promise<void> {
+  const subject = `Training Scheduler instructor updated: ${details.trainingTitle}`
+  const html = `
+    <p>Hi ${escapeHtml(details.requesterName)},</p>
+    <p>The engineering contact for your booking of <strong>${escapeHtml(details.trainingTitle)}</strong> on ${escapeHtml(details.sessionDate)} at ${escapeHtml(details.sessionTime)} PT has been updated to <strong>${escapeHtml(newInstructorEmail)}</strong>.</p>
+    ${bookingDetailsHtml(details)}
+    <p>Best regards,<br>Training Scheduler</p>
+  `
+
+  await transporter.sendMail({
+    from: smtpFrom,
+    to: details.requesterEmail,
+    cc: newInstructorEmail,
+    subject,
+    html,
+  })
+}
+
 function escapeHtml(text: string): string {
   const map: Record<string, string> = {
     '&': '&amp;',

@@ -4,7 +4,7 @@ import express, { type NextFunction, type Request, type Response } from 'express
 import path from 'node:path'
 import { dump } from 'js-yaml'
 import { createDataStore, type Booking } from './data-store.js'
-import { readEmailRecipientConfig, sendBookingNotificationEmail, sendBookingCancellationNotificationEmail, getCFEContactEmail, writeEmailRecipientConfig } from './email-service.js'
+import { readEmailRecipientConfig, sendBookingNotificationEmail, sendBookingCancellationNotificationEmail, sendInstructorUpdateNotificationEmail, getCFEContactEmail, getCFEContactEmailFromConfig, writeEmailRecipientConfig } from './email-service.js'
 import { readTrainingVideoCatalog } from './training-videos.js'
 
 const password = process.env.SCHEDULER_PASSWORD
@@ -44,12 +44,24 @@ const isSystemUnavailableBooking = (booking: Booking) =>
   booking.requesterEmail === 'scheduler-block@local' ||
   booking.requesterName === 'System Block' ||
   booking.oem === 'Not available'
+const isEmail = (value: unknown) => typeof value === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
 
 const sendData = async (_request: Request, response: Response) => {
   const data = await store.read()
   const trainings = new Map(data.trainings.map((training) => [training.id, training]))
+  const sessions = new Map(data.sessions.map((session) => [session.id, session]))
+  const recipientConfig = await readEmailRecipientConfig()
+  const resolveInstructor = (booking: Booking) => {
+    if (booking.instructorEmail) return booking.instructorEmail
+    const trainingId = sessions.get(booking.sessionId)?.trainingId
+    return trainingId ? getCFEContactEmailFromConfig(trainingId, booking.oem, booking.odm ?? 'NA', recipientConfig) ?? undefined : undefined
+  }
   response.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate')
-  response.json({ ...data, sessions: data.sessions.map((session) => ({ ...session, training: trainings.get(session.trainingId) })), bookings: data.bookings.filter((booking) => booking.status === 'confirmed') })
+  response.json({
+    ...data,
+    sessions: data.sessions.map((session) => ({ ...session, training: trainings.get(session.trainingId) })),
+    bookings: data.bookings.filter((booking) => booking.status === 'confirmed').map((booking) => ({ ...booking, instructorEmail: resolveInstructor(booking) })),
+  })
 }
 
 app.get('/api/scheduler', sendData)
@@ -64,9 +76,14 @@ app.get('/api/bookings', async (request, response) => {
   const data = await store.read()
   const trainings = new Map(data.trainings.map((training) => [training.id, training]))
   const sessions = new Map(data.sessions.map((session) => [session.id, session]))
+  const recipientConfig = await readEmailRecipientConfig()
   const matches = data.bookings
     .filter((booking) => (booking.status === 'confirmed' || booking.status === 'pending') && booking.requesterEmail.toLowerCase() === email)
-    .map((booking) => ({ ...booking, session: sessions.get(booking.sessionId), training: sessions.get(booking.sessionId) ? trainings.get(sessions.get(booking.sessionId)!.trainingId) : undefined }))
+    .map((booking) => {
+      const trainingId = sessions.get(booking.sessionId)?.trainingId
+      const instructorEmail = booking.instructorEmail ?? (trainingId ? getCFEContactEmailFromConfig(trainingId, booking.oem, booking.odm ?? 'NA', recipientConfig) ?? undefined : undefined)
+      return { ...booking, instructorEmail, session: sessions.get(booking.sessionId), training: sessions.get(booking.sessionId) ? trainings.get(sessions.get(booking.sessionId)!.trainingId) : undefined }
+    })
   response.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate')
   response.json({ bookings: matches })
 })
@@ -275,6 +292,51 @@ app.delete('/api/bookings/:id', async (request, response) => {
   }
 
   response.status(204).end()
+})
+
+app.put('/api/bookings/:id/instructor', async (request, response) => {
+  const requesterEmail = String(request.body?.requesterEmail ?? '').trim().toLowerCase()
+  const instructorEmail = String(request.body?.instructorEmail ?? '').trim().toLowerCase()
+  if (!requesterEmail || !instructorEmail) return response.status(400).json({ error: 'REQUIRED_FIELDS_MISSING' })
+  if (!isEmail(instructorEmail)) return response.status(400).json({ error: 'INVALID_INSTRUCTOR_EMAIL' })
+  let booking: Booking | undefined
+  let session: Awaited<ReturnType<typeof store.read>>['sessions'][0] | undefined
+  let training: Awaited<ReturnType<typeof store.read>>['trainings'][0] | undefined
+  await store.update((data) => {
+    booking = data.bookings.find((item) => item.id === request.params.id && item.requesterEmail.trim().toLowerCase() === requesterEmail && item.status === 'confirmed')
+    if (!booking) throw new Error('BOOKING_NOT_FOUND')
+    session = data.sessions.find((item) => item.id === booking!.sessionId)
+    training = session ? data.trainings.find((item) => item.id === session!.trainingId) : undefined
+    booking.instructorEmail = instructorEmail
+  })
+
+  try {
+    if (booking && session && training) {
+      await sendInstructorUpdateNotificationEmail(
+        {
+          bookingId: booking.id,
+          sessionId: booking.sessionId,
+          trainingId: training.id,
+          trainingTitle: training.title,
+          sessionDate: session.date,
+          sessionTime: session.startTime,
+          durationMinutes: session.durationMinutes,
+          oem: booking.oem,
+          odm: booking.odm,
+          trainingFormat: booking.trainingFormat,
+          requesterName: booking.requesterName,
+          requesterEmail: booking.requesterEmail,
+          createdAt: booking.createdAt,
+          instructorEmail,
+        },
+        instructorEmail,
+      )
+    }
+  } catch (error) {
+    console.error('Failed to send instructor update notification email:', error)
+  }
+
+  response.json({ ...booking, instructorEmail })
 })
 
 app.use(express.static(staticRoot))
