@@ -127,6 +127,31 @@ const courseAgendas: Record<string, { title: string; items: AgendaItem[] }> = {
       { text: 'What this means for your platform roadmap, and what to plan for now' },
     ],
   },
+  'wifi-log': {
+    title: 'WiFi Debug Training agenda',
+    items: [
+      { text: 'How to download and install Wi-Fi Driver' },
+      { text: 'How to use WRT2G' },
+      { text: 'How to capture DDD logs' },
+      { text: 'Installation of OEM tools' },
+      { text: 'DRTU basic function' },
+      { text: 'CITU basic function' },
+      { text: 'NDT basic function' },
+      { text: 'Ant tool basic function' },
+    ],
+  },
+  'bt-log': {
+    title: 'BT Debug Training agenda',
+    items: [
+      { text: 'Install/Uninstall Bluetooth Driver' },
+      {
+        text: 'Log Capture Tool',
+        children: ['Ibttrace', 'MSFT Tracing Tool (Microsoft Bluetooth Tracing)', 'Intel Wireless Reporting Tool (WRT)'],
+      },
+      { text: 'Ibtverify / GPIO Table' },
+      { text: 'Intel SSTDebugStudio' },
+    ],
+  },
 }
 
 export async function readEmailRecipientConfig(): Promise<EmailRecipientConfig> {

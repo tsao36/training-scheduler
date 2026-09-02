@@ -271,6 +271,11 @@ const unavailableTimeLabel = (startMinutes: number, endMinutes: number) =>
   startMinutes === SCHEDULE_START_MINUTES && endMinutes === SCHEDULE_END_MINUTES
     ? "All day"
     : `${timeFromMinutes(startMinutes)}-${timeFromMinutes(endMinutes)} PT`;
+const unavailableSlotNote = (label: string, startMinutes: number): string => {
+  if (label === "WiFi 8 for all" && startMinutes === 14 * 60 + 30) return "During WiFi CIRM";
+  if (label === "BT HDT for all" && startMinutes === 16 * 60) return "During BT CIRM";
+  return "";
+};
 const unavailableScheduleLabel = (sessions: Session[]) => {
   const firstSession = sessions[0];
   if (!firstSession) return "";
@@ -323,6 +328,31 @@ const COURSE_AGENDAS: Record<string, { title: string; items: AgendaItem[] }> = {
       { text: "Application scenarios on a notebook platform" },
       { text: "Specification status and a realistic view of the timeline" },
       { text: "What this means for your platform roadmap, and what to plan for now" },
+    ],
+  },
+  "wifi-debug-major": {
+    title: "WiFi Debug Training agenda",
+    items: [
+      { text: "How to download and install Wi-Fi Driver" },
+      { text: "How to use WRT2G" },
+      { text: "How to capture DDD logs" },
+      { text: "Installation of OEM tools" },
+      { text: "DRTU basic function" },
+      { text: "CITU basic function" },
+      { text: "NDT basic function" },
+      { text: "Ant tool basic function" },
+    ],
+  },
+  "bt-debug-major": {
+    title: "BT Debug Training agenda",
+    items: [
+      { text: "Install/Uninstall Bluetooth Driver" },
+      {
+        text: "Log Capture Tool",
+        children: ["Ibttrace", "MSFT Tracing Tool (Microsoft Bluetooth Tracing)", "Intel Wireless Reporting Tool (WRT)"],
+      },
+      { text: "Ibtverify / GPIO Table" },
+      { text: "Intel SSTDebugStudio" },
     ],
   },
 };
@@ -698,6 +728,7 @@ function App() {
           ...entry,
           dateLabel: compactDateList(entry.dates),
           timeLabel: unavailableTimeLabel(entry.startMinutes, entry.endMinutes),
+          note: unavailableSlotNote(entry.label, entry.startMinutes),
         }));
       const allDayDatesByLabel = visibleUnavailableDays.reduce<Map<string, string[]>>((groups, entry) => {
         groups.set(entry.label, [...(groups.get(entry.label) ?? []), entry.date]);
@@ -710,6 +741,7 @@ function App() {
         dates,
         dateLabel: compactDateList(dates),
         timeLabel: "All day",
+        note: "",
       }));
 
       return [...allDayEntries, ...partialDayEntries]
@@ -1470,6 +1502,7 @@ function App() {
                   {unavailableSlotSummary.map((entry) => (
                     <span key={`${entry.label}-${entry.dateLabel}-${entry.timeLabel}`}>
                       <b>{entry.label}:</b> {entry.dateLabel} · {entry.timeLabel}
+                      {entry.note && <em className="unavailable-slot-note"> ({entry.note})</em>}
                     </span>
                   ))}
                 </div>
