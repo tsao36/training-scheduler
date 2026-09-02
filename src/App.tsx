@@ -408,7 +408,7 @@ function App() {
   const [selectedSession, setSelectedSession] = useState<Session | null>(null);
   const [query, setQuery] = useState("");
   const [weekIndex, setWeekIndex] = useState(0);
-  const [modal, setModal] = useState<"booking" | "login" | "my-bookings" | "topic-customer" | "booking-blocks" | "booking-confirmation" | "verification-success" | "email-recipients" | "training-videos" | "course-agenda" | "update-instructor" | null>(
+  const [modal, setModal] = useState<"booking" | "login" | "my-bookings" | "topic-customer" | "booking-blocks" | "booking-confirmation" | "verification-success" | "email-recipients" | "training-videos" | "course-agenda" | null>(
     null,
   );
   const [bookingDraft, setBookingDraft] = useState<{
@@ -428,9 +428,6 @@ function App() {
   const [bookingInProgress, setBookingInProgress] = useState(false);
   const [cancellingBookingId, setCancellingBookingId] = useState<string | null>(null);
   const [updatingInstructorBookingId, setUpdatingInstructorBookingId] = useState<string | null>(null);
-  const [instructorUpdateTarget, setInstructorUpdateTarget] = useState<Booking | null>(null);
-  const [instructorUpdateRequesterEmail, setInstructorUpdateRequesterEmail] = useState("");
-  const [instructorUpdateEmail, setInstructorUpdateEmail] = useState("");
   const [clearBookingsInProgress, setClearBookingsInProgress] = useState(false);
   const [lookupEmail, setLookupEmail] = useState("");
   const [lookupResults, setLookupResults] = useState<BookingLookup[] | null>(null);
