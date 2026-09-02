@@ -407,7 +407,7 @@ function App() {
   const [selectedSession, setSelectedSession] = useState<Session | null>(null);
   const [query, setQuery] = useState("");
   const [weekIndex, setWeekIndex] = useState(0);
-  const [modal, setModal] = useState<"booking" | "login" | "my-bookings" | "topic-customer" | "booking-blocks" | "booking-confirmation" | "verification-success" | "email-recipients" | "training-videos" | "course-agenda" | null>(
+  const [modal, setModal] = useState<"booking" | "login" | "my-bookings" | "topic-customer" | "booking-blocks" | "booking-confirmation" | "verification-success" | "email-recipients" | "training-videos" | "course-agenda" | "update-instructor" | null>(
     null,
   );
   const [bookingDraft, setBookingDraft] = useState<{
@@ -422,10 +422,14 @@ function App() {
     requesterEmail: "",
   });
   const [authenticated, setAuthenticated] = useState(false);
+  const [bookingInstructorPreview, setBookingInstructorPreview] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [bookingInProgress, setBookingInProgress] = useState(false);
   const [cancellingBookingId, setCancellingBookingId] = useState<string | null>(null);
   const [updatingInstructorBookingId, setUpdatingInstructorBookingId] = useState<string | null>(null);
+  const [instructorUpdateTarget, setInstructorUpdateTarget] = useState<Booking | null>(null);
+  const [instructorUpdateRequesterEmail, setInstructorUpdateRequesterEmail] = useState("");
+  const [instructorUpdateEmail, setInstructorUpdateEmail] = useState("");
   const [clearBookingsInProgress, setClearBookingsInProgress] = useState(false);
   const [lookupEmail, setLookupEmail] = useState("");
   const [lookupResults, setLookupResults] = useState<BookingLookup[] | null>(null);
@@ -617,6 +621,18 @@ function App() {
     if (!banner) return;
     delete banner.dataset.errorCode;
   }, [error]);
+  useEffect(() => {
+    if (modal !== "booking" || !selectedSession?.trainingId) {
+      setBookingInstructorPreview(null);
+      return;
+    }
+    let cancelled = false;
+    const params = new URLSearchParams({ trainingId: selectedSession.trainingId, oem: bookingDraft.oem, odm: bookingDraft.odm });
+    api<{ instructorEmail: string | null }>(`/api/instructor-preview?${params}`)
+      .then((result) => { if (!cancelled) setBookingInstructorPreview(result.instructorEmail); })
+      .catch(() => { if (!cancelled) setBookingInstructorPreview(null); });
+    return () => { cancelled = true; };
+  }, [modal, selectedSession?.trainingId, bookingDraft.oem, bookingDraft.odm]);
   const trainings = data?.trainings ?? [];
   const visibleUnavailableDays = useMemo(
     () =>
@@ -2081,6 +2097,9 @@ function App() {
               ))}
             </select>
           </label>
+          <p className="instructor-preview">
+            <UserRound size={13} /> Instructor: {bookingInstructorPreview ?? "Not configured"}
+          </p>
           <label className="form-label">
             Training type
             <select

@@ -70,6 +70,15 @@ app.get('/api/training-videos', async (_request, response) => {
   response.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate')
   response.json(catalog)
 })
+app.get('/api/instructor-preview', async (request, response) => {
+  const trainingId = String(request.query.trainingId ?? '')
+  const oem = request.query.oem ? String(request.query.oem) : undefined
+  const odm = request.query.odm ? String(request.query.odm) : undefined
+  if (!trainingId) return response.status(400).json({ error: 'REQUIRED_FIELDS_MISSING' })
+  const instructorEmail = await getCFEContactEmail(trainingId, oem, odm)
+  response.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate')
+  response.json({ instructorEmail })
+})
 app.get('/api/bookings', async (request, response) => {
   const email = String(request.query.email ?? '').trim().toLowerCase()
   if (!email) return response.status(400).json({ error: 'REQUESTER_EMAIL_REQUIRED' })

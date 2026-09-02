@@ -121,6 +121,7 @@ button { font: inherit; cursor: pointer; }
 .unavailable-slot-list span { color: var(--muted); font-size: 10px; line-height: 1.35; }
 .unavailable-slot-list b { color: var(--navy); font-weight: 700; }
 .unavailable-slot-note { font-style: italic; }
+.instructor-preview { display: flex; align-items: center; gap: 6px; margin: 0; padding: 9px 10px; background: #f1eee8; color: var(--navy); font-size: 11px; }
 .topic-summary-total {
 	margin-top: 8px;
 	padding: 9px 10px;
