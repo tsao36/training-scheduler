@@ -135,6 +135,7 @@ const userError = (code: string) =>
       "This OEM/ODM already has a booking for the same training topic.",
     INVALID_EMAIL_RECIPIENTS_YAML: "Please check the recipient table for missing or invalid values.",
     INVALID_INSTRUCTOR_EMAIL: "Please enter a valid instructor email address.",
+    NO_INSTRUCTOR_MAPPED: "No instructor is mapped for this OEM/ODM and training. Please email jonathan.tsao@intel.com to add an instructor mapping.",
   })[code] ?? "Something went wrong. Please try again.";
 // crypto.randomUUID requires a secure context (HTTPS/localhost); fall back to getRandomValues over plain HTTP.
 const generateId = (): string => {
@@ -956,6 +957,10 @@ function App() {
   }, [sessions, selectedSession]);
   const createBooking = async () => {
     if (!selectedSession || bookingInProgress) return;
+    if (!bookingInstructorPreview) {
+      setError(userError("NO_INSTRUCTOR_MAPPED"));
+      return;
+    }
     setBookingInProgress(true);
     try {
       const result = await api<Booking>("/api/bookings", {
@@ -2100,6 +2105,11 @@ function App() {
           <p className="instructor-preview">
             <UserRound size={13} /> Instructor: {bookingInstructorPreview ?? "Not configured"}
           </p>
+          {!bookingInstructorPreview && (
+            <div className="session-capacity closed">
+              <LockKeyhole size={16} /> No instructor is mapped for this OEM/ODM and training. Booking is disabled — please email jonathan.tsao@intel.com to add an instructor mapping.
+            </div>
+          )}
           <label className="form-label">
             Training type
             <select
@@ -2133,7 +2143,7 @@ function App() {
               required
             />
           </label>
-          <button className="book-button" type="button" onClick={createBooking} disabled={bookingInProgress}>
+          <button className="book-button" type="button" onClick={createBooking} disabled={bookingInProgress || !bookingInstructorPreview}>
             {bookingInProgress ? <span className="button-spinner" aria-hidden="true" /> : <Check size={17} />}
             {bookingInProgress ? "Sending notification..." : "Confirm booking"}
           </button>

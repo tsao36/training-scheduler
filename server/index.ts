@@ -4,7 +4,7 @@ import express, { type NextFunction, type Request, type Response } from 'express
 import path from 'node:path'
 import { dump } from 'js-yaml'
 import { createDataStore, type Booking } from './data-store.js'
-import { readEmailRecipientConfig, sendBookingNotificationEmail, sendBookingCancellationNotificationEmail, sendInstructorUpdateNotificationEmail, getCFEContactEmail, getCFEContactEmailFromConfig, writeEmailRecipientConfig } from './email-service.js'
+import { readEmailRecipientConfig, sendBookingNotificationEmail, sendBookingCancellationNotificationEmail, sendInstructorUpdateNotificationEmail, getCFEContactEmail, getCFEContactEmailFromConfig, getExplicitCFEContactEmail, writeEmailRecipientConfig } from './email-service.js'
 import { readTrainingVideoCatalog } from './training-videos.js'
 
 const password = process.env.SCHEDULER_PASSWORD
@@ -75,7 +75,7 @@ app.get('/api/instructor-preview', async (request, response) => {
   const oem = request.query.oem ? String(request.query.oem) : undefined
   const odm = request.query.odm ? String(request.query.odm) : undefined
   if (!trainingId) return response.status(400).json({ error: 'REQUIRED_FIELDS_MISSING' })
-  const instructorEmail = await getCFEContactEmail(trainingId, oem, odm)
+  const instructorEmail = await getExplicitCFEContactEmail(trainingId, oem, odm)
   response.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate')
   response.json({ instructorEmail })
 })
@@ -153,6 +153,13 @@ app.post('/api/bookings', async (request, response) => {
   const selectedTrainingFormat = String(trainingFormat)
   if (!OEM_OPTIONS.has(selectedOem) || !ODM_OPTIONS.has(selectedOdm)) return response.status(400).json({ error: 'INVALID_CUSTOMER_SELECTION' })
   if (!TRAINING_FORMAT_OPTIONS.has(selectedTrainingFormat)) return response.status(400).json({ error: 'INVALID_TRAINING_FORMAT' })
+
+  const preCheckData = await store.read()
+  const preCheckSession = preCheckData.sessions.find((item) => item.id === sessionId && item.status === 'active')
+  const preCheckTraining = preCheckSession ? preCheckData.trainings.find((item) => item.id === preCheckSession!.trainingId) : undefined
+  const instructorEmail = preCheckTraining ? await getExplicitCFEContactEmail(preCheckTraining.id, selectedOem, selectedOdm) : null
+  if (preCheckTraining && !instructorEmail) return response.status(400).json({ error: 'NO_INSTRUCTOR_MAPPED' })
+
   let booking: Booking | undefined
   let session: Awaited<ReturnType<typeof store.read>>['sessions'][0] | undefined
   let training: Awaited<ReturnType<typeof store.read>>['trainings'][0] | undefined
@@ -187,10 +194,8 @@ app.post('/api/bookings', async (request, response) => {
     data.bookings.push(booking)
   })
 
-  let instructorEmail: string | null = null
   try {
     if (booking && session && training) {
-      instructorEmail = await getCFEContactEmail(training.id, selectedOem, selectedOdm)
       await sendBookingNotificationEmail(
         {
           bookingId: booking.id,

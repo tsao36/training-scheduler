@@ -194,6 +194,24 @@ export async function getCFEContactEmail(trainingId: string, oem?: string, odm?:
   return getCFEContactEmailFromConfig(trainingId, oem, odm, config)
 }
 
+// Like getCFEContactEmailFromConfig, but does not silently fall back to the training's generic
+// default when the training routes by OEM and this specific OEM/ODM has no explicit entry.
+export function getExplicitCFEContactEmailFromConfig(trainingId: string, oem: string | undefined, odm: string | undefined, config: EmailRecipientConfig): string | null {
+  const configForTraining = config[trainingId] ?? {}
+  const exactOdmMatch = oem && odm ? configForTraining[`${oem} / ${odm}`] : undefined
+  if (exactOdmMatch) return exactOdmMatch
+  const exactMatch = oem ? configForTraining[oem] : undefined
+  if (exactMatch) return exactMatch
+  const hasOemSpecificRouting = Object.keys(configForTraining).some((key) => key !== 'default')
+  if (hasOemSpecificRouting) return null
+  return configForTraining.default ?? null
+}
+
+export async function getExplicitCFEContactEmail(trainingId: string, oem?: string, odm?: string): Promise<string | null> {
+  const config = await readEmailRecipientConfig()
+  return getExplicitCFEContactEmailFromConfig(trainingId, oem, odm, config)
+}
+
 export async function getBookingNotificationRecipients(trainingId: string, requesterEmail: string, oem?: string, odm?: string): Promise<string[]> {
   const instructorEmail = await getCFEContactEmail(trainingId, oem, odm)
   return Array.from(new Set([requesterEmail, ...(instructorEmail ? [instructorEmail] : [])]))
