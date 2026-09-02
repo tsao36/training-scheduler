@@ -1631,30 +1631,6 @@ function App() {
                         <small>Instructor: {booking.instructorEmail ?? "Not configured"}</small>
                         <code>{booking.id}</code>
                       </span>
-                      <div className="booking-record-actions">
-                        <button
-                          className="secondary-button"
-                          type="button"
-                          disabled={updatingInstructorBookingId === booking.id}
-                          onClick={() => {
-                            const requesterEmail = window.prompt("Enter the requester email used for this booking.");
-                            if (requesterEmail) updateBookingInstructor(booking.id, requesterEmail);
-                          }}
-                        >
-                          <UserRound size={13} /> {updatingInstructorBookingId === booking.id ? "Updating..." : "Update instructor"}
-                        </button>
-                        <button
-                          className="cancel-booking-button"
-                          type="button"
-                          disabled={cancellingBookingId === booking.id}
-                          onClick={() => {
-                            const requesterEmail = window.prompt("Enter the requester email used for this booking.");
-                            if (requesterEmail) cancelBooking(booking.id, requesterEmail);
-                          }}
-                        >
-                          <Trash2 size={13} /> {cancellingBookingId === booking.id ? "Cancelling..." : "Cancel booking"}
-                        </button>
-                      </div>
                     </div>
                   ))}
                 </div>
@@ -1667,6 +1643,32 @@ function App() {
                     <Trash2 size={15} /> Delete session
                   </button>
                 )}
+                {selectedBookings.map((booking) => (
+                  <div className="booking-record-actions" key={booking.id}>
+                    <button
+                      className="secondary-button"
+                      type="button"
+                      disabled={updatingInstructorBookingId === booking.id}
+                      onClick={() => {
+                        const requesterEmail = window.prompt("Enter the requester email used for this booking.");
+                        if (requesterEmail) updateBookingInstructor(booking.id, requesterEmail);
+                      }}
+                    >
+                      <UserRound size={13} /> {updatingInstructorBookingId === booking.id ? "Updating..." : `Update instructor (${customerLabel(booking)})`}
+                    </button>
+                    <button
+                      className="cancel-booking-button"
+                      type="button"
+                      disabled={cancellingBookingId === booking.id}
+                      onClick={() => {
+                        const requesterEmail = window.prompt("Enter the requester email used for this booking.");
+                        if (requesterEmail) cancelBooking(booking.id, requesterEmail);
+                      }}
+                    >
+                      <Trash2 size={13} /> {cancellingBookingId === booking.id ? "Cancelling..." : `Cancel booking (${customerLabel(booking)})`}
+                    </button>
+                  </div>
+                ))}
                 {selectedSessionState === "shared" && (
                   <div className="session-capacity shared">
                     <Check size={16} /> Already booked by {selectedBookings.length} customer(s), still open for other OEM/ODM.
