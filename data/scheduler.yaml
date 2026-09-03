@@ -5050,6 +5050,108 @@ sessions:
     startTime: '17:00'
     durationMinutes: 30
     status: active
+  - id: a1b2c3d4-1111-4a10-9001-000000000001
+    trainingId: bt-hdt
+    date: '2026-09-18'
+    startTime: '09:00'
+    durationMinutes: 30
+    status: active
+  - id: a1b2c3d4-1111-4a10-9001-000000000002
+    trainingId: bt-hdt
+    date: '2026-09-18'
+    startTime: '09:30'
+    durationMinutes: 30
+    status: active
+  - id: a1b2c3d4-1111-4a10-9001-000000000003
+    trainingId: bt-hdt
+    date: '2026-09-18'
+    startTime: '10:00'
+    durationMinutes: 30
+    status: active
+  - id: a1b2c3d4-1111-4a10-9001-000000000004
+    trainingId: bt-hdt
+    date: '2026-09-18'
+    startTime: '10:30'
+    durationMinutes: 30
+    status: active
+  - id: a1b2c3d4-1111-4a10-9001-000000000005
+    trainingId: bt-hdt
+    date: '2026-09-18'
+    startTime: '11:00'
+    durationMinutes: 30
+    status: active
+  - id: a1b2c3d4-1111-4a10-9001-000000000006
+    trainingId: bt-hdt
+    date: '2026-09-18'
+    startTime: '11:30'
+    durationMinutes: 30
+    status: active
+  - id: a1b2c3d4-1111-4a10-9001-000000000007
+    trainingId: bt-hdt
+    date: '2026-09-18'
+    startTime: '12:00'
+    durationMinutes: 30
+    status: active
+  - id: a1b2c3d4-1111-4a10-9001-000000000008
+    trainingId: bt-hdt
+    date: '2026-09-18'
+    startTime: '12:30'
+    durationMinutes: 30
+    status: active
+  - id: a1b2c3d4-1111-4a10-9001-000000000009
+    trainingId: bt-hdt
+    date: '2026-09-18'
+    startTime: '13:00'
+    durationMinutes: 30
+    status: active
+  - id: a1b2c3d4-1111-4a10-9001-000000000010
+    trainingId: bt-hdt
+    date: '2026-09-18'
+    startTime: '13:30'
+    durationMinutes: 30
+    status: active
+  - id: a1b2c3d4-1111-4a10-9001-000000000011
+    trainingId: bt-hdt
+    date: '2026-09-18'
+    startTime: '14:00'
+    durationMinutes: 30
+    status: active
+  - id: a1b2c3d4-1111-4a10-9001-000000000012
+    trainingId: bt-hdt
+    date: '2026-09-18'
+    startTime: '14:30'
+    durationMinutes: 30
+    status: active
+  - id: a1b2c3d4-1111-4a10-9001-000000000013
+    trainingId: bt-hdt
+    date: '2026-09-18'
+    startTime: '15:00'
+    durationMinutes: 30
+    status: active
+  - id: a1b2c3d4-1111-4a10-9001-000000000014
+    trainingId: bt-hdt
+    date: '2026-09-18'
+    startTime: '15:30'
+    durationMinutes: 30
+    status: active
+  - id: a1b2c3d4-1111-4a10-9001-000000000015
+    trainingId: bt-hdt
+    date: '2026-09-18'
+    startTime: '16:00'
+    durationMinutes: 30
+    status: active
+  - id: a1b2c3d4-1111-4a10-9001-000000000016
+    trainingId: bt-hdt
+    date: '2026-09-18'
+    startTime: '16:30'
+    durationMinutes: 30
+    status: active
+  - id: a1b2c3d4-1111-4a10-9001-000000000017
+    trainingId: bt-hdt
+    date: '2026-09-18'
+    startTime: '17:00'
+    durationMinutes: 30
+    status: active
   - id: 09cad31d-5d69-4818-bfb6-94ab506a7b56
     trainingId: bt-hdt
     date: '2026-09-21'
