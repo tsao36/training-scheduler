@@ -305,6 +305,12 @@ const customerLabel = (booking: Booking) =>
   booking.odm ? `${booking.oem} / ${booking.odm}` : booking.oem;
 const trainingFormatLabel = (format?: TrainingFormat) =>
   TRAINING_FORMAT_OPTIONS.find((option) => option.value === format)?.label;
+const deliveryModeForBookings = (training: Training | undefined, bookings: Booking[]) =>
+  bookings.some((booking) => booking.trainingFormat === "without-video") ? "Live" : (training?.mode ?? "Video");
+const instructorLabelForBookings = (training: Training | undefined, bookings: Booking[]) => {
+  const instructorEmails = Array.from(new Set(bookings.map((booking) => booking.instructorEmail).filter(Boolean)));
+  return instructorEmails.length > 0 ? instructorEmails.join(", ") : (training?.instructor ?? "Not configured");
+};
 type AgendaItem = { text: string; children?: string[] };
 const COURSE_AGENDAS: Record<string, { title: string; items: AgendaItem[] }> = {
   "wifi-8-major": {
@@ -804,6 +810,12 @@ function App() {
     : "";
   const selectedBookings = selectedSession
     ? bookings.filter((booking) => booking.sessionId === selectedSession.id)
+    : [];
+  const selectedSessionDeliveryMode = selectedSession
+    ? deliveryModeForBookings(selectedSession.training, selectedBookings)
+    : null;
+  const activeSlotBookings = activeSlotTooltip
+    ? bookings.filter((booking) => booking.sessionId === activeSlotTooltip.session.id)
     : [];
   const selectedSessionState = !selectedSession
     ? "open"
@@ -1573,13 +1585,14 @@ function App() {
               >
                 <b>{activeSlotTooltip.session.training?.title}</b>
                 <span>{activeSlotTooltip.session.startTime} PT · 30 min</span>
-                <span>Instructor: {activeSlotTooltip.session.training?.instructor}</span>
-                <span>Delivery: {activeSlotTooltip.session.training?.mode === "Live" ? "Instructor-led" : "CFE online video"}</span>
-                {activeSlotTooltip.bookings.length > 0 ? activeSlotTooltip.bookings.map((booking) => (
+                <span>Instructor: {instructorLabelForBookings(activeSlotTooltip.session.training, activeSlotBookings)}</span>
+                <span>Delivery: {deliveryModeForBookings(activeSlotTooltip.session.training, activeSlotBookings) === "Live" ? "Instructor-led" : "CFE online video"}</span>
+                {activeSlotBookings.length > 0 ? activeSlotBookings.map((booking) => (
                   <span className={`booking-info${booking.status === "pending" ? " pending" : ""}`} key={booking.id}>
                     <b>OEM: {booking.oem}</b>
                     <b>ODM: {booking.odm ?? "NA"}</b>
                     <span>Booked by: {booking.requesterEmail}</span>
+                    <span>Instructor: {booking.instructorEmail ?? "Not configured"}</span>
                     {booking.status === "pending" && <span className="pending-badge">Awaiting confirmation</span>}
                   </span>
                 )) : <span>No bookings yet</span>}
@@ -1603,14 +1616,14 @@ function App() {
               </div>
               {selectedSession && (
                 <span
-                  className={`mode-tag ${selectedSession.training?.mode.toLowerCase()}`}
+                  className={`mode-tag ${selectedSessionDeliveryMode?.toLowerCase()}`}
                 >
-                  {selectedSession.training?.mode === "Live" ? (
+                  {selectedSessionDeliveryMode === "Live" ? (
                     <UserRound size={13} />
                   ) : (
                     <Video size={13} />
                   )}
-                  {selectedSession.training?.mode}
+                  {selectedSessionDeliveryMode}
                 </span>
               )}
             </div>
