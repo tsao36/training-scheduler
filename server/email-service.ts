@@ -10,6 +10,7 @@ const smtpUser = process.env.SMTP_USER
 const smtpPass = process.env.SMTP_PASS
 const smtpFrom = process.env.SMTP_FROM ?? 'noreply@intel.com'
 const recipientConfigPath = process.env.EMAIL_RECIPIENTS_FILE ?? path.resolve('data/email-recipients.yaml')
+const sessionTimeZoneLabel = 'Taiwan time'
 
 const defaultRecipientConfig = {
   'wifi-log': { default: 'hannahx.hung@intel.com' },
@@ -224,7 +225,7 @@ export async function sendBookingNotificationEmail(
   const subject = `Training Scheduler booking confirmed: ${details.trainingTitle}`
   const html = `
     <p>Hi ${escapeHtml(details.requesterName)},</p>
-    <p>Your booking for <strong>${escapeHtml(details.trainingTitle)}</strong> has been confirmed for ${escapeHtml(details.sessionDate)} at ${escapeHtml(details.sessionTime)} PT.</p>
+    <p>Your booking for <strong>${escapeHtml(details.trainingTitle)}</strong> has been confirmed for ${escapeHtml(details.sessionDate)} at ${escapeHtml(details.sessionTime)} ${sessionTimeZoneLabel}.</p>
     ${bookingDetailsHtml(details)}
     ${agendaHtml(details.trainingId)}
     <p>The corresponding engineering contact has also been notified for this session.</p>
@@ -258,7 +259,7 @@ export async function sendBookingCancellationNotificationEmail(
   const subject = `Training Scheduler booking cancelled: ${trainingTitle}`
   const html = `
     <p>Hi ${escapeHtml(requesterName)},</p>
-    <p>Your booking for <strong>${escapeHtml(trainingTitle)}</strong> on ${sessionDate} at ${sessionTime} PT has been cancelled.</p>
+    <p>Your booking for <strong>${escapeHtml(trainingTitle)}</strong> on ${escapeHtml(sessionDate)} at ${escapeHtml(sessionTime)} ${sessionTimeZoneLabel} has been cancelled.</p>
     <p>The corresponding engineering contact has also been notified.</p>
     <p>Best regards,<br>Training Scheduler</p>
   `
@@ -279,7 +280,7 @@ export async function sendInstructorUpdateNotificationEmail(
   const subject = `Training Scheduler instructor updated: ${details.trainingTitle}`
   const html = `
     <p>Hi ${escapeHtml(details.requesterName)},</p>
-    <p>The engineering contact for your booking of <strong>${escapeHtml(details.trainingTitle)}</strong> on ${escapeHtml(details.sessionDate)} at ${escapeHtml(details.sessionTime)} PT has been updated to <strong>${escapeHtml(newInstructorEmail)}</strong>.</p>
+    <p>The engineering contact for your booking of <strong>${escapeHtml(details.trainingTitle)}</strong> on ${escapeHtml(details.sessionDate)} at ${escapeHtml(details.sessionTime)} ${sessionTimeZoneLabel} has been updated to <strong>${escapeHtml(newInstructorEmail)}</strong>.</p>
     ${bookingDetailsHtml(details)}
     <p>Best regards,<br>Training Scheduler</p>
   `
@@ -311,7 +312,7 @@ function bookingDetailsHtml(details: BookingEmailDetails): string {
     ['Training ID', details.trainingId],
     ['Training class', details.trainingTitle],
     ['Date', details.sessionDate],
-    ['Start time', `${details.sessionTime} PT`],
+    ['Start time', `${details.sessionTime} ${sessionTimeZoneLabel}`],
     ['Duration', `${details.durationMinutes} minutes`],
     ['OEM', details.oem],
     ['ODM', details.odm ?? 'NA'],

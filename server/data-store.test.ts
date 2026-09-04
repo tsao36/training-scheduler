@@ -123,6 +123,8 @@ test('booking notification preview includes details and agenda', async () => {
   assert.match(html, /Asus/)
   assert.match(html, /Quanta/)
   assert.match(html, /Training with video/)
+  assert.match(html, /14:30 Taiwan time/)
+  assert.doesNotMatch(html, /14:30 PT/)
   assert.doesNotMatch(html, /Requester name/)
   assert.match(html, /trainer@example.com/)
   assert.match(html, /WiFi 8 Training agenda/)
