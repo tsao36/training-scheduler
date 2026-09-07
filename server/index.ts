@@ -148,6 +148,8 @@ app.delete('/api/sessions/:id', requireScheduler, async (request, response) => {
 app.post('/api/bookings', async (request, response) => {
   const { sessionId, oem, odm, trainingFormat, requesterName, requesterEmail } = request.body ?? {}
   if (!sessionId || !oem || !odm || !trainingFormat || !requesterName || !requesterEmail) return response.status(400).json({ error: 'REQUIRED_FIELDS_MISSING' })
+  const normalizedRequesterEmail = String(requesterEmail).trim().toLowerCase()
+  if (!isEmail(normalizedRequesterEmail)) return response.status(400).json({ error: 'INVALID_REQUESTER_EMAIL' })
   const selectedOem = String(oem)
   const selectedOdm = String(odm)
   const selectedTrainingFormat = String(trainingFormat)
@@ -187,7 +189,7 @@ app.post('/api/bookings', async (request, response) => {
       odm: selectedOdm,
       trainingFormat: selectedTrainingFormat as Booking['trainingFormat'],
       requesterName,
-      requesterEmail: requesterEmail.toLowerCase(),
+      requesterEmail: normalizedRequesterEmail,
       createdAt: new Date().toISOString(),
       status: 'confirmed',
     }

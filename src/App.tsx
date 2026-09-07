@@ -134,9 +134,11 @@ const userError = (code: string) =>
     DUPLICATE_TOPIC_CUSTOMER_BOOKING:
       "This OEM/ODM already has a booking for the same training topic.",
     INVALID_EMAIL_RECIPIENTS_YAML: "Please check the recipient table for missing or invalid values.",
+    INVALID_REQUESTER_EMAIL: "Please enter a valid requester email address.",
     INVALID_INSTRUCTOR_EMAIL: "Please enter a valid instructor email address.",
     NO_INSTRUCTOR_MAPPED: "No instructor is mapped for this OEM/ODM and training. Please email jonathan.tsao@intel.com to add an instructor mapping.",
   })[code] ?? "Something went wrong. Please try again.";
+const isEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 // crypto.randomUUID requires a secure context (HTTPS/localhost); fall back to getRandomValues over plain HTTP.
 const generateId = (): string => {
   if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") return crypto.randomUUID();
@@ -966,6 +968,11 @@ function App() {
   }, [sessions, selectedSession]);
   const createBooking = async () => {
     if (!selectedSession || bookingInProgress) return;
+    const requesterEmail = bookingDraft.requesterEmail.trim();
+    if (!isEmail(requesterEmail)) {
+      setError(userError("INVALID_REQUESTER_EMAIL"));
+      return;
+    }
     if (!bookingInstructorPreview) {
       setError(userError("NO_INSTRUCTOR_MAPPED"));
       return;
@@ -976,7 +983,8 @@ function App() {
         method: "POST",
         body: JSON.stringify({
           ...bookingDraft,
-          requesterName: deriveRequesterName(bookingDraft.requesterEmail),
+          requesterEmail,
+          requesterName: deriveRequesterName(requesterEmail),
           sessionId: selectedSession.id,
         }),
       });
