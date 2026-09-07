@@ -39,6 +39,12 @@ trainings:
     instructor: Brenton
     accent: yellow
     mode: Video
+  - id: bios-sar
+    title: BIOS SAR
+    shortTitle: BIOS SAR
+    instructor: Frank
+    accent: blue
+    mode: Live
   - id: wifi-8-honor
     title: WiFi 8 for Honor
     shortTitle: WiFi8 Honor

@@ -25,6 +25,7 @@ export type Session = {
 export type Booking = {
   id: string
   sessionId: string
+  trainingId?: string
   oem: string
   odm?: string
   trainingFormat?: 'with-video' | 'without-video'

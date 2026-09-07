@@ -17,6 +17,11 @@ const staticRoot = path.resolve('dist')
 const OEM_OPTIONS = new Set(['Dell', 'HP', 'Asus', 'Acer', 'Fujitsu', 'VAIO', 'Panasonic', 'NEC', 'Samsung', 'LG', 'Honor', 'Wiko', 'Dynabook', 'Google', 'Microsoft', 'MSFT Surface', 'MSI', 'GIGABYTE', 'Xiaomi', 'Aistone', 'PRC CTE', 'Lenovo Ideapad', 'Lenovo ThinkPad', 'NA'])
 const ODM_OPTIONS = new Set(['Quanta', 'Pegatron', 'Wistron', 'Inventec', 'Compal', 'LCFC', 'Luxshare', 'Huaqin', 'Longcheer', 'NA'])
 const TRAINING_FORMAT_OPTIONS = new Set(['with-video', 'without-video'])
+const BIOS_SAR_TRAINING_ID = 'bios-sar'
+const BIOS_SAR_OEM = 'Dell'
+const BIOS_SAR_INSTRUCTOR_EMAIL = 'frank.fc.yang@intel.com'
+const instructorForTraining = async (trainingId: string, oem: string, odm: string) =>
+  trainingId === BIOS_SAR_TRAINING_ID ? BIOS_SAR_INSTRUCTOR_EMAIL : getCFEContactEmail(trainingId, oem, odm)
 const isDate = (value: unknown) => typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)
 const trainingUnavailableLabel = (trainingId: string, title: string) => {
   if (trainingId === 'wifi-log') return 'WiFi Debug Training'
@@ -53,7 +58,8 @@ const sendData = async (_request: Request, response: Response) => {
   const recipientConfig = await readEmailRecipientConfig()
   const resolveInstructor = (booking: Booking) => {
     if (booking.instructorEmail) return booking.instructorEmail
-    const trainingId = sessions.get(booking.sessionId)?.trainingId
+    const trainingId = booking.trainingId ?? sessions.get(booking.sessionId)?.trainingId
+    if (trainingId === BIOS_SAR_TRAINING_ID) return BIOS_SAR_INSTRUCTOR_EMAIL
     return trainingId ? getCFEContactEmailFromConfig(trainingId, booking.oem, booking.odm ?? 'NA', recipientConfig) ?? undefined : undefined
   }
   response.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate')
@@ -75,6 +81,7 @@ app.get('/api/instructor-preview', async (request, response) => {
   const oem = request.query.oem ? String(request.query.oem) : undefined
   const odm = request.query.odm ? String(request.query.odm) : undefined
   if (!trainingId) return response.status(400).json({ error: 'REQUIRED_FIELDS_MISSING' })
+  if (trainingId === BIOS_SAR_TRAINING_ID) return response.json({ instructorEmail: oem === BIOS_SAR_OEM ? BIOS_SAR_INSTRUCTOR_EMAIL : null })
   const instructorEmail = await getExplicitCFEContactEmail(trainingId, oem, odm)
   response.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate')
   response.json({ instructorEmail })
@@ -89,9 +96,9 @@ app.get('/api/bookings', async (request, response) => {
   const matches = data.bookings
     .filter((booking) => (booking.status === 'confirmed' || booking.status === 'pending') && booking.requesterEmail.toLowerCase() === email)
     .map((booking) => {
-      const trainingId = sessions.get(booking.sessionId)?.trainingId
-      const instructorEmail = booking.instructorEmail ?? (trainingId ? getCFEContactEmailFromConfig(trainingId, booking.oem, booking.odm ?? 'NA', recipientConfig) ?? undefined : undefined)
-      return { ...booking, instructorEmail, session: sessions.get(booking.sessionId), training: sessions.get(booking.sessionId) ? trainings.get(sessions.get(booking.sessionId)!.trainingId) : undefined }
+      const trainingId = booking.trainingId ?? sessions.get(booking.sessionId)?.trainingId
+      const instructorEmail = booking.instructorEmail ?? (trainingId === BIOS_SAR_TRAINING_ID ? BIOS_SAR_INSTRUCTOR_EMAIL : trainingId ? getCFEContactEmailFromConfig(trainingId, booking.oem, booking.odm ?? 'NA', recipientConfig) ?? undefined : undefined)
+      return { ...booking, instructorEmail, session: sessions.get(booking.sessionId), training: trainingId ? trainings.get(trainingId) : undefined }
     })
   response.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate')
   response.json({ bookings: matches })
@@ -146,7 +153,7 @@ app.delete('/api/sessions/:id', requireScheduler, async (request, response) => {
 })
 
 app.post('/api/bookings', async (request, response) => {
-  const { sessionId, oem, odm, trainingFormat, requesterName, requesterEmail } = request.body ?? {}
+  const { sessionId, trainingId, oem, odm, trainingFormat, requesterName, requesterEmail } = request.body ?? {}
   if (!sessionId || !oem || !odm || !trainingFormat || !requesterName || !requesterEmail) return response.status(400).json({ error: 'REQUIRED_FIELDS_MISSING' })
   const normalizedRequesterEmail = String(requesterEmail).trim().toLowerCase()
   if (!isEmail(normalizedRequesterEmail)) return response.status(400).json({ error: 'INVALID_REQUESTER_EMAIL' })
@@ -158,8 +165,12 @@ app.post('/api/bookings', async (request, response) => {
 
   const preCheckData = await store.read()
   const preCheckSession = preCheckData.sessions.find((item) => item.id === sessionId && item.status === 'active')
-  const preCheckTraining = preCheckSession ? preCheckData.trainings.find((item) => item.id === preCheckSession!.trainingId) : undefined
-  const instructorEmail = preCheckTraining ? await getExplicitCFEContactEmail(preCheckTraining.id, selectedOem, selectedOdm) : null
+  const requestedTrainingId = typeof trainingId === 'string' ? trainingId : preCheckSession?.trainingId
+  if (!preCheckSession || !requestedTrainingId || (requestedTrainingId !== preCheckSession.trainingId && requestedTrainingId !== BIOS_SAR_TRAINING_ID)) return response.status(400).json({ error: 'SESSION_NOT_FOUND' })
+  if (requestedTrainingId === BIOS_SAR_TRAINING_ID && selectedOem !== BIOS_SAR_OEM) return response.status(400).json({ error: 'INVALID_CUSTOMER_SELECTION' })
+  const preCheckTraining = preCheckData.trainings.find((item) => item.id === requestedTrainingId)
+  if (!preCheckTraining) return response.status(400).json({ error: 'SESSION_NOT_FOUND' })
+  const instructorEmail = requestedTrainingId === BIOS_SAR_TRAINING_ID ? BIOS_SAR_INSTRUCTOR_EMAIL : await getExplicitCFEContactEmail(preCheckTraining.id, selectedOem, selectedOdm)
   if (preCheckTraining && !instructorEmail) return response.status(400).json({ error: 'NO_INSTRUCTOR_MAPPED' })
 
   let booking: Booking | undefined
@@ -177,14 +188,15 @@ app.post('/api/bookings', async (request, response) => {
       if (existing.oem !== selectedOem) return false
       if ((existing.odm ?? 'NA') !== selectedOdm) return false
       const existingSession = data.sessions.find((item) => item.id === existing.sessionId)
-      return existingSession?.trainingId === session!.trainingId
+      return (existing.trainingId ?? existingSession?.trainingId) === requestedTrainingId
     })
     if (hasDuplicateTopicCustomerBooking) throw new Error('DUPLICATE_TOPIC_CUSTOMER_BOOKING')
 
-    training = data.trainings.find((item) => item.id === session!.trainingId)
+    training = data.trainings.find((item) => item.id === requestedTrainingId)
     booking = {
       id: randomUUID(),
       sessionId,
+      trainingId: requestedTrainingId === session.trainingId ? undefined : requestedTrainingId,
       oem: selectedOem,
       odm: selectedOdm,
       trainingFormat: selectedTrainingFormat as Booking['trainingFormat'],
@@ -286,14 +298,14 @@ app.delete('/api/bookings/:id', async (request, response) => {
     booking = data.bookings.find((item) => item.id === request.params.id && item.requesterEmail.trim().toLowerCase() === email && item.status === 'confirmed')
     if (!booking) throw new Error('BOOKING_NOT_FOUND')
     session = data.sessions.find((item) => item.id === booking!.sessionId)
-    training = session ? data.trainings.find((item) => item.id === session!.trainingId) : undefined
+    training = session ? data.trainings.find((item) => item.id === (booking!.trainingId ?? session!.trainingId)) : undefined
     booking.status = 'cancelled'
     booking.cancelledAt = new Date().toISOString()
   })
 
   try {
     if (booking && session && training) {
-      const instructorEmail = await getCFEContactEmail(training.id, booking.oem, booking.odm ?? 'NA')
+      const instructorEmail = await instructorForTraining(training.id, booking.oem, booking.odm ?? 'NA')
       await sendBookingCancellationNotificationEmail(
         booking.requesterEmail,
         booking.requesterName,
@@ -322,7 +334,8 @@ app.put('/api/bookings/:id/instructor', async (request, response) => {
     booking = data.bookings.find((item) => item.id === request.params.id && item.requesterEmail.trim().toLowerCase() === requesterEmail && item.status === 'confirmed')
     if (!booking) throw new Error('BOOKING_NOT_FOUND')
     session = data.sessions.find((item) => item.id === booking!.sessionId)
-    training = session ? data.trainings.find((item) => item.id === session!.trainingId) : undefined
+    training = session ? data.trainings.find((item) => item.id === (booking!.trainingId ?? session!.trainingId)) : undefined
+    if (training?.id === BIOS_SAR_TRAINING_ID && instructorEmail !== BIOS_SAR_INSTRUCTOR_EMAIL) throw new Error('BIOS_SAR_INSTRUCTOR_REQUIRED')
     booking.instructorEmail = instructorEmail
   })
 

@@ -46,6 +46,7 @@ type Session = {
 type Booking = {
   id: string;
   sessionId: string;
+  trainingId?: string;
   oem: string;
   odm?: string;
   trainingFormat?: TrainingFormat;
@@ -107,6 +108,7 @@ const TRAINING_FORMAT_OPTIONS = [
   { value: "with-video", label: "Training with video: Instructor play online video and answer QnA in person" },
   { value: "without-video", label: "Training without video: Instructor do live training, no video" },
 ] as const;
+const BIOS_SAR_TRAINING_ID = "bios-sar";
 type OemOption = (typeof OEM_OPTIONS)[number];
 type OdmOption = (typeof ODM_OPTIONS)[number];
 type TrainingFormat = (typeof TRAINING_FORMAT_OPTIONS)[number]["value"];
@@ -424,6 +426,7 @@ function App() {
     odm: OdmOption;
     trainingFormat: TrainingFormat;
     requesterEmail: string;
+    trainingId?: string;
   }>({
     oem: OEM_OPTIONS[0],
     odm: ODM_OPTIONS[0],
@@ -633,12 +636,12 @@ function App() {
       return;
     }
     let cancelled = false;
-    const params = new URLSearchParams({ trainingId: selectedSession.trainingId, oem: bookingDraft.oem, odm: bookingDraft.odm });
+    const params = new URLSearchParams({ trainingId: bookingDraft.trainingId ?? selectedSession.trainingId, oem: bookingDraft.oem, odm: bookingDraft.odm });
     api<{ instructorEmail: string | null }>(`/api/instructor-preview?${params}`)
       .then((result) => { if (!cancelled) setBookingInstructorPreview(result.instructorEmail); })
       .catch(() => { if (!cancelled) setBookingInstructorPreview(null); });
     return () => { cancelled = true; };
-  }, [modal, selectedSession?.trainingId, bookingDraft.oem, bookingDraft.odm]);
+  }, [modal, selectedSession?.trainingId, bookingDraft.trainingId, bookingDraft.oem, bookingDraft.odm]);
   const trainings = data?.trainings ?? [];
   const visibleUnavailableDays = useMemo(
     () =>
@@ -778,7 +781,7 @@ function App() {
   );
   const courseCatalog = useMemo(() => {
     const grouped = new Map<string, Training[]>();
-    trainings.forEach((training) => {
+    trainings.filter((training) => training.id !== BIOS_SAR_TRAINING_ID).forEach((training) => {
       const key = majorCourseMeta(training).key;
       (grouped.get(key) ?? grouped.set(key, []).get(key)!).push(training);
     });
@@ -837,7 +840,7 @@ function App() {
           session.startTime === selectedSession.startTime &&
           !blockedSessionIds.has(session.id),
       );
-      return courseCatalog
+      const options = courseCatalog
         .map((entry) => ({
           key: entry.key,
           title: entry.title,
@@ -846,18 +849,25 @@ function App() {
           ),
         }))
         .filter((entry): entry is { key: string; title: string; session: Session } => Boolean(entry.session));
+      const biosSarTraining = trainings.find((training) => training.id === BIOS_SAR_TRAINING_ID);
+      if (bookingDraft.oem === "Dell" && biosSarTraining) {
+        options.push({ key: BIOS_SAR_TRAINING_ID, title: biosSarTraining.title, session: { ...selectedSession, trainingId: BIOS_SAR_TRAINING_ID, training: biosSarTraining } });
+      }
+      return options;
     },
-    [blockedSessionIds, courseCatalog, selectedSession, sessions],
+    [blockedSessionIds, bookingDraft.oem, courseCatalog, selectedSession, sessions, trainings],
   );
-  const selectedBookingTopicKey = selectedSession?.training ? majorCourseMeta(selectedSession.training).key : "";
+  const selectedBookingTopicKey = bookingDraft.trainingId ?? (selectedSession?.training ? majorCourseMeta(selectedSession.training).key : "");
   const bookingCourseSessions = useMemo(
     () =>
-      selectedBookingTopicKey
+      bookingDraft.trainingId === BIOS_SAR_TRAINING_ID && selectedSession
+        ? [selectedSession]
+        : selectedBookingTopicKey
         ? sessions.filter(
             (session) => session.training && majorCourseMeta(session.training).key === selectedBookingTopicKey,
           )
         : [],
-    [sessions, selectedBookingTopicKey],
+    [bookingDraft.trainingId, selectedSession, sessions, selectedBookingTopicKey],
   );
   const bookingAvailableDates = useMemo(
     () => Array.from(new Set(bookingCourseSessions.map((session) => session.date))).sort(),
@@ -984,6 +994,7 @@ function App() {
         body: JSON.stringify({
           ...bookingDraft,
           requesterEmail,
+          trainingId: bookingDraft.trainingId ?? selectedSession.trainingId,
           requesterName: deriveRequesterName(requesterEmail),
           sessionId: selectedSession.id,
         }),
@@ -2073,6 +2084,7 @@ function App() {
                 if (!option) return;
                 setSelectedSession(option.session);
                 setSelectedTraining(option.session.training ?? null);
+                setBookingDraft({ ...bookingDraft, trainingId: option.key === BIOS_SAR_TRAINING_ID ? BIOS_SAR_TRAINING_ID : undefined });
               }}
             >
               {bookingTopicOptions.map((option) => (
@@ -2087,12 +2099,17 @@ function App() {
             <select
               value={bookingDraft.oem}
               disabled={bookingInProgress}
-              onChange={(event) =>
-                setBookingDraft({
-                  ...bookingDraft,
-                  oem: event.target.value as OemOption,
-                })
-              }
+              onChange={(event) => {
+                const oem = event.target.value as OemOption;
+                if (oem !== "Dell" && bookingDraft.trainingId === BIOS_SAR_TRAINING_ID) {
+                  const scheduledSession = sessions.find((session) => session.id === selectedSession?.id);
+                  if (scheduledSession) {
+                    setSelectedSession(scheduledSession);
+                    setSelectedTraining(scheduledSession.training ?? null);
+                  }
+                }
+                setBookingDraft({ ...bookingDraft, oem, trainingId: oem === "Dell" ? bookingDraft.trainingId : undefined });
+              }}
             >
               {OEM_OPTIONS.map((oem) => (
                 <option value={oem} key={oem}>
