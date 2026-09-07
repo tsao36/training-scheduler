@@ -50,6 +50,17 @@ export type SchedulerData = {
 
 type StoredSchedulerData = Omit<SchedulerData, 'version'> & { version?: number }
 
+const requiredHiddenTrainings: Training[] = [
+  {
+    id: 'bios-sar',
+    title: 'BIOS SAR',
+    shortTitle: 'BIOS SAR',
+    instructor: 'Frank',
+    accent: 'blue',
+    mode: 'Live',
+  },
+]
+
 const LOCK_RETRY_MS = 20
 const LOCK_ATTEMPTS = 500
 const STALE_LOCK_MS = 30_000
@@ -113,7 +124,10 @@ export class DataStore {
     if (!parsed?.window || !Array.isArray(parsed.trainings) || !Array.isArray(parsed.sessions) || !Array.isArray(parsed.bookings)) {
       throw new Error('INVALID_SCHEDULER_YAML')
     }
-    return { ...parsed, version: parsed.version ?? 0 }
+    const missingRequiredTrainings = requiredHiddenTrainings.filter(
+      (requiredTraining) => !parsed.trainings.some((training) => training.id === requiredTraining.id),
+    )
+    return { ...parsed, trainings: [...parsed.trainings, ...missingRequiredTrainings], version: parsed.version ?? 0 }
   }
 
   private async acquireLock(lockPath: string): Promise<import('node:fs/promises').FileHandle> {

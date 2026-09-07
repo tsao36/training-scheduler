@@ -55,6 +55,24 @@ test('writes a valid YAML document after an update', async () => {
   await rm(directory, { recursive: true, force: true })
 })
 
+test('adds the hidden BIOS SAR training when reading existing scheduler data', async () => {
+  const directory = await mkdtemp(path.join(os.tmpdir(), 'training-scheduler-'))
+  const filePath = path.join(directory, 'scheduler.yaml')
+  await writeFile(filePath, validYaml, 'utf8')
+  const store = new DataStore(filePath)
+
+  const result = await store.read()
+  assert.deepEqual(result.trainings.find((training) => training.id === 'bios-sar'), {
+    id: 'bios-sar',
+    title: 'BIOS SAR',
+    shortTitle: 'BIOS SAR',
+    instructor: 'Frank',
+    accent: 'blue',
+    mode: 'Live',
+  })
+  await rm(directory, { recursive: true, force: true })
+})
+
 test('creates a YAML backup and keeps only the latest eight backups', async () => {
   const directory = await mkdtemp(path.join(os.tmpdir(), 'training-scheduler-'))
   const filePath = path.join(directory, 'scheduler.yaml')
