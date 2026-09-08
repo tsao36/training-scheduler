@@ -3,7 +3,7 @@ import { randomUUID } from 'node:crypto'
 import express, { type NextFunction, type Request, type Response } from 'express'
 import path from 'node:path'
 import { dump } from 'js-yaml'
-import { createDataStore, type Booking } from './data-store.js'
+import { createDataStore, type AttendanceRecord, type Booking } from './data-store.js'
 import { readEmailRecipientConfig, sendBookingNotificationEmail, sendBookingCancellationNotificationEmail, sendInstructorUpdateNotificationEmail, getCFEContactEmail, getCFEContactEmailFromConfig, getExplicitCFEContactEmail, writeEmailRecipientConfig } from './email-service.js'
 import { readTrainingVideoCatalog } from './training-videos.js'
 
@@ -150,6 +150,82 @@ app.delete('/api/sessions/:id', requireScheduler, async (request, response) => {
     else data.sessions = data.sessions.filter((item) => item.id !== session.id)
   })
   response.status(204).end()
+})
+
+// An instructor may record attendance if they are mapped to the session's training, are the
+// explicit instructor on one of its bookings, or own the always-available BIOS SAR training.
+const authorizedInstructorEmails = async (data: Awaited<ReturnType<typeof store.read>>, sessionId: string) => {
+  const session = data.sessions.find((item) => item.id === sessionId)
+  if (!session) return null
+  const recipientConfig = await readEmailRecipientConfig()
+  const emails = new Set<string>()
+  const addMappedInstructors = (trainingId: string) => {
+    if (trainingId === BIOS_SAR_TRAINING_ID) emails.add(BIOS_SAR_INSTRUCTOR_EMAIL)
+    Object.values(recipientConfig[trainingId] ?? {}).forEach((email) => emails.add(String(email).trim().toLowerCase()))
+  }
+  addMappedInstructors(session.trainingId)
+  data.bookings
+    .filter((booking) => booking.sessionId === sessionId && booking.status === 'confirmed')
+    .forEach((booking) => {
+      const trainingId = booking.trainingId ?? session.trainingId
+      addMappedInstructors(trainingId)
+      if (booking.instructorEmail) emails.add(booking.instructorEmail.trim().toLowerCase())
+      const mapped = getCFEContactEmailFromConfig(trainingId, booking.oem, booking.odm ?? 'NA', recipientConfig)
+      if (mapped) emails.add(mapped.trim().toLowerCase())
+    })
+  return emails
+}
+
+app.get('/api/sessions/:id/attendance-access', async (request, response) => {
+  const instructorEmail = String(request.query.instructorEmail ?? '').trim().toLowerCase()
+  if (!isEmail(instructorEmail)) return response.status(400).json({ error: 'INVALID_INSTRUCTOR_EMAIL' })
+  const allowedEmails = await authorizedInstructorEmails(await store.read(), request.params.id)
+  if (!allowedEmails) return response.status(404).json({ error: 'SESSION_NOT_FOUND' })
+  response.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate')
+  response.json({ authorized: allowedEmails.has(instructorEmail) })
+})
+
+app.post('/api/sessions/:id/attendance', async (request, response) => {
+  const instructorEmail = String(request.body?.instructorEmail ?? '').trim().toLowerCase()
+  const attendeeCount = Number(request.body?.attendeeCount)
+  const notes = typeof request.body?.notes === 'string' ? request.body.notes.trim().slice(0, 500) : ''
+  if (!instructorEmail) return response.status(400).json({ error: 'REQUIRED_FIELDS_MISSING' })
+  if (!isEmail(instructorEmail)) return response.status(400).json({ error: 'INVALID_INSTRUCTOR_EMAIL' })
+  if (!Number.isInteger(attendeeCount) || attendeeCount < 0 || attendeeCount > 1000) return response.status(400).json({ error: 'INVALID_ATTENDANCE_COUNT' })
+
+  const current = await store.read()
+  const allowedEmails = await authorizedInstructorEmails(current, request.params.id)
+  if (!allowedEmails) return response.status(404).json({ error: 'SESSION_NOT_FOUND' })
+  if (!allowedEmails.has(instructorEmail)) return response.status(403).json({ error: 'NOT_SESSION_INSTRUCTOR' })
+
+  let record: AttendanceRecord | undefined
+  await store.update((data) => {
+    const session = data.sessions.find((item) => item.id === request.params.id)
+    if (!session) throw new Error('SESSION_NOT_FOUND')
+    data.attendance ??= []
+    const now = new Date().toISOString()
+    const existing = data.attendance.find((item) => item.sessionId === session.id && item.instructorEmail === instructorEmail)
+    if (existing) {
+      existing.attendeeCount = attendeeCount
+      existing.notes = notes || undefined
+      existing.updatedAt = now
+      record = existing
+    } else {
+      record = {
+        id: randomUUID(),
+        sessionId: session.id,
+        trainingId: session.trainingId,
+        attendeeCount,
+        instructorEmail,
+        notes: notes || undefined,
+        recordedAt: now,
+        updatedAt: now,
+      }
+      data.attendance.push(record)
+    }
+  })
+
+  response.status(201).json(record)
 })
 
 app.post('/api/bookings', async (request, response) => {

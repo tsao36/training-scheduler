@@ -63,6 +63,16 @@ type UnavailableDay = {
   label: string;
   warning: string;
 };
+type AttendanceRecord = {
+  id: string;
+  sessionId: string;
+  trainingId: string;
+  attendeeCount: number;
+  instructorEmail: string;
+  notes?: string;
+  recordedAt: string;
+  updatedAt: string;
+};
 type BookingLookup = Booking & { session?: Session; training?: Training };
 type SlotTooltip = { session: Session; bookings: Booking[] };
 type RecipientRow = { id: string; trainingId: string; oem: string; odm: string; email: string };
@@ -70,6 +80,7 @@ type SchedulerData = {
   trainings: Training[];
   sessions: Session[];
   bookings: Booking[];
+  attendance?: AttendanceRecord[];
   unavailableDays?: UnavailableDay[];
 };
 type Day = { date: string; day: string; weekday: string };
@@ -138,6 +149,9 @@ const userError = (code: string) =>
     INVALID_EMAIL_RECIPIENTS_YAML: "Please check the recipient table for missing or invalid values.",
     INVALID_REQUESTER_EMAIL: "Please enter a valid requester email address.",
     INVALID_INSTRUCTOR_EMAIL: "Please enter a valid instructor email address.",
+    INVALID_ATTENDANCE_COUNT: "Please enter the attendance as a whole number between 0 and 1000.",
+    NOT_SESSION_INSTRUCTOR:
+      "This email is not the instructor for this session, so attendance cannot be recorded.",
     NO_INSTRUCTOR_MAPPED: "No instructor is mapped for this OEM/ODM and training. Please email jonathan.tsao@intel.com to add an instructor mapping.",
   })[code] ?? "Something went wrong. Please try again.";
 const isEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
@@ -418,7 +432,7 @@ function App() {
   const [selectedSession, setSelectedSession] = useState<Session | null>(null);
   const [query, setQuery] = useState("");
   const [weekIndex, setWeekIndex] = useState(0);
-  const [modal, setModal] = useState<"booking" | "login" | "my-bookings" | "topic-customer" | "booking-blocks" | "booking-confirmation" | "verification-success" | "email-recipients" | "training-videos" | "course-agenda" | null>(
+  const [modal, setModal] = useState<"booking" | "login" | "my-bookings" | "topic-customer" | "booking-blocks" | "booking-confirmation" | "verification-success" | "email-recipients" | "training-videos" | "course-agenda" | "attendance" | null>(
     null,
   );
   const [bookingDraft, setBookingDraft] = useState<{
@@ -461,6 +475,15 @@ function App() {
   });
   const [activeDayWarnings, setActiveDayWarnings] = useState<UnavailableDay[] | null>(null);
   const [activeSlotTooltip, setActiveSlotTooltip] = useState<SlotTooltip | null>(null);
+  const [attendanceDraft, setAttendanceDraft] = useState<{
+    session: Session | null;
+    instructorEmail: string;
+    attendeeCount: string;
+    notes: string;
+  }>({ session: null, instructorEmail: "", attendeeCount: "", notes: "" });
+  const [attendanceVerified, setAttendanceVerified] = useState(false);
+  const [verifyingInstructor, setVerifyingInstructor] = useState(false);
+  const [savingAttendance, setSavingAttendance] = useState(false);
   const dayWarningTooltipRef = useRef<HTMLDivElement | null>(null);
   const slotTooltipRef = useRef<HTMLDivElement | null>(null);
   const [clocks, setClocks] = useState<Clock[]>(() => timeZones.map(([label, timeZone]) => ({ label, timeZone, time: formatClock(timeZone) })));
@@ -819,6 +842,9 @@ function App() {
   const selectedSessionDeliveryMode = selectedSession
     ? deliveryModeForBookings(selectedSession.training, selectedBookings)
     : null;
+  const selectedAttendance = selectedSession
+    ? (data?.attendance ?? []).filter((record) => record.sessionId === selectedSession.id)
+    : [];
   const activeSlotBookings = activeSlotTooltip
     ? bookings.filter((booking) => booking.sessionId === activeSlotTooltip.session.id)
     : [];
@@ -1131,6 +1157,73 @@ function App() {
       setError((cause as Error).message);
     } finally {
       setUpdatingInstructorBookingId(null);
+    }
+  };
+  const openAttendanceModal = (session: Session) => {
+    const existing = (data?.attendance ?? []).filter((record) => record.sessionId === session.id);
+    setAttendanceDraft({
+      session,
+      instructorEmail: existing[0]?.instructorEmail ?? "",
+      attendeeCount: existing[0] ? String(existing[0].attendeeCount) : "",
+      notes: existing[0]?.notes ?? "",
+    });
+    setAttendanceVerified(false);
+    setError("");
+    setModal("attendance");
+  };
+  const verifyAttendanceInstructor = async () => {
+    const session = attendanceDraft.session;
+    if (!session || verifyingInstructor) return;
+    const instructorEmail = attendanceDraft.instructorEmail.trim().toLowerCase();
+    if (!isEmail(instructorEmail)) {
+      setError(userError("INVALID_INSTRUCTOR_EMAIL"));
+      return;
+    }
+    setVerifyingInstructor(true);
+    try {
+      const result = await api<{ authorized: boolean }>(
+        `/api/sessions/${session.id}/attendance-access?instructorEmail=${encodeURIComponent(instructorEmail)}`,
+      );
+      if (!result.authorized) {
+        setAttendanceVerified(false);
+        setError(userError("NOT_SESSION_INSTRUCTOR"));
+        return;
+      }
+      setAttendanceVerified(true);
+      setError("");
+    } catch (cause) {
+      setAttendanceVerified(false);
+      setError((cause as Error).message);
+    } finally {
+      setVerifyingInstructor(false);
+    }
+  };
+  const submitAttendance = async () => {
+    const session = attendanceDraft.session;
+    if (!session || savingAttendance || !attendanceVerified) return;
+    const instructorEmail = attendanceDraft.instructorEmail.trim().toLowerCase();
+    if (!isEmail(instructorEmail)) {
+      setError(userError("INVALID_INSTRUCTOR_EMAIL"));
+      return;
+    }
+    const attendeeCount = Number(attendanceDraft.attendeeCount);
+    if (!Number.isInteger(attendeeCount) || attendeeCount < 0 || attendeeCount > 1000) {
+      setError(userError("INVALID_ATTENDANCE_COUNT"));
+      return;
+    }
+    setSavingAttendance(true);
+    try {
+      await api(`/api/sessions/${session.id}/attendance`, {
+        method: "POST",
+        body: JSON.stringify({ instructorEmail, attendeeCount, notes: attendanceDraft.notes.trim() || undefined }),
+      });
+      await refresh({ focusLatestBooking: false });
+      setModal(null);
+      setError("");
+    } catch (cause) {
+      setError((cause as Error).message);
+    } finally {
+      setSavingAttendance(false);
     }
   };
   const createUnavailableDay = async () => {
@@ -1683,7 +1776,35 @@ function App() {
                       </span>
                     </div>
                   ))}
+                  <div>
+                    <Users size={16} />
+                    <span>
+                      Attendance
+                      <strong>
+                        {selectedAttendance.length === 0
+                          ? "Not recorded"
+                          : `${selectedAttendance.reduce((total, record) => total + record.attendeeCount, 0)} attendee(s)`}
+                      </strong>
+                    </span>
+                  </div>
+                  {selectedAttendance.map((record) => (
+                    <div className="booking-record" key={record.id}>
+                      <span>
+                        <strong>{record.attendeeCount} attendee(s)</strong>
+                        <small>Recorded by: {record.instructorEmail}</small>
+                        <small>Updated: {new Date(record.updatedAt).toLocaleString()}</small>
+                        {record.notes && <small>Notes: {record.notes}</small>}
+                      </span>
+                    </div>
+                  ))}
                 </div>
+                <button
+                  className="secondary-button"
+                  type="button"
+                  onClick={() => openAttendanceModal(selectedSession)}
+                >
+                  <Users size={15} /> {selectedAttendance.length > 0 ? "Update attendance" : "Record attendance"}
+                </button>
                 {authenticated && (
                   <button
                     className="delete-button"
@@ -1773,6 +1894,75 @@ function App() {
             <button className="book-button" type="submit">
               Unlock scheduler
             </button>
+          </form>
+        </Modal>
+      )}
+      {modal === "attendance" && attendanceDraft.session && (
+        <Modal title="Record attendance" close={() => setModal(null)}>
+          <p className="modal-copy">
+            {attendanceDraft.session.training?.title ?? "Training session"} · {attendanceDraft.session.date} · {attendanceDraft.session.startTime} PT
+          </p>
+          <p className="modal-copy">
+            Only the instructor for this session can record attendance. Verify your instructor email first.
+          </p>
+          <form
+            onSubmit={(event) => {
+              event.preventDefault();
+              if (attendanceVerified) void submitAttendance();
+              else void verifyAttendanceInstructor();
+            }}
+          >
+            <label className="form-label">
+              Instructor email
+              <input
+                type="email"
+                value={attendanceDraft.instructorEmail}
+                onChange={(event) => {
+                  const instructorEmail = event.target.value;
+                  setAttendanceVerified(false);
+                  setAttendanceDraft((current) => ({ ...current, instructorEmail }));
+                }}
+                placeholder="instructor@intel.com"
+                required
+                autoFocus
+              />
+            </label>
+            {!attendanceVerified ? (
+              <button className="book-button" type="submit" disabled={verifyingInstructor}>
+                <Check size={17} /> {verifyingInstructor ? "Verifying..." : "Verify instructor"}
+              </button>
+            ) : (
+              <>
+                <div className="session-capacity shared">
+                  <Check size={16} /> Instructor verified.
+                </div>
+                <label className="form-label">
+                  Number of attendees
+                  <input
+                    type="number"
+                    min={0}
+                    max={1000}
+                    step={1}
+                    value={attendanceDraft.attendeeCount}
+                    onChange={(event) => setAttendanceDraft((current) => ({ ...current, attendeeCount: event.target.value }))}
+                    required
+                  />
+                </label>
+                <label className="form-label">
+                  Notes (optional)
+                  <input
+                    type="text"
+                    maxLength={500}
+                    value={attendanceDraft.notes}
+                    onChange={(event) => setAttendanceDraft((current) => ({ ...current, notes: event.target.value }))}
+                    placeholder="Anything worth recording about this session"
+                  />
+                </label>
+                <button className="book-button" type="submit" disabled={savingAttendance}>
+                  <Plus size={17} /> {savingAttendance ? "Saving..." : "Save attendance"}
+                </button>
+              </>
+            )}
           </form>
         </Modal>
       )}

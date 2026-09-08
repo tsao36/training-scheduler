@@ -39,11 +39,23 @@ export type Booking = {
   instructorEmail?: string
 }
 
+export type AttendanceRecord = {
+  id: string
+  sessionId: string
+  trainingId: string
+  attendeeCount: number
+  instructorEmail: string
+  notes?: string
+  recordedAt: string
+  updatedAt: string
+}
+
 export type SchedulerData = {
   window: { start: string; end: string; durationMinutes: number }
   trainings: Training[]
   sessions: Session[]
   bookings: Booking[]
+  attendance?: AttendanceRecord[]
   unavailableDays?: { date: string; label: string; warning: string }[]
   version: number
 }
@@ -127,7 +139,7 @@ export class DataStore {
     const missingRequiredTrainings = requiredHiddenTrainings.filter(
       (requiredTraining) => !parsed.trainings.some((training) => training.id === requiredTraining.id),
     )
-    return { ...parsed, trainings: [...parsed.trainings, ...missingRequiredTrainings], version: parsed.version ?? 0 }
+    return { ...parsed, trainings: [...parsed.trainings, ...missingRequiredTrainings], attendance: parsed.attendance ?? [], version: parsed.version ?? 0 }
   }
 
   private async acquireLock(lockPath: string): Promise<import('node:fs/promises').FileHandle> {
