@@ -1707,9 +1707,6 @@ function App() {
                 })}
               </div>
             </div>
-            <div className="calendar-footer">
-              <span className="footer-note">Weekdays · 09:00–17:30 PT</span>
-            </div>
             {unavailableSlotSummary.length > 0 && (
               <div className="unavailable-slot-list">
                 <strong>Unavailable training sessions</strong>
