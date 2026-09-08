@@ -930,8 +930,11 @@ function App() {
     [bookingDraft.trainingId, selectedSession, sessions, selectedBookingTopicKey],
   );
   const bookingAvailableDates = useMemo(
-    () => Array.from(new Set(bookingCourseSessions.map((session) => session.date))).sort(),
-    [bookingCourseSessions],
+    () =>
+      Array.from(new Set(bookingCourseSessions.map((session) => session.date)))
+        .filter((date) => bookingDraft.oem === "Dell" || !isDellOnlyDate(date))
+        .sort(),
+    [bookingCourseSessions, bookingDraft.oem],
   );
   const bookingAvailableTimes = useMemo(
     () =>

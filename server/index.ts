@@ -1,6 +1,9 @@
 import cookieParser from 'cookie-parser'
 import { randomUUID } from 'node:crypto'
 import express, { type NextFunction, type Request, type Response } from 'express'
+import { readFileSync } from 'node:fs'
+import http from 'node:http'
+import https from 'node:https'
 import path from 'node:path'
 import { dump } from 'js-yaml'
 import { createDataStore, type AttendanceRecord, type Booking } from './data-store.js'
@@ -13,6 +16,11 @@ const baseUrl = process.env.BASE_URL ?? 'http://localhost:5173'
 const store = createDataStore()
 const app = express()
 const port = Number(process.env.PORT ?? 3001)
+const tlsKeyFile = process.env.TLS_KEY_FILE
+const tlsCertFile = process.env.TLS_CERT_FILE
+const tlsEnabled = Boolean(tlsKeyFile && tlsCertFile)
+// Optional plain-HTTP listener that only redirects to HTTPS.
+const httpRedirectPort = process.env.HTTP_REDIRECT_PORT ? Number(process.env.HTTP_REDIRECT_PORT) : undefined
 const staticRoot = path.resolve('dist')
 const OEM_OPTIONS = new Set(['Dell', 'HP', 'Asus', 'Acer', 'Fujitsu', 'VAIO', 'Panasonic', 'NEC', 'Samsung', 'LG', 'Honor', 'Wiko', 'Dynabook', 'Google', 'Microsoft', 'MSFT Surface', 'MSI', 'GIGABYTE', 'Xiaomi', 'Aistone', 'PRC CTE', 'Lenovo Ideapad', 'Lenovo ThinkPad', 'NA'])
 const ODM_OPTIONS = new Set(['Quanta', 'Pegatron', 'Wistron', 'Inventec', 'Compal', 'LCFC', 'Luxshare', 'Huaqin', 'Longcheer', 'NA'])
@@ -112,7 +120,7 @@ app.get('/api/bookings', async (request, response) => {
 })
 app.post('/api/auth/login', (request, response) => {
   if (request.body?.password !== password) return response.status(401).json({ error: 'INVALID_PASSWORD' })
-  response.cookie('scheduler', 'true', { signed: true, httpOnly: true, sameSite: 'strict', secure: process.env.NODE_ENV === 'production' })
+  response.cookie('scheduler', 'true', { signed: true, httpOnly: true, sameSite: 'strict', secure: tlsEnabled })
   response.json({ authenticated: true })
 })
 app.post('/api/auth/logout', (_request, response) => {
@@ -480,4 +488,23 @@ const runScheduledBackup = async () => {
 }
 const backupInterval = setInterval(() => { void runScheduledBackup() }, 30_000)
 backupInterval.unref()
-app.listen(port, () => console.log(`Training Scheduler listening on port ${port}`))
+if (tlsEnabled) {
+  const credentials = {
+    key: readFileSync(tlsKeyFile!),
+    cert: readFileSync(tlsCertFile!),
+    ...(process.env.TLS_CA_FILE ? { ca: readFileSync(process.env.TLS_CA_FILE) } : {}),
+    ...(process.env.TLS_PASSPHRASE ? { passphrase: process.env.TLS_PASSPHRASE } : {}),
+  }
+  https.createServer(credentials, app).listen(port, () => console.log(`Training Scheduler listening on https port ${port}`))
+  if (httpRedirectPort) {
+    http
+      .createServer((request, response) => {
+        const host = (request.headers.host ?? '').replace(/:\d+$/, '')
+        response.writeHead(301, { Location: `https://${host}${port === 443 ? '' : `:${port}`}${request.url ?? '/'}` })
+        response.end()
+      })
+      .listen(httpRedirectPort, () => console.log(`Redirecting http port ${httpRedirectPort} to https`))
+  }
+} else {
+  app.listen(port, () => console.log(`Training Scheduler listening on port ${port}`))
+}
