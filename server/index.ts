@@ -17,11 +17,17 @@ const staticRoot = path.resolve('dist')
 const OEM_OPTIONS = new Set(['Dell', 'HP', 'Asus', 'Acer', 'Fujitsu', 'VAIO', 'Panasonic', 'NEC', 'Samsung', 'LG', 'Honor', 'Wiko', 'Dynabook', 'Google', 'Microsoft', 'MSFT Surface', 'MSI', 'GIGABYTE', 'Xiaomi', 'Aistone', 'PRC CTE', 'Lenovo Ideapad', 'Lenovo ThinkPad', 'NA'])
 const ODM_OPTIONS = new Set(['Quanta', 'Pegatron', 'Wistron', 'Inventec', 'Compal', 'LCFC', 'Luxshare', 'Huaqin', 'Longcheer', 'NA'])
 const TRAINING_FORMAT_OPTIONS = new Set(['with-video', 'without-video'])
-const BIOS_SAR_TRAINING_ID = 'bios-sar'
-const BIOS_SAR_OEM = 'Dell'
-const BIOS_SAR_INSTRUCTOR_EMAIL = 'frank.fc.yang@intel.com'
+const DELL_ONLY_OEM = 'Dell'
+// Trainings that are only offered to Dell and always route to a fixed instructor.
+const DELL_ONLY_INSTRUCTOR_EMAILS: Record<string, string> = {
+  'bios-sar': 'frank.fc.yang@intel.com',
+  killer: 'richard.yang@intel.com',
+}
+const dellOnlyInstructorEmail = (trainingId?: string) => (trainingId ? DELL_ONLY_INSTRUCTOR_EMAILS[trainingId] : undefined)
+// Sessions after this date are reserved for Dell only.
+const DELL_ONLY_PERIOD_AFTER = '2026-10-09'
 const instructorForTraining = async (trainingId: string, oem: string, odm: string) =>
-  trainingId === BIOS_SAR_TRAINING_ID ? BIOS_SAR_INSTRUCTOR_EMAIL : getCFEContactEmail(trainingId, oem, odm)
+  dellOnlyInstructorEmail(trainingId) ?? getCFEContactEmail(trainingId, oem, odm)
 const isDate = (value: unknown) => typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)
 const trainingUnavailableLabel = (trainingId: string, title: string) => {
   if (trainingId === 'wifi-log') return 'WiFi Debug Training'
@@ -59,7 +65,8 @@ const sendData = async (_request: Request, response: Response) => {
   const resolveInstructor = (booking: Booking) => {
     if (booking.instructorEmail) return booking.instructorEmail
     const trainingId = booking.trainingId ?? sessions.get(booking.sessionId)?.trainingId
-    if (trainingId === BIOS_SAR_TRAINING_ID) return BIOS_SAR_INSTRUCTOR_EMAIL
+    const fixedInstructor = dellOnlyInstructorEmail(trainingId)
+    if (fixedInstructor) return fixedInstructor
     return trainingId ? getCFEContactEmailFromConfig(trainingId, booking.oem, booking.odm ?? 'NA', recipientConfig) ?? undefined : undefined
   }
   response.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate')
@@ -81,7 +88,7 @@ app.get('/api/instructor-preview', async (request, response) => {
   const oem = request.query.oem ? String(request.query.oem) : undefined
   const odm = request.query.odm ? String(request.query.odm) : undefined
   if (!trainingId) return response.status(400).json({ error: 'REQUIRED_FIELDS_MISSING' })
-  if (trainingId === BIOS_SAR_TRAINING_ID) return response.json({ instructorEmail: oem === BIOS_SAR_OEM ? BIOS_SAR_INSTRUCTOR_EMAIL : null })
+  if (dellOnlyInstructorEmail(trainingId)) return response.json({ instructorEmail: oem === DELL_ONLY_OEM ? dellOnlyInstructorEmail(trainingId) : null })
   const instructorEmail = await getExplicitCFEContactEmail(trainingId, oem, odm)
   response.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate')
   response.json({ instructorEmail })
@@ -97,7 +104,7 @@ app.get('/api/bookings', async (request, response) => {
     .filter((booking) => (booking.status === 'confirmed' || booking.status === 'pending') && booking.requesterEmail.toLowerCase() === email)
     .map((booking) => {
       const trainingId = booking.trainingId ?? sessions.get(booking.sessionId)?.trainingId
-      const instructorEmail = booking.instructorEmail ?? (trainingId === BIOS_SAR_TRAINING_ID ? BIOS_SAR_INSTRUCTOR_EMAIL : trainingId ? getCFEContactEmailFromConfig(trainingId, booking.oem, booking.odm ?? 'NA', recipientConfig) ?? undefined : undefined)
+      const instructorEmail = booking.instructorEmail ?? dellOnlyInstructorEmail(trainingId) ?? (trainingId ? getCFEContactEmailFromConfig(trainingId, booking.oem, booking.odm ?? 'NA', recipientConfig) ?? undefined : undefined)
       return { ...booking, instructorEmail, session: sessions.get(booking.sessionId), training: trainingId ? trainings.get(trainingId) : undefined }
     })
   response.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate')
@@ -133,7 +140,7 @@ app.post('/api/sessions', requireScheduler, async (request, response) => {
     if (!training) throw new Error('TRAINING_NOT_FOUND')
     const startMinutes = Number(startTime?.slice(0, 2)) * 60 + Number(startTime?.slice(3, 5))
     const weekday = new Date(`${date}T12:00:00Z`).getUTCDay()
-    if (!/^2026-(09-(1[4-9]|2[0-9])|10-0[1-9])$/.test(date) || weekday === 0 || weekday === 6 || !/^\d{2}:(00|30)$/.test(startTime) || startMinutes < 540 || startMinutes > 1020) throw new Error('INVALID_SESSION_TIME')
+    if (!/^2026-(09-(1[4-9]|2[0-9])|10-(0[1-9]|[12][0-9]|30))$/.test(date) || weekday === 0 || weekday === 6 || !/^\d{2}:(00|30)$/.test(startTime) || startMinutes < 540 || startMinutes > 1020) throw new Error('INVALID_SESSION_TIME')
     if (current.sessions.some((session) => session.status === 'active' && session.trainingId === trainingId && session.date === date && session.startTime === startTime)) throw new Error('DUPLICATE_SESSION')
     if (current.sessions.some((session) => session.status === 'active' && session.date === date && session.startTime === startTime && current.trainings.find((item) => item.id === session.trainingId)?.instructor === training.instructor)) throw new Error('INSTRUCTOR_CONFLICT')
     current.sessions.push({ id: crypto.randomUUID(), trainingId, date, startTime, durationMinutes: current.window.durationMinutes, status: 'active' })
@@ -160,7 +167,8 @@ const authorizedInstructorEmails = async (data: Awaited<ReturnType<typeof store.
   const recipientConfig = await readEmailRecipientConfig()
   const emails = new Set<string>()
   const addMappedInstructors = (trainingId: string) => {
-    if (trainingId === BIOS_SAR_TRAINING_ID) emails.add(BIOS_SAR_INSTRUCTOR_EMAIL)
+    const fixedInstructor = dellOnlyInstructorEmail(trainingId)
+    if (fixedInstructor) emails.add(fixedInstructor)
     Object.values(recipientConfig[trainingId] ?? {}).forEach((email) => emails.add(String(email).trim().toLowerCase()))
   }
   addMappedInstructors(session.trainingId)
@@ -242,11 +250,12 @@ app.post('/api/bookings', async (request, response) => {
   const preCheckData = await store.read()
   const preCheckSession = preCheckData.sessions.find((item) => item.id === sessionId && item.status === 'active')
   const requestedTrainingId = typeof trainingId === 'string' ? trainingId : preCheckSession?.trainingId
-  if (!preCheckSession || !requestedTrainingId || (requestedTrainingId !== preCheckSession.trainingId && requestedTrainingId !== BIOS_SAR_TRAINING_ID)) return response.status(400).json({ error: 'SESSION_NOT_FOUND' })
-  if (requestedTrainingId === BIOS_SAR_TRAINING_ID && selectedOem !== BIOS_SAR_OEM) return response.status(400).json({ error: 'INVALID_CUSTOMER_SELECTION' })
+  if (!preCheckSession || !requestedTrainingId || (requestedTrainingId !== preCheckSession.trainingId && !dellOnlyInstructorEmail(requestedTrainingId))) return response.status(400).json({ error: 'SESSION_NOT_FOUND' })
+  if (preCheckSession.date > DELL_ONLY_PERIOD_AFTER && selectedOem !== DELL_ONLY_OEM) return response.status(400).json({ error: 'DELL_ONLY_PERIOD' })
+  if (dellOnlyInstructorEmail(requestedTrainingId) && selectedOem !== DELL_ONLY_OEM) return response.status(400).json({ error: 'INVALID_CUSTOMER_SELECTION' })
   const preCheckTraining = preCheckData.trainings.find((item) => item.id === requestedTrainingId)
   if (!preCheckTraining) return response.status(400).json({ error: 'SESSION_NOT_FOUND' })
-  const instructorEmail = requestedTrainingId === BIOS_SAR_TRAINING_ID ? BIOS_SAR_INSTRUCTOR_EMAIL : await getExplicitCFEContactEmail(preCheckTraining.id, selectedOem, selectedOdm)
+  const instructorEmail = dellOnlyInstructorEmail(requestedTrainingId) ?? await getExplicitCFEContactEmail(preCheckTraining.id, selectedOem, selectedOdm)
   if (preCheckTraining && !instructorEmail) return response.status(400).json({ error: 'NO_INSTRUCTOR_MAPPED' })
 
   let booking: Booking | undefined
@@ -411,7 +420,8 @@ app.put('/api/bookings/:id/instructor', async (request, response) => {
     if (!booking) throw new Error('BOOKING_NOT_FOUND')
     session = data.sessions.find((item) => item.id === booking!.sessionId)
     training = session ? data.trainings.find((item) => item.id === (booking!.trainingId ?? session!.trainingId)) : undefined
-    if (training?.id === BIOS_SAR_TRAINING_ID && instructorEmail !== BIOS_SAR_INSTRUCTOR_EMAIL) throw new Error('BIOS_SAR_INSTRUCTOR_REQUIRED')
+    const fixedInstructor = dellOnlyInstructorEmail(training?.id)
+    if (fixedInstructor && instructorEmail !== fixedInstructor) throw new Error('FIXED_INSTRUCTOR_REQUIRED')
     booking.instructorEmail = instructorEmail
   })
 

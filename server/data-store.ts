@@ -71,6 +71,14 @@ const requiredHiddenTrainings: Training[] = [
     accent: 'blue',
     mode: 'Live',
   },
+  {
+    id: 'killer',
+    title: 'Killer Training',
+    shortTitle: 'Killer',
+    instructor: 'Richard',
+    accent: 'mint',
+    mode: 'Live',
+  },
 ]
 
 const LOCK_RETRY_MS = 20

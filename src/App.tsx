@@ -106,13 +106,34 @@ const weekdays: Day[] = [
   ["2026-10-07", "Wed"],
   ["2026-10-08", "Thu"],
   ["2026-10-09", "Fri"],
+  ["2026-10-12", "Mon"],
+  ["2026-10-13", "Tue"],
+  ["2026-10-14", "Wed"],
+  ["2026-10-15", "Thu"],
+  ["2026-10-16", "Fri"],
+  ["2026-10-19", "Mon"],
+  ["2026-10-20", "Tue"],
+  ["2026-10-21", "Wed"],
+  ["2026-10-22", "Thu"],
+  ["2026-10-23", "Fri"],
+  ["2026-10-26", "Mon"],
+  ["2026-10-27", "Tue"],
+  ["2026-10-28", "Wed"],
+  ["2026-10-29", "Thu"],
+  ["2026-10-30", "Fri"],
 ].map(([date, weekday]) => ({ date, day: date.slice(-2), weekday }));
 const weekGroups: { label: string; days: Day[] }[] = [
   { label: "14–18 SEP", days: weekdays.slice(0, 5) },
   { label: "21–25 SEP", days: weekdays.slice(5, 10) },
   { label: "28 SEP–02 OCT", days: weekdays.slice(10, 15) },
   { label: "05–09 OCT", days: weekdays.slice(15, 20) },
+  { label: "12–16 OCT", days: weekdays.slice(20, 25) },
+  { label: "19–23 OCT", days: weekdays.slice(25, 30) },
+  { label: "26–30 OCT", days: weekdays.slice(30, 35) },
 ];
+// Sessions after this date are reserved for Dell only.
+const DELL_ONLY_PERIOD_AFTER = "2026-10-09";
+const isDellOnlyDate = (date?: string) => Boolean(date && date > DELL_ONLY_PERIOD_AFTER);
 const OEM_OPTIONS = ["Dell", "HP", "Asus", "Acer", "Fujitsu", "VAIO", "Panasonic", "NEC", "Samsung", "LG", "Honor", "Wiko", "Dynabook", "Google", "Microsoft", "MSFT Surface", "MSI", "GIGABYTE", "Xiaomi", "Aistone", "PRC CTE", "Lenovo Ideapad", "Lenovo ThinkPad", "NA"] as const;
 const ODM_OPTIONS = ["Quanta", "Pegatron", "Wistron", "Inventec", "Compal", "LCFC", "Luxshare", "Huaqin", "Longcheer", "NA"] as const;
 const TRAINING_FORMAT_OPTIONS = [
@@ -120,6 +141,10 @@ const TRAINING_FORMAT_OPTIONS = [
   { value: "without-video", label: "Training without video: Instructor do live training, no video" },
 ] as const;
 const BIOS_SAR_TRAINING_ID = "bios-sar";
+const KILLER_TRAINING_ID = "killer";
+// Trainings offered to Dell only; they are hidden from the course catalog and added as booking topics on demand.
+const DELL_ONLY_TRAINING_IDS = [BIOS_SAR_TRAINING_ID, KILLER_TRAINING_ID];
+const isDellOnlyTraining = (trainingId?: string | null) => Boolean(trainingId && DELL_ONLY_TRAINING_IDS.includes(trainingId));
 type OemOption = (typeof OEM_OPTIONS)[number];
 type OdmOption = (typeof ODM_OPTIONS)[number];
 type TrainingFormat = (typeof TRAINING_FORMAT_OPTIONS)[number]["value"];
@@ -153,6 +178,7 @@ const userError = (code: string) =>
     NOT_SESSION_INSTRUCTOR:
       "This email is not the instructor for this session, so attendance cannot be recorded.",
     NO_INSTRUCTOR_MAPPED: "No instructor is mapped for this OEM/ODM and training. Please email jonathan.tsao@intel.com to add an instructor mapping.",
+    DELL_ONLY_PERIOD: "Sessions after 09 October 2026 are reserved for Dell only.",
   })[code] ?? "Something went wrong. Please try again.";
 const isEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 // crypto.randomUUID requires a secure context (HTTPS/localhost); fall back to getRandomValues over plain HTTP.
@@ -665,6 +691,11 @@ function App() {
       .catch(() => { if (!cancelled) setBookingInstructorPreview(null); });
     return () => { cancelled = true; };
   }, [modal, selectedSession?.trainingId, bookingDraft.trainingId, bookingDraft.oem, bookingDraft.odm]);
+  useEffect(() => {
+    if (isDellOnlyDate(selectedSession?.date) && bookingDraft.oem !== "Dell") {
+      setBookingDraft((current) => ({ ...current, oem: "Dell" }));
+    }
+  }, [selectedSession?.date, bookingDraft.oem]);
   const trainings = data?.trainings ?? [];
   const visibleUnavailableDays = useMemo(
     () =>
@@ -804,7 +835,7 @@ function App() {
   );
   const courseCatalog = useMemo(() => {
     const grouped = new Map<string, Training[]>();
-    trainings.filter((training) => training.id !== BIOS_SAR_TRAINING_ID).forEach((training) => {
+    trainings.filter((training) => !isDellOnlyTraining(training.id)).forEach((training) => {
       const key = majorCourseMeta(training).key;
       (grouped.get(key) ?? grouped.set(key, []).get(key)!).push(training);
     });
@@ -875,9 +906,12 @@ function App() {
           ),
         }))
         .filter((entry): entry is { key: string; title: string; session: Session } => Boolean(entry.session));
-      const biosSarTraining = trainings.find((training) => training.id === BIOS_SAR_TRAINING_ID);
-      if (bookingDraft.oem === "Dell" && biosSarTraining) {
-        options.push({ key: BIOS_SAR_TRAINING_ID, title: biosSarTraining.title, session: { ...selectedSession, trainingId: BIOS_SAR_TRAINING_ID, training: biosSarTraining } });
+      if (bookingDraft.oem === "Dell") {
+        DELL_ONLY_TRAINING_IDS.forEach((trainingId) => {
+          const dellOnlyTraining = trainings.find((training) => training.id === trainingId);
+          if (!dellOnlyTraining) return;
+          options.push({ key: trainingId, title: dellOnlyTraining.title, session: { ...selectedSession, trainingId, training: dellOnlyTraining } });
+        });
       }
       return options;
     },
@@ -886,7 +920,7 @@ function App() {
   const selectedBookingTopicKey = bookingDraft.trainingId ?? (selectedSession?.training ? majorCourseMeta(selectedSession.training).key : "");
   const bookingCourseSessions = useMemo(
     () =>
-      bookingDraft.trainingId === BIOS_SAR_TRAINING_ID && selectedSession
+      isDellOnlyTraining(bookingDraft.trainingId) && selectedSession
         ? [selectedSession]
         : selectedBookingTopicKey
         ? sessions.filter(
@@ -1007,6 +1041,10 @@ function App() {
     const requesterEmail = bookingDraft.requesterEmail.trim();
     if (!isEmail(requesterEmail)) {
       setError(userError("INVALID_REQUESTER_EMAIL"));
+      return;
+    }
+    if (isDellOnlyDate(selectedSession.date) && bookingDraft.oem !== "Dell") {
+      setError(userError("DELL_ONLY_PERIOD"));
       return;
     }
     if (!bookingInstructorPreview) {
@@ -1442,6 +1480,11 @@ function App() {
                 </button>
               </div>
             </div>
+            {currentWeek.days.some((day) => isDellOnlyDate(day.date)) && (
+              <div className="dell-only-notice">
+                <LockKeyhole size={15} /> Dell only — sessions after 09 Oct 2026 are reserved for Dell bookings.
+              </div>
+            )}
             <div className="week-group active-week">
               <div
                 className="calendar-grid"
@@ -2236,6 +2279,11 @@ function App() {
           <p className="modal-copy">
             Your booking will be visible to everyone using this schedule.
           </p>
+          {isDellOnlyDate(selectedSession?.date) && (
+            <div className="dell-only-notice">
+              <LockKeyhole size={15} /> Dell only — this date is reserved for Dell bookings.
+            </div>
+          )}
           <label className="form-label">
             Session date
             <select
@@ -2274,7 +2322,7 @@ function App() {
                 if (!option) return;
                 setSelectedSession(option.session);
                 setSelectedTraining(option.session.training ?? null);
-                setBookingDraft({ ...bookingDraft, trainingId: option.key === BIOS_SAR_TRAINING_ID ? BIOS_SAR_TRAINING_ID : undefined });
+                setBookingDraft({ ...bookingDraft, trainingId: isDellOnlyTraining(option.key) ? option.key : undefined });
               }}
             >
               {bookingTopicOptions.map((option) => (
@@ -2291,7 +2339,7 @@ function App() {
               disabled={bookingInProgress}
               onChange={(event) => {
                 const oem = event.target.value as OemOption;
-                if (oem !== "Dell" && bookingDraft.trainingId === BIOS_SAR_TRAINING_ID) {
+                if (oem !== "Dell" && isDellOnlyTraining(bookingDraft.trainingId)) {
                   const scheduledSession = sessions.find((session) => session.id === selectedSession?.id);
                   if (scheduledSession) {
                     setSelectedSession(scheduledSession);
@@ -2301,7 +2349,7 @@ function App() {
                 setBookingDraft({ ...bookingDraft, oem, trainingId: oem === "Dell" ? bookingDraft.trainingId : undefined });
               }}
             >
-              {OEM_OPTIONS.map((oem) => (
+              {OEM_OPTIONS.filter((oem) => !isDellOnlyDate(selectedSession?.date) || oem === "Dell").map((oem) => (
                 <option value={oem} key={oem}>
                   {oem}
                 </option>
