@@ -8,6 +8,7 @@ import path from 'node:path'
 import { dump } from 'js-yaml'
 import { createDataStore, type AttendanceRecord, type Booking } from './data-store.js'
 import { readEmailRecipientConfig, sendBookingNotificationEmail, sendBookingCancellationNotificationEmail, sendInstructorUpdateNotificationEmail, getCFEContactEmail, getCFEContactEmailFromConfig, getExplicitCFEContactEmail, writeEmailRecipientConfig } from './email-service.js'
+import { resolveDisplayTrainingId } from './booking-topic.js'
 import { readTrainingVideoCatalog } from './training-videos.js'
 
 const password = process.env.SCHEDULER_PASSWORD
@@ -80,7 +81,14 @@ const sendData = async (_request: Request, response: Response) => {
   response.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate')
   response.json({
     ...data,
-    sessions: data.sessions.map((session) => ({ ...session, training: trainings.get(session.trainingId) })),
+    sessions: data.sessions.map((session) => {
+      const effectiveTrainingId = resolveDisplayTrainingId(
+        session.trainingId,
+        data.bookings.filter((booking) => booking.sessionId === session.id),
+        session.id,
+      )
+      return { ...session, training: trainings.get(effectiveTrainingId ?? session.trainingId) }
+    }),
     bookings: data.bookings.filter((booking) => booking.status === 'confirmed').map((booking) => ({ ...booking, instructorEmail: resolveInstructor(booking) })),
   })
 }

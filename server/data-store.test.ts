@@ -4,6 +4,7 @@ import os from 'node:os'
 import path from 'node:path'
 import test from 'node:test'
 import { DataStore } from './data-store.js'
+import { resolveDisplayTrainingId } from './booking-topic.js'
 
 const validYaml = `window:
   start: '2026-09-14'
@@ -150,8 +151,6 @@ test('booking notification preview includes details and agenda', async () => {
 })
 
 test('resolves the active training title from the booked custom topic instead of the slot default', async () => {
-  const { resolveDisplayTrainingId } = await import('../src/booking-topic.ts')
-
   assert.equal(
     resolveDisplayTrainingId('wifi-8', [{ sessionId: 'session-1', trainingId: 'killer' }], 'session-1'),
     'killer',
@@ -159,5 +158,16 @@ test('resolves the active training title from the booked custom topic instead of
   assert.equal(
     resolveDisplayTrainingId('wifi-8', [{ sessionId: 'session-2', trainingId: 'wifi-log' }], 'session-1'),
     'wifi-8',
+  )
+})
+
+test('keeps the custom Dell-only training visible on server responses when a slot default is BT HDT', () => {
+  assert.equal(
+    resolveDisplayTrainingId('bt-hdt', [{ sessionId: 'session-9', trainingId: 'killer' }], 'session-9'),
+    'killer',
+  )
+  assert.equal(
+    resolveDisplayTrainingId('bt-hdt', [{ sessionId: 'session-9', trainingId: 'bt-hdt' }], 'session-9'),
+    'bt-hdt',
   )
 })
