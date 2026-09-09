@@ -148,3 +148,16 @@ test('booking notification preview includes details and agenda', async () => {
   assert.match(html, /WiFi 8 Training agenda/)
   assert.match(html, /The Key Pillars of Wi-Fi 8/)
 })
+
+test('resolves the active training title from the booked custom topic instead of the slot default', async () => {
+  const { resolveDisplayTrainingId } = await import('../src/booking-topic.ts')
+
+  assert.equal(
+    resolveDisplayTrainingId('wifi-8', [{ sessionId: 'session-1', trainingId: 'killer' }], 'session-1'),
+    'killer',
+  )
+  assert.equal(
+    resolveDisplayTrainingId('wifi-8', [{ sessionId: 'session-2', trainingId: 'wifi-log' }], 'session-1'),
+    'wifi-8',
+  )
+})

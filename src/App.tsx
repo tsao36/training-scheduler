@@ -24,6 +24,7 @@ import {
   X,
 } from "lucide-react";
 import { dump, load } from "js-yaml";
+import { resolveDisplayTrainingId } from "./booking-topic";
 import "./App.css";
 
 type Training = {
@@ -870,8 +871,15 @@ function App() {
   const selectedBookings = selectedSession
     ? bookings.filter((booking) => booking.sessionId === selectedSession.id)
     : [];
+  const selectedDisplayTrainingId = resolveDisplayTrainingId(
+    selectedSession?.trainingId,
+    selectedBookings,
+    selectedSession?.id,
+  );
+  const selectedDisplayTraining =
+    trainings.find((training) => training.id === selectedDisplayTrainingId) ?? selectedSession?.training ?? null;
   const selectedSessionDeliveryMode = selectedSession
-    ? deliveryModeForBookings(selectedSession.training, selectedBookings)
+    ? deliveryModeForBookings(selectedDisplayTraining, selectedBookings)
     : null;
   const selectedAttendance = selectedSession
     ? (data?.attendance ?? []).filter((record) => record.sessionId === selectedSession.id)
@@ -1764,7 +1772,7 @@ function App() {
                   {selectedSession ? "SELECTED SESSION" : "SESSION DETAILS"}
                 </span>
                 <h2>
-                  {selectedSession?.training?.title ??
+                  {selectedDisplayTraining?.title ??
                     selectedTraining?.title ??
                     "Choose a course"}
                 </h2>
@@ -1795,7 +1803,7 @@ function App() {
                     </strong>
                     <span>
                       <Clock3 size={14} /> 30 min ·{" "}
-                      {selectedSession.training?.instructor}
+                      {selectedDisplayTraining?.instructor}
                     </span>
                   </div>
                 </div>

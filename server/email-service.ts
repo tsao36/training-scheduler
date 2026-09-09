@@ -9,8 +9,11 @@ const smtpPort = Number(process.env.SMTP_PORT ?? 587)
 const smtpUser = process.env.SMTP_USER
 const smtpPass = process.env.SMTP_PASS
 const smtpFrom = process.env.SMTP_FROM ?? 'noreply@intel.com'
-const recipientConfigPath = process.env.EMAIL_RECIPIENTS_FILE ?? path.resolve('data/email-recipients.yaml')
 const sessionTimeZoneLabel = 'Taiwan time'
+
+function getRecipientConfigPath(): string {
+  return process.env.EMAIL_RECIPIENTS_FILE ?? path.resolve('data/email-recipients.yaml')
+}
 
 const defaultRecipientConfig = {
   'wifi-log': { default: 'hannahx.hung@intel.com' },
@@ -156,18 +159,28 @@ const courseAgendas: Record<string, { title: string; items: AgendaItem[] }> = {
 }
 
 export async function readEmailRecipientConfig(): Promise<EmailRecipientConfig> {
+  const recipientConfigPath = getRecipientConfigPath()
   try {
     const raw = await fs.readFile(recipientConfigPath, 'utf8')
     const parsed = load(raw) as Record<string, Record<string, string>> | undefined
     if (parsed && typeof parsed === 'object') return parsed
-  } catch {
-    // Fall back to built-in defaults if the file does not exist yet.
+  } catch (error) {
+    if (error instanceof Error && /ENOENT|EISDIR/.test(error.message)) {
+      return { ...defaultRecipientConfig }
+    }
+    throw new Error('INVALID_EMAIL_RECIPIENTS_YAML')
   }
   return { ...defaultRecipientConfig }
 }
 
 export async function writeEmailRecipientConfig(yamlText: string): Promise<EmailRecipientConfig> {
-  const parsed = load(yamlText) as Record<string, Record<string, string>> | undefined
+  const recipientConfigPath = getRecipientConfigPath()
+  let parsed: Record<string, Record<string, string>> | undefined
+  try {
+    parsed = load(yamlText) as Record<string, Record<string, string>> | undefined
+  } catch {
+    throw new Error('INVALID_EMAIL_RECIPIENTS_YAML')
+  }
   if (!parsed || typeof parsed !== 'object') throw new Error('INVALID_EMAIL_RECIPIENTS_YAML')
 
   const normalized = Object.fromEntries(

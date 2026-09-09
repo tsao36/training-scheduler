@@ -7,7 +7,7 @@
     "dev": "vite",
     "dev:server": "tsx server/index.ts",
     "build": "tsc -b && tsc -p tsconfig.server.json && vite build",
-    "test": "tsx --test server/data-store.test.ts",
+    "test": "tsx --test --test-concurrency=1 server/data-store.test.ts server/webapp.test.ts",
     "lint": "oxlint",
     "preview": "vite preview",
     "start": "node dist-server/index.js"
