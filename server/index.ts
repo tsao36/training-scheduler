@@ -32,6 +32,7 @@ const DELL_ONLY_INSTRUCTOR_EMAILS: Record<string, string> = {
   'bios-sar': 'frank.fc.yang@intel.com',
   killer: 'richard.yang@intel.com',
 }
+const TEST_INSTRUCTOR_EMAIL = 'tsao36@gmail.com'
 const dellOnlyInstructorEmail = (trainingId?: string) => (trainingId ? DELL_ONLY_INSTRUCTOR_EMAILS[trainingId] : undefined)
 // Sessions after this date are reserved for Dell only.
 const DELL_ONLY_PERIOD_AFTER = '2026-10-09'
@@ -98,6 +99,19 @@ app.get('/api/training-videos', async (_request, response) => {
   const catalog = await readTrainingVideoCatalog()
   response.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate')
   response.json(catalog)
+})
+app.get('/api/instructors', async (_request, response) => {
+  const data = await store.read()
+  const recipientConfig = await readEmailRecipientConfig()
+  const instructors = new Set<string>([TEST_INSTRUCTOR_EMAIL, ...Object.values(DELL_ONLY_INSTRUCTOR_EMAILS)])
+  Object.values(recipientConfig).forEach((trainingRecipients) => {
+    Object.values(trainingRecipients).forEach((email) => instructors.add(String(email).trim().toLowerCase()))
+  })
+  data.bookings.forEach((booking) => {
+    if (booking.instructorEmail) instructors.add(booking.instructorEmail.trim().toLowerCase())
+  })
+  response.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate')
+  response.json({ instructors: Array.from(instructors).filter(Boolean).sort() })
 })
 app.get('/api/instructor-preview', async (request, response) => {
   const trainingId = String(request.query.trainingId ?? '')

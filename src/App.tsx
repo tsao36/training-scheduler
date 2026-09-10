@@ -475,6 +475,8 @@ function App() {
     requesterEmail: "",
   });
   const [authenticated, setAuthenticated] = useState(false);
+  const [availableInstructors, setAvailableInstructors] = useState<string[]>([]);
+  const [instructorSelections, setInstructorSelections] = useState<Record<string, string>>({});
   const [bookingInstructorPreview, setBookingInstructorPreview] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [bookingInProgress, setBookingInProgress] = useState(false);
@@ -565,6 +567,9 @@ function App() {
       .catch(() => undefined);
     api<TrainingVideoCatalog>("/api/training-videos")
       .then(setTrainingVideoCatalog)
+      .catch(() => undefined);
+    api<{ instructors: string[] }>("/api/instructors")
+      .then((result) => setAvailableInstructors(result.instructors))
       .catch(() => undefined);
     
   }, []);
@@ -1183,14 +1188,14 @@ function App() {
       setCancellingBookingId(null);
     }
   };
-  const updateBookingInstructor = async (bookingId: string, requesterEmail = lookupEmail) => {
+  const updateBookingInstructor = async (bookingId: string, instructorEmail: string, requesterEmail = lookupEmail) => {
     if (updatingInstructorBookingId) return;
     const ownerEmail = requesterEmail.trim();
     if (!ownerEmail) {
       setError("Enter the requester email used for this booking.");
       return;
     }
-    const newInstructorEmail = window.prompt("Enter the new instructor email for this booking.")?.trim();
+    const newInstructorEmail = instructorEmail.trim();
     if (!newInstructorEmail) return;
     setUpdatingInstructorBookingId(bookingId);
     try {
@@ -1867,13 +1872,36 @@ function App() {
                 )}
                 {selectedBookings.map((booking) => (
                   <div className="booking-record-actions" key={booking.id}>
+                    <label className="form-label">
+                      Instructor
+                      <select
+                        value={instructorSelections[booking.id] ?? booking.instructorEmail ?? availableInstructors[0] ?? ""}
+                        disabled={updatingInstructorBookingId === booking.id}
+                        onChange={(event) =>
+                          setInstructorSelections((current) => ({
+                            ...current,
+                            [booking.id]: event.target.value,
+                          }))
+                        }
+                      >
+                        {Array.from(new Set([booking.instructorEmail ?? "", ...availableInstructors]))
+                          .filter((email): email is string => Boolean(email))
+                          .sort()
+                          .map((email) => (
+                            <option value={email} key={email}>
+                              {email}
+                            </option>
+                          ))}
+                      </select>
+                    </label>
                     <button
                       className="secondary-button"
                       type="button"
                       disabled={updatingInstructorBookingId === booking.id}
                       onClick={() => {
                         const requesterEmail = window.prompt("Enter the requester email used for this booking.");
-                        if (requesterEmail) updateBookingInstructor(booking.id, requesterEmail);
+                        const instructorEmail = instructorSelections[booking.id] ?? booking.instructorEmail ?? availableInstructors[0] ?? "";
+                        if (requesterEmail) updateBookingInstructor(booking.id, instructorEmail, requesterEmail);
                       }}
                     >
                       <UserRound size={13} /> {updatingInstructorBookingId === booking.id ? "Updating..." : `Update instructor (${customerLabel(booking)})`}
@@ -2024,7 +2052,55 @@ function App() {
             <label className="form-label">Requester email<input type="email" value={lookupEmail} onChange={(event) => setLookupEmail(event.target.value)} placeholder="name@example.com" required autoFocus /></label>
             <button className="book-button" type="submit"><Search size={17} /> Find my bookings</button>
           </form>
-          {lookupResults && <div className="lookup-results">{lookupResults.length === 0 ? <p className="empty-list">No active bookings found for this email.</p> : lookupResults.map((booking) => <div className="lookup-booking" key={booking.id}><strong>{booking.training?.title ?? "Training session"}</strong><span>{booking.session?.date} · {booking.session?.startTime} PT · {booking.session?.durationMinutes} min</span><span>Customer: {customerLabel(booking)}</span>{trainingFormatLabel(booking.trainingFormat) && <span>{trainingFormatLabel(booking.trainingFormat)}</span>}<span>Instructor: {booking.instructorEmail ?? "Not configured"}</span><code>{booking.id}</code>{booking.status === "confirmed" && <div className="booking-record-actions"><button className="secondary-button" type="button" disabled={updatingInstructorBookingId === booking.id} onClick={() => updateBookingInstructor(booking.id)}><UserRound size={13} /> {updatingInstructorBookingId === booking.id ? "Updating..." : "Update instructor"}</button><button className="cancel-booking-button" type="button" disabled={cancellingBookingId === booking.id} onClick={() => cancelBooking(booking.id)}><Trash2 size={13} /> {cancellingBookingId === booking.id ? "Cancelling..." : "Cancel booking"}</button></div>}</div>)}</div>}
+          {lookupResults && (
+            <div className="lookup-results">
+              {lookupResults.length === 0 ? (
+                <p className="empty-list">No active bookings found for this email.</p>
+              ) : (
+                lookupResults.map((booking) => {
+                  const selectedInstructor = instructorSelections[booking.id] ?? booking.instructorEmail ?? availableInstructors[0] ?? "";
+                  const instructorOptions = Array.from(new Set([booking.instructorEmail ?? "", ...availableInstructors]))
+                    .filter((email): email is string => Boolean(email))
+                    .sort();
+                  return (
+                    <div className="lookup-booking" key={booking.id}>
+                      <strong>{booking.training?.title ?? "Training session"}</strong>
+                      <span>{booking.session?.date} · {booking.session?.startTime} PT · {booking.session?.durationMinutes} min</span>
+                      <span>Customer: {customerLabel(booking)}</span>
+                      {trainingFormatLabel(booking.trainingFormat) && <span>{trainingFormatLabel(booking.trainingFormat)}</span>}
+                      <span>Instructor: {booking.instructorEmail ?? "Not configured"}</span>
+                      <code>{booking.id}</code>
+                      {booking.status === "confirmed" && (
+                        <div className="booking-record-actions">
+                          <label className="form-label">
+                            Instructor
+                            <select
+                              value={selectedInstructor}
+                              disabled={updatingInstructorBookingId === booking.id}
+                              onChange={(event) => setInstructorSelections((current) => ({ ...current, [booking.id]: event.target.value }))}
+                            >
+                              {instructorOptions.map((email) => <option value={email} key={email}>{email}</option>)}
+                            </select>
+                          </label>
+                          <button
+                            className="secondary-button"
+                            type="button"
+                            disabled={updatingInstructorBookingId === booking.id}
+                            onClick={() => updateBookingInstructor(booking.id, selectedInstructor)}
+                          >
+                            <UserRound size={13} /> {updatingInstructorBookingId === booking.id ? "Updating..." : "Update instructor"}
+                          </button>
+                          <button className="cancel-booking-button" type="button" disabled={cancellingBookingId === booking.id} onClick={() => cancelBooking(booking.id)}>
+                            <Trash2 size={13} /> {cancellingBookingId === booking.id ? "Cancelling..." : "Cancel booking"}
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          )}
         </Modal>
       )}
       {modal === "topic-customer" && (
