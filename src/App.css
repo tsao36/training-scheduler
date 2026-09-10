@@ -6,6 +6,7 @@
 .topbar-center { display: flex; align-items: center; gap: 9px; font-size: 11px; letter-spacing: .7px; color: #b9c0c2; text-transform: uppercase; }
 .live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--blue); box-shadow: 0 0 0 4px rgba(119,159,227,.16); }
 .topbar-divider { width: 1px; height: 13px; background: #48535b; margin: 0 5px; }
+.server-version { margin-left: auto; margin-right: 16px; padding: 5px 8px; border: 1px solid rgba(119,159,227,.45); color: #b9c0c2; font-size: 9px; letter-spacing: .8px; font-variant-numeric: tabular-nums; }
 .user-menu { display: flex; align-items: center; gap: 9px; font-size: 12px; color: #d8dcda; }
 .avatar { display: grid; place-items: center; width: 28px; height: 28px; background: #e5a57f; color: var(--navy); border-radius: 50%; font-size: 10px; font-weight: 700; }
 .main-content { max-width: 1450px; margin: 0 auto; padding: 47px 48px 60px; }

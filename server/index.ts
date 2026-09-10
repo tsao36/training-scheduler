@@ -1,5 +1,6 @@
 import cookieParser from 'cookie-parser'
 import { randomUUID } from 'node:crypto'
+import { execFileSync } from 'node:child_process'
 import express, { type NextFunction, type Request, type Response } from 'express'
 import { readFileSync } from 'node:fs'
 import http from 'node:http'
@@ -14,6 +15,13 @@ import { readTrainingVideoCatalog } from './training-videos.js'
 const password = process.env.SCHEDULER_PASSWORD
 if (!password) throw new Error('SCHEDULER_PASSWORD is required')
 const baseUrl = process.env.BASE_URL ?? 'http://localhost:5173'
+const serverVersion = process.env.APP_VERSION ?? (() => {
+  try {
+    return execFileSync('git', ['rev-parse', '--short', 'HEAD'], { encoding: 'utf8' }).trim()
+  } catch {
+    return 'unknown'
+  }
+})()
 const store = createDataStore()
 const app = express()
 const port = Number(process.env.PORT ?? 3001)
@@ -95,6 +103,10 @@ const sendData = async (_request: Request, response: Response) => {
 }
 
 app.get('/api/scheduler', sendData)
+app.get('/api/version', (_request, response) => {
+  response.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate')
+  response.json({ version: serverVersion })
+})
 app.get('/api/training-videos', async (_request, response) => {
   const catalog = await readTrainingVideoCatalog()
   response.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate')
