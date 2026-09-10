@@ -118,6 +118,8 @@ button { font: inherit; cursor: pointer; }
 .agenda-list li { padding-left: 4px; }
 .agenda-sublist { display: grid; gap: 8px; margin: 8px 0 0; padding-left: 18px; list-style: disc; color: var(--muted); font-size: 11px; }
 .heading-actions { display: flex; align-items: center; gap: 9px; }
+.schedule-book-action { display: flex; justify-content: flex-end; margin-bottom: 12px; }
+.schedule-book-action .book-button { width: auto; }
 .secondary-button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; border: 1px solid var(--blue); background: transparent; color: var(--navy); padding: 11px 14px; font-size: 11px; font-weight: 700; }
 .secondary-button:hover { background: #E5ECF8; }
 .lookup-results { display: grid; gap: 8px; margin-top: 18px; border-top: 1px solid var(--line); padding-top: 5px; }

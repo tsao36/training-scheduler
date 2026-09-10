@@ -1383,9 +1383,6 @@ function App() {
             </p>
           </div>
           <div className="heading-actions">
-            <button className="book-button" type="button" onClick={() => openBookingModal(null)}>
-              <Plus size={16} /> Book a session
-            </button>
             <button className="secondary-button" type="button" onClick={() => { setLookupResults(null); setModal("my-bookings"); }}>
               <CalendarDays size={16} /> My bookings
             </button>
@@ -1507,6 +1504,11 @@ function App() {
           </aside>
           <section className="calendar-panel schedule-spotlight">
             <span className="schedule-spotlight-badge">Start here — click an open slot to book a session</span>
+            <div className="schedule-book-action">
+              <button className="book-button" type="button" onClick={() => openBookingModal(null)}>
+                <Plus size={16} /> Book a session
+              </button>
+            </div>
             <div className="calendar-toolbar">
               <div>
                 <span className="section-kicker">SCHEDULE VIEW</span>
