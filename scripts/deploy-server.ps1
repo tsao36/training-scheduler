@@ -76,6 +76,8 @@ if (-not (Test-Path $DataFile)) {
 
 $repoDataFile = Join-Path $RepoPath "data\scheduler.yaml"
 $preservedDataFile = ""
+$preservedRecipientsFile = ""
+$preservedPackageLockFile = ""
 $shouldPreserveRepoDataFile = (Resolve-Path $DataFile).Path -eq (Resolve-Path $repoDataFile).Path
 
 Write-Step "Git update"
@@ -88,6 +90,26 @@ if ($shouldPreserveRepoDataFile) {
     Invoke-Checked "git" @("checkout", "--", "data/scheduler.yaml")
   }
 }
+$repoRecipientsFile = Join-Path $RepoPath "data\email-recipients.yaml"
+if (Test-Path $repoRecipientsFile) {
+  $recipientsStatus = & git status --porcelain -- data/email-recipients.yaml
+  if ($recipientsStatus) {
+    $preservedRecipientsFile = Join-Path $env:TEMP "training-scheduler-recipients-$([guid]::NewGuid()).yaml"
+    Copy-Item -Path $repoRecipientsFile -Destination $preservedRecipientsFile -Force
+    Write-Host "Preserved recipient config before git update: $preservedRecipientsFile"
+    Invoke-Checked "git" @("checkout", "--", "data/email-recipients.yaml")
+  }
+}
+$repoPackageLockFile = Join-Path $RepoPath "package-lock.json"
+if (Test-Path $repoPackageLockFile) {
+  $packageLockStatus = & git status --porcelain -- package-lock.json
+  if ($packageLockStatus) {
+    $preservedPackageLockFile = Join-Path $env:TEMP "training-scheduler-package-lock-$([guid]::NewGuid()).json"
+    Copy-Item -Path $repoPackageLockFile -Destination $preservedPackageLockFile -Force
+    Write-Host "Preserved local package-lock before git update: $preservedPackageLockFile"
+    Invoke-Checked "git" @("checkout", "--", "package-lock.json")
+  }
+}
 
 try {
   Invoke-Checked "git" @("fetch", "origin")
@@ -98,6 +120,16 @@ try {
     Copy-Item -Path $preservedDataFile -Destination $DataFile -Force
     Remove-Item -Path $preservedDataFile -Force -ErrorAction SilentlyContinue
     Write-Host "Restored preserved runtime data file after git update."
+  }
+  if ($preservedRecipientsFile) {
+    Copy-Item -Path $preservedRecipientsFile -Destination $repoRecipientsFile -Force
+    Remove-Item -Path $preservedRecipientsFile -Force -ErrorAction SilentlyContinue
+    Write-Host "Restored preserved recipient config after git update."
+  }
+  if ($preservedPackageLockFile) {
+    Copy-Item -Path $preservedPackageLockFile -Destination $repoPackageLockFile -Force
+    Remove-Item -Path $preservedPackageLockFile -Force -ErrorAction SilentlyContinue
+    Write-Host "Restored preserved local package-lock after git update."
   }
 }
 
