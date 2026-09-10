@@ -479,7 +479,7 @@ function App() {
     requesterEmail: "",
   });
   const [authenticated, setAuthenticated] = useState(false);
-    const [serverVersion, setServerVersion] = useState("unknown");
+  const [appVersion, setAppVersion] = useState("unknown");
   const [availableInstructors, setAvailableInstructors] = useState<string[]>([]);
   const [instructorSelections, setInstructorSelections] = useState<Record<string, string>>({});
   const [editingInstructorBookingId, setEditingInstructorBookingId] = useState<string | null>(null);
@@ -572,7 +572,7 @@ function App() {
       .then((result) => setAuthenticated(result.authenticated))
       .catch(() => undefined);
     api<{ version: string }>('/api/version')
-      .then((result) => setServerVersion(result.version))
+      .then((result) => setAppVersion(result.version))
       .catch(() => undefined);
     api<TrainingVideoCatalog>("/api/training-videos")
       .then(setTrainingVideoCatalog)
@@ -1339,8 +1339,8 @@ function App() {
         <div className="world-clocks" aria-label="Current local times">
           {clocks.map((clock) => <span className="world-clock" key={clock.label}><b>{clock.label}</b><time>{clock.time}</time></span>)}
         </div>
-        <span className="server-version" title="Git commit currently running on the server">
-          SERVER {serverVersion}
+        <span className="server-version" title="Application version currently running on the server">
+          VERSION {appVersion}
         </span>
         <button
           className="user-menu"
