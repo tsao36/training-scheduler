@@ -41,6 +41,8 @@ const DELL_ONLY_INSTRUCTOR_EMAILS: Record<string, string> = {
 }
 const DELL_ONLY_TRAINING_IDS = new Set(['bios-sar', 'killer'])
 const TEST_INSTRUCTOR_EMAIL = 'tsao36@gmail.com'
+const AVAILABLE_INSTRUCTOR_EMAILS = ['richard.yang@intel.com']
+const KILLER_DEFAULT_INSTRUCTOR_EMAIL = 'richard.yang@intel.com'
 const dellOnlyInstructorEmail = (trainingId?: string) => (trainingId ? DELL_ONLY_INSTRUCTOR_EMAILS[trainingId] : undefined)
 // Sessions after this date are reserved for Dell only.
 const DELL_ONLY_PERIOD_AFTER = '2026-10-09'
@@ -115,7 +117,7 @@ app.get('/api/training-videos', async (_request, response) => {
 app.get('/api/instructors', async (_request, response) => {
   const data = await store.read()
   const recipientConfig = await readEmailRecipientConfig()
-  const instructors = new Set<string>([TEST_INSTRUCTOR_EMAIL, ...Object.values(DELL_ONLY_INSTRUCTOR_EMAILS)])
+  const instructors = new Set<string>([TEST_INSTRUCTOR_EMAIL, ...AVAILABLE_INSTRUCTOR_EMAILS, ...Object.values(DELL_ONLY_INSTRUCTOR_EMAILS)])
   Object.values(recipientConfig).forEach((trainingRecipients) => {
     Object.values(trainingRecipients).forEach((email) => instructors.add(String(email).trim().toLowerCase()))
   })
@@ -131,7 +133,7 @@ app.get('/api/instructor-preview', async (request, response) => {
   const odm = request.query.odm ? String(request.query.odm) : undefined
   if (!trainingId) return response.status(400).json({ error: 'REQUIRED_FIELDS_MISSING' })
   if (dellOnlyInstructorEmail(trainingId)) return response.json({ instructorEmail: oem === DELL_ONLY_OEM ? dellOnlyInstructorEmail(trainingId) : null })
-  if (trainingId === 'killer' && oem === DELL_ONLY_OEM) return response.json({ instructorEmail: TEST_INSTRUCTOR_EMAIL })
+  if (trainingId === 'killer' && oem === DELL_ONLY_OEM) return response.json({ instructorEmail: KILLER_DEFAULT_INSTRUCTOR_EMAIL })
   const instructorEmail = await getExplicitCFEContactEmail(trainingId, oem, odm)
   response.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate')
   response.json({ instructorEmail })

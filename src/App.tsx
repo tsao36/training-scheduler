@@ -994,6 +994,19 @@ function App() {
     setSelectedSession(match);
     setSelectedTraining(match.training ?? null);
   };
+  const openBookingModal = (session = selectedSession) => {
+    if (session) {
+      setSelectedSession(session);
+      setSelectedTraining(session.training ?? null);
+    }
+    setBookingDraft((current) => ({
+      ...current,
+      trainingId: undefined,
+      instructorEmail: undefined,
+    }));
+    setError("");
+    setModal("booking");
+  };
   const sessionById = useMemo(
     () => new Map(sessions.map((session) => [session.id, session])),
     [sessions],
@@ -1622,8 +1635,7 @@ function App() {
                         dayAvailable[0];
                       setSelectedSession(nextMatch);
                       setSelectedTraining(nextMatch.training ?? null);
-                      setModal("booking");
-                      setError("");
+                      openBookingModal(nextMatch);
                     }}
                   >
                     {Array.from({ length: 17 }, (_, index) => (
@@ -1928,7 +1940,7 @@ function App() {
                   <button
                     className="book-button"
                     type="button"
-                    onClick={() => setModal("booking")}
+                    onClick={() => openBookingModal()}
                   >
                     <Plus size={17} /> {selectedBookings.length > 0 ? "Book this shared slot" : "Book this session"}
                   </button>
