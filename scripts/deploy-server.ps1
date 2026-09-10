@@ -130,6 +130,9 @@ if ($shouldInstallDependencies) {
 
 Write-Step "Build"
 & npm run build
+if ($LASTEXITCODE -ne 0) {
+  throw "Build failed with exit code $LASTEXITCODE. Existing service was not restarted."
+}
 
 Write-Step "Stop existing service on port $Port"
 Stop-PortProcess -TargetPort $Port

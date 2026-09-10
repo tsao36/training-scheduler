@@ -896,7 +896,7 @@ function App() {
   const selectedDisplayTraining =
     trainings.find((training) => training.id === selectedDisplayTrainingId) ?? selectedSession?.training ?? null;
   const selectedSessionDeliveryMode = selectedSession
-    ? deliveryModeForBookings(selectedDisplayTraining, selectedBookings)
+    ? deliveryModeForBookings(selectedDisplayTraining ?? undefined, selectedBookings)
     : null;
   const selectedAttendance = selectedSession
     ? (data?.attendance ?? []).filter((record) => record.sessionId === selectedSession.id)
