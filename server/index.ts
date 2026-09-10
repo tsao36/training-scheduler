@@ -30,8 +30,8 @@ const DELL_ONLY_OEM = 'Dell'
 // Trainings that are only offered to Dell and always route to a fixed instructor.
 const DELL_ONLY_INSTRUCTOR_EMAILS: Record<string, string> = {
   'bios-sar': 'frank.fc.yang@intel.com',
-  killer: 'richard.yang@intel.com',
 }
+const DELL_ONLY_TRAINING_IDS = new Set(['bios-sar', 'killer'])
 const TEST_INSTRUCTOR_EMAIL = 'tsao36@gmail.com'
 const dellOnlyInstructorEmail = (trainingId?: string) => (trainingId ? DELL_ONLY_INSTRUCTOR_EMAILS[trainingId] : undefined)
 // Sessions after this date are reserved for Dell only.
@@ -119,6 +119,7 @@ app.get('/api/instructor-preview', async (request, response) => {
   const odm = request.query.odm ? String(request.query.odm) : undefined
   if (!trainingId) return response.status(400).json({ error: 'REQUIRED_FIELDS_MISSING' })
   if (dellOnlyInstructorEmail(trainingId)) return response.json({ instructorEmail: oem === DELL_ONLY_OEM ? dellOnlyInstructorEmail(trainingId) : null })
+  if (trainingId === 'killer' && oem === DELL_ONLY_OEM) return response.json({ instructorEmail: TEST_INSTRUCTOR_EMAIL })
   const instructorEmail = await getExplicitCFEContactEmail(trainingId, oem, odm)
   response.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate')
   response.json({ instructorEmail })
@@ -267,25 +268,29 @@ app.post('/api/sessions/:id/attendance', async (request, response) => {
 })
 
 app.post('/api/bookings', async (request, response) => {
-  const { sessionId, trainingId, oem, odm, trainingFormat, requesterName, requesterEmail } = request.body ?? {}
+  const { sessionId, trainingId, oem, odm, trainingFormat, requesterName, requesterEmail, instructorEmail: requestedInstructorEmail } = request.body ?? {}
   if (!sessionId || !oem || !odm || !trainingFormat || !requesterName || !requesterEmail) return response.status(400).json({ error: 'REQUIRED_FIELDS_MISSING' })
   const normalizedRequesterEmail = String(requesterEmail).trim().toLowerCase()
   if (!isEmail(normalizedRequesterEmail)) return response.status(400).json({ error: 'INVALID_REQUESTER_EMAIL' })
   const selectedOem = String(oem)
   const selectedOdm = String(odm)
   const selectedTrainingFormat = String(trainingFormat)
+  const selectedInstructorEmail = typeof requestedInstructorEmail === 'string' ? requestedInstructorEmail.trim().toLowerCase() : undefined
+  if (selectedInstructorEmail && !isEmail(selectedInstructorEmail)) return response.status(400).json({ error: 'INVALID_INSTRUCTOR_EMAIL' })
   if (!OEM_OPTIONS.has(selectedOem) || !ODM_OPTIONS.has(selectedOdm)) return response.status(400).json({ error: 'INVALID_CUSTOMER_SELECTION' })
   if (!TRAINING_FORMAT_OPTIONS.has(selectedTrainingFormat)) return response.status(400).json({ error: 'INVALID_TRAINING_FORMAT' })
 
   const preCheckData = await store.read()
   const preCheckSession = preCheckData.sessions.find((item) => item.id === sessionId && item.status === 'active')
   const requestedTrainingId = typeof trainingId === 'string' ? trainingId : preCheckSession?.trainingId
-  if (!preCheckSession || !requestedTrainingId || (requestedTrainingId !== preCheckSession.trainingId && !dellOnlyInstructorEmail(requestedTrainingId))) return response.status(400).json({ error: 'SESSION_NOT_FOUND' })
+  if (!preCheckSession || !requestedTrainingId || (requestedTrainingId !== preCheckSession.trainingId && !DELL_ONLY_TRAINING_IDS.has(requestedTrainingId))) return response.status(400).json({ error: 'SESSION_NOT_FOUND' })
   if (preCheckSession.date > DELL_ONLY_PERIOD_AFTER && selectedOem !== DELL_ONLY_OEM) return response.status(400).json({ error: 'DELL_ONLY_PERIOD' })
   if (dellOnlyInstructorEmail(requestedTrainingId) && selectedOem !== DELL_ONLY_OEM) return response.status(400).json({ error: 'INVALID_CUSTOMER_SELECTION' })
   const preCheckTraining = preCheckData.trainings.find((item) => item.id === requestedTrainingId)
   if (!preCheckTraining) return response.status(400).json({ error: 'SESSION_NOT_FOUND' })
-  const instructorEmail = dellOnlyInstructorEmail(requestedTrainingId) ?? await getExplicitCFEContactEmail(preCheckTraining.id, selectedOem, selectedOdm)
+  const fixedInstructorEmail = dellOnlyInstructorEmail(requestedTrainingId)
+  if (fixedInstructorEmail && selectedInstructorEmail && selectedInstructorEmail !== fixedInstructorEmail) return response.status(400).json({ error: 'FIXED_INSTRUCTOR_REQUIRED' })
+  const instructorEmail = fixedInstructorEmail ?? selectedInstructorEmail ?? await getExplicitCFEContactEmail(preCheckTraining.id, selectedOem, selectedOdm) ?? undefined
   if (preCheckTraining && !instructorEmail) return response.status(400).json({ error: 'NO_INSTRUCTOR_MAPPED' })
 
   let booking: Booking | undefined
@@ -319,6 +324,7 @@ app.post('/api/bookings', async (request, response) => {
       requesterEmail: normalizedRequesterEmail,
       createdAt: new Date().toISOString(),
       status: 'confirmed',
+      instructorEmail,
     }
     data.bookings.push(booking)
   })

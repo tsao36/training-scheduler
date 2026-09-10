@@ -143,6 +143,9 @@ const TRAINING_FORMAT_OPTIONS = [
 ] as const;
 const BIOS_SAR_TRAINING_ID = "bios-sar";
 const KILLER_TRAINING_ID = "killer";
+const DELL_ONLY_INSTRUCTOR_EMAILS: Record<string, string> = {
+  [BIOS_SAR_TRAINING_ID]: "frank.fc.yang@intel.com",
+};
 // Trainings offered to Dell only; they are hidden from the course catalog and added as booking topics on demand.
 const DELL_ONLY_TRAINING_IDS = [BIOS_SAR_TRAINING_ID, KILLER_TRAINING_ID];
 const isDellOnlyTraining = (trainingId?: string | null) => Boolean(trainingId && DELL_ONLY_TRAINING_IDS.includes(trainingId));
@@ -467,6 +470,7 @@ function App() {
     odm: OdmOption;
     trainingFormat: TrainingFormat;
     requesterEmail: string;
+    instructorEmail?: string;
     trainingId?: string;
   }>({
     oem: OEM_OPTIONS[0],
@@ -477,6 +481,7 @@ function App() {
   const [authenticated, setAuthenticated] = useState(false);
   const [availableInstructors, setAvailableInstructors] = useState<string[]>([]);
   const [instructorSelections, setInstructorSelections] = useState<Record<string, string>>({});
+  const [editingInstructorBookingId, setEditingInstructorBookingId] = useState<string | null>(null);
   const [bookingInstructorPreview, setBookingInstructorPreview] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [bookingInProgress, setBookingInProgress] = useState(false);
@@ -876,6 +881,9 @@ function App() {
   const selectedBookings = selectedSession
     ? bookings.filter((booking) => booking.sessionId === selectedSession.id)
     : [];
+  const editingInstructorBooking = selectedBookings.find(
+    (booking) => booking.id === editingInstructorBookingId,
+  );
   const selectedDisplayTrainingId = resolveDisplayTrainingId(
     selectedSession?.trainingId,
     selectedBookings,
@@ -931,6 +939,11 @@ function App() {
     [blockedSessionIds, bookingDraft.oem, courseCatalog, selectedSession, sessions, trainings],
   );
   const selectedBookingTopicKey = bookingDraft.trainingId ?? (selectedSession?.training ? majorCourseMeta(selectedSession.training).key : "");
+  const selectedBookingTrainingId = bookingDraft.trainingId ?? selectedSession?.trainingId;
+  const fixedBookingInstructor = selectedBookingTrainingId
+    ? DELL_ONLY_INSTRUCTOR_EMAILS[selectedBookingTrainingId]
+    : undefined;
+  const selectedBookingInstructor = fixedBookingInstructor ?? bookingDraft.instructorEmail ?? bookingInstructorPreview ?? availableInstructors[0] ?? "";
   const bookingCourseSessions = useMemo(
     () =>
       isDellOnlyTraining(bookingDraft.trainingId) && selectedSession
@@ -1074,6 +1087,7 @@ function App() {
         body: JSON.stringify({
           ...bookingDraft,
           requesterEmail,
+          instructorEmail: bookingDraft.instructorEmail ?? bookingInstructorPreview ?? undefined,
           trainingId: bookingDraft.trainingId ?? selectedSession.trainingId,
           requesterName: deriveRequesterName(requesterEmail),
           sessionId: selectedSession.id,
@@ -1188,14 +1202,14 @@ function App() {
       setCancellingBookingId(null);
     }
   };
-  const updateBookingInstructor = async (bookingId: string, instructorEmail: string, requesterEmail = lookupEmail) => {
+  const updateBookingInstructor = async (bookingId: string, instructorEmail?: string, requesterEmail = lookupEmail) => {
     if (updatingInstructorBookingId) return;
     const ownerEmail = requesterEmail.trim();
     if (!ownerEmail) {
       setError("Enter the requester email used for this booking.");
       return;
     }
-    const newInstructorEmail = instructorEmail.trim();
+    const newInstructorEmail = (instructorEmail ?? window.prompt("Enter the new instructor email for this booking.") ?? "").trim();
     if (!newInstructorEmail) return;
     setUpdatingInstructorBookingId(bookingId);
     try {
@@ -1206,6 +1220,7 @@ function App() {
       setLookupResults((current) =>
         current?.map((booking) => (booking.id === bookingId ? { ...booking, instructorEmail: newInstructorEmail.toLowerCase() } : booking)) ?? null,
       );
+      setEditingInstructorBookingId(null);
       await refresh({ focusLatestBooking: false });
     } catch (cause) {
       setError((cause as Error).message);
@@ -1872,39 +1887,12 @@ function App() {
                 )}
                 {selectedBookings.map((booking) => (
                   <div className="booking-record-actions" key={booking.id}>
-                    <label className="form-label">
-                      Instructor
-                      <select
-                        value={instructorSelections[booking.id] ?? booking.instructorEmail ?? availableInstructors[0] ?? ""}
-                        disabled={updatingInstructorBookingId === booking.id}
-                        onChange={(event) =>
-                          setInstructorSelections((current) => ({
-                            ...current,
-                            [booking.id]: event.target.value,
-                          }))
-                        }
-                      >
-                        {Array.from(new Set([booking.instructorEmail ?? "", ...availableInstructors]))
-                          .filter((email): email is string => Boolean(email))
-                          .sort()
-                          .map((email) => (
-                            <option value={email} key={email}>
-                              {email}
-                            </option>
-                          ))}
-                      </select>
-                    </label>
                     <button
                       className="secondary-button"
                       type="button"
-                      disabled={updatingInstructorBookingId === booking.id}
-                      onClick={() => {
-                        const requesterEmail = window.prompt("Enter the requester email used for this booking.");
-                        const instructorEmail = instructorSelections[booking.id] ?? booking.instructorEmail ?? availableInstructors[0] ?? "";
-                        if (requesterEmail) updateBookingInstructor(booking.id, instructorEmail, requesterEmail);
-                      }}
+                      onClick={() => setEditingInstructorBookingId(booking.id)}
                     >
-                      <UserRound size={13} /> {updatingInstructorBookingId === booking.id ? "Updating..." : `Update instructor (${customerLabel(booking)})`}
+                      <UserRound size={13} /> Update instructor ({customerLabel(booking)})
                     </button>
                     <button
                       className="cancel-booking-button"
@@ -2468,6 +2456,28 @@ function App() {
             </div>
           )}
           <label className="form-label">
+            Instructor
+            <select
+              value={selectedBookingInstructor}
+              disabled={bookingInProgress || Boolean(fixedBookingInstructor)}
+              onChange={(event) =>
+                setBookingDraft((current) => ({
+                  ...current,
+                  instructorEmail: event.target.value,
+                }))
+              }
+            >
+              {Array.from(new Set([selectedBookingInstructor, ...availableInstructors]))
+                .filter((email): email is string => Boolean(email))
+                .sort()
+                .map((email) => (
+                  <option value={email} key={email}>
+                    {email}
+                  </option>
+                ))}
+            </select>
+          </label>
+          <label className="form-label">
             Training type
             <select
               value={bookingDraft.trainingFormat}
@@ -2517,6 +2527,47 @@ function App() {
           </p>
           <button className="book-button" type="button" onClick={() => { setBookingConfirmation(null); setModal(null); }}>
             <Check size={17} /> Done
+          </button>
+        </Modal>
+      )}
+      {editingInstructorBooking && (
+        <Modal title="Update instructor" close={() => setEditingInstructorBookingId(null)}>
+          <p className="modal-copy">
+            Choose the instructor for {customerLabel(editingInstructorBooking)}.
+          </p>
+          <label className="form-label">
+            Instructor
+            <select
+              value={instructorSelections[editingInstructorBooking.id] ?? editingInstructorBooking.instructorEmail ?? availableInstructors[0] ?? ""}
+              disabled={updatingInstructorBookingId === editingInstructorBooking.id}
+              onChange={(event) =>
+                setInstructorSelections((current) => ({
+                  ...current,
+                  [editingInstructorBooking.id]: event.target.value,
+                }))
+              }
+            >
+              {Array.from(new Set([editingInstructorBooking.instructorEmail ?? "", ...availableInstructors]))
+                .filter((email): email is string => Boolean(email))
+                .sort()
+                .map((email) => (
+                  <option value={email} key={email}>
+                    {email}
+                  </option>
+                ))}
+            </select>
+          </label>
+          <button
+            className="book-button"
+            type="button"
+            disabled={updatingInstructorBookingId === editingInstructorBooking.id}
+            onClick={() => {
+              const requesterEmail = window.prompt("Enter the requester email used for this booking.");
+              const instructorEmail = instructorSelections[editingInstructorBooking.id] ?? editingInstructorBooking.instructorEmail ?? availableInstructors[0] ?? "";
+              if (requesterEmail) updateBookingInstructor(editingInstructorBooking.id, instructorEmail, requesterEmail);
+            }}
+          >
+            <Check size={17} /> {updatingInstructorBookingId === editingInstructorBooking.id ? "Updating..." : "Save instructor"}
           </button>
         </Modal>
       )}
