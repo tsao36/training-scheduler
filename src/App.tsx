@@ -480,6 +480,7 @@ function App() {
   });
   const [authenticated, setAuthenticated] = useState(false);
   const [appVersion, setAppVersion] = useState("unknown");
+  const [appCommit, setAppCommit] = useState("unknown");
   const [availableInstructors, setAvailableInstructors] = useState<string[]>([]);
   const [instructorSelections, setInstructorSelections] = useState<Record<string, string>>({});
   const [editingInstructorBookingId, setEditingInstructorBookingId] = useState<string | null>(null);
@@ -571,8 +572,11 @@ function App() {
     api<{ authenticated: boolean }>("/api/auth/status")
       .then((result) => setAuthenticated(result.authenticated))
       .catch(() => undefined);
-    api<{ version: string }>('/api/version')
-      .then((result) => setAppVersion(result.version))
+    api<{ version: string; commit: string }>('/api/version')
+      .then((result) => {
+        setAppVersion(result.version);
+        setAppCommit(result.commit);
+      })
       .catch(() => undefined);
     api<TrainingVideoCatalog>("/api/training-videos")
       .then(setTrainingVideoCatalog)
@@ -944,8 +948,8 @@ function App() {
   );
   const selectedBookingTopicKey = bookingDraft.trainingId ?? (selectedSession?.training ? majorCourseMeta(selectedSession.training).key : "");
   const selectedBookingTrainingId = bookingDraft.trainingId ?? selectedSession?.trainingId;
-  const fixedBookingInstructor = selectedBookingTrainingId
-    ? DELL_ONLY_INSTRUCTOR_EMAILS[selectedBookingTrainingId]
+  const fixedBookingInstructor = selectedBookingTrainingId === BIOS_SAR_TRAINING_ID
+    ? DELL_ONLY_INSTRUCTOR_EMAILS[BIOS_SAR_TRAINING_ID]
     : undefined;
   const selectedBookingInstructor = fixedBookingInstructor ?? bookingDraft.instructorEmail ?? bookingInstructorPreview ?? availableInstructors[0] ?? "";
   const bookingCourseSessions = useMemo(
@@ -1352,8 +1356,8 @@ function App() {
         <div className="world-clocks" aria-label="Current local times">
           {clocks.map((clock) => <span className="world-clock" key={clock.label}><b>{clock.label}</b><time>{clock.time}</time></span>)}
         </div>
-        <span className="server-version" title="Application version currently running on the server">
-          VERSION {appVersion}
+        <span className="server-version" title="Application version and Git commit currently running on the server">
+          VERSION {appVersion} · COMMIT {appCommit}
         </span>
         <button
           className="user-menu"

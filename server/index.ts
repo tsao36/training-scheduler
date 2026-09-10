@@ -1,5 +1,6 @@
 import cookieParser from 'cookie-parser'
 import { randomUUID } from 'node:crypto'
+import { execFileSync } from 'node:child_process'
 import express, { type NextFunction, type Request, type Response } from 'express'
 import { readFileSync } from 'node:fs'
 import http from 'node:http'
@@ -18,6 +19,13 @@ const appVersion = process.env.APP_VERSION ?? (() => {
   try {
     const packageJson = JSON.parse(readFileSync(path.resolve('package.json'), 'utf8')) as { version?: string }
     return packageJson.version ?? 'unknown'
+  } catch {
+    return 'unknown'
+  }
+})()
+const appCommit = process.env.APP_COMMIT ?? (() => {
+  try {
+    return execFileSync('git', ['rev-parse', '--short', 'HEAD'], { encoding: 'utf8' }).trim()
   } catch {
     return 'unknown'
   }
@@ -107,7 +115,7 @@ const sendData = async (_request: Request, response: Response) => {
 app.get('/api/scheduler', sendData)
 app.get('/api/version', (_request, response) => {
   response.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate')
-  response.json({ version: appVersion })
+  response.json({ version: appVersion, commit: appCommit })
 })
 app.get('/api/training-videos', async (_request, response) => {
   const catalog = await readTrainingVideoCatalog()
