@@ -915,8 +915,6 @@ function App() {
       : selectedBookings.length > 0
         ? "shared"
         : "open";
-  const canBookSelectedSession =
-    Boolean(selectedSession) && selectedSessionState !== "closed";
   const bookingTopicOptions = useMemo(
     () => {
       if (!selectedSession) return [];
@@ -954,14 +952,14 @@ function App() {
   const selectedBookingInstructor = fixedBookingInstructor ?? bookingDraft.instructorEmail ?? bookingInstructorPreview ?? availableInstructors[0] ?? "";
   const bookingCourseSessions = useMemo(
     () =>
-      isDellOnlyTraining(bookingDraft.trainingId) && selectedSession
-        ? [selectedSession]
+      isDellOnlyTraining(bookingDraft.trainingId)
+        ? sessions.filter((session) => session.status === "active" && !blockedSessionIds.has(session.id))
         : selectedBookingTopicKey
         ? sessions.filter(
             (session) => session.training && majorCourseMeta(session.training).key === selectedBookingTopicKey,
           )
         : [],
-    [bookingDraft.trainingId, selectedSession, sessions, selectedBookingTopicKey],
+    [blockedSessionIds, bookingDraft.trainingId, sessions, selectedBookingTopicKey],
   );
   const bookingAvailableDates = useMemo(
     () =>
@@ -999,10 +997,15 @@ function App() {
     setSelectedTraining(match.training ?? null);
   };
   const openBookingModal = (session = selectedSession) => {
-    if (session) {
-      setSelectedSession(session);
-      setSelectedTraining(session.training ?? null);
+    const initialSession = session ?? sessions.find(
+      (candidate) => candidate.status === "active" && !blockedSessionIds.has(candidate.id),
+    );
+    if (!initialSession) {
+      setError("No available sessions left to book.");
+      return;
     }
+    setSelectedSession(initialSession);
+    setSelectedTraining(initialSession.training ?? null);
     setBookingDraft((current) => ({
       ...current,
       trainingId: undefined,
@@ -1380,6 +1383,9 @@ function App() {
             </p>
           </div>
           <div className="heading-actions">
+            <button className="book-button" type="button" onClick={() => openBookingModal(null)}>
+              <Plus size={16} /> Book a session
+            </button>
             <button className="secondary-button" type="button" onClick={() => { setLookupResults(null); setModal("my-bookings"); }}>
               <CalendarDays size={16} /> My bookings
             </button>
@@ -1940,19 +1946,6 @@ function App() {
                     <LockKeyhole size={16} /> This slot is closed and cannot accept new bookings.
                   </div>
                 )}
-                {canBookSelectedSession ? (
-                  <button
-                    className="book-button"
-                    type="button"
-                    onClick={() => openBookingModal()}
-                  >
-                    <Plus size={17} /> {selectedBookings.length > 0 ? "Book this shared slot" : "Book this session"}
-                  </button>
-                ) : (
-                  <div className="session-capacity closed">
-                    <LockKeyhole size={16} /> Slot closed
-                  </div>
-                )}
               </>
             ) : (
               <div className="empty-session">
@@ -2370,7 +2363,7 @@ function App() {
         </Modal>
       )}
       {modal === "booking" && (
-        <Modal title="Book this session" close={() => setModal(null)}>
+        <Modal title="Book a session" close={() => setModal(null)}>
           <p className="modal-copy">
             Your booking will be visible to everyone using this schedule.
           </p>
