@@ -171,3 +171,17 @@ test('keeps the custom Dell-only training visible on server responses when a slo
     'bt-hdt',
   )
 })
+
+test('keeps the Dell custom topic visible when another customer books the same session later', () => {
+  assert.equal(
+    resolveDisplayTrainingId(
+      'bt-hdt',
+      [
+        { sessionId: 'session-10', trainingId: 'killer', oem: 'Dell' },
+        { sessionId: 'session-10', trainingId: 'wifi-8', oem: 'Asus' },
+      ],
+      'session-10',
+    ),
+    'killer',
+  )
+})

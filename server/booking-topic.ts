@@ -1,6 +1,7 @@
 export type BookingTopicLike = {
   sessionId?: string
   trainingId?: string
+  oem?: string
 }
 
 export function resolveDisplayTrainingId(
@@ -8,9 +9,15 @@ export function resolveDisplayTrainingId(
   bookings: BookingTopicLike[] = [],
   sessionId?: string,
 ): string | undefined {
-  const customTopic = bookings
-    .filter((booking) => booking.sessionId === sessionId && booking.trainingId && booking.trainingId !== sessionTrainingId)
+  const sessionBookings = bookings.filter((booking) => booking.sessionId === sessionId)
+  const customBookings = sessionBookings.filter(
+    (booking) => booking.trainingId && booking.trainingId !== sessionTrainingId,
+  )
+  const dellCustomTopic = customBookings
+    .filter((booking) => booking.oem === 'Dell')
+    .at(-1)
+  const customTopic = customBookings
     .at(-1)
 
-  return customTopic?.trainingId ?? sessionTrainingId
+  return dellCustomTopic?.trainingId ?? customTopic?.trainingId ?? sessionTrainingId
 }
