@@ -117,7 +117,7 @@ button { font: inherit; cursor: pointer; }
 .agenda-list { display: grid; gap: 12px; margin: 6px 0 0; padding-left: 20px; color: var(--navy); font-size: 12px; line-height: 1.5; }
 .agenda-list li { padding-left: 4px; }
 .agenda-sublist { display: grid; gap: 8px; margin: 8px 0 0; padding-left: 18px; list-style: disc; color: var(--muted); font-size: 11px; }
-.heading-actions { display: flex; align-items: center; gap: 9px; }
+.heading-actions { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 9px; }
 .schedule-book-action { display: flex; justify-content: flex-end; margin-bottom: 12px; }
 .schedule-book-action .book-button { width: auto; }
 .secondary-button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; border: 1px solid var(--blue); background: transparent; color: var(--navy); padding: 11px 14px; font-size: 11px; font-weight: 700; }
@@ -169,6 +169,68 @@ button { font: inherit; cursor: pointer; }
 	text-align: right;
 	color: #3B5167;
 	font-size: 12px;
+}
+.topic-schedule-list {
+	display: grid;
+	gap: 10px;
+	margin-top: 14px;
+	max-height: 52vh;
+	overflow-y: auto;
+	padding-right: 4px;
+}
+.topic-schedule-item {
+	display: grid;
+	gap: 6px;
+	padding: 12px;
+	border-left: 3px solid var(--blue);
+	background: white;
+	border-top: 1px solid var(--line);
+	border-right: 1px solid var(--line);
+	border-bottom: 1px solid var(--line);
+}
+.topic-schedule-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+}
+.topic-schedule-header strong {
+	color: var(--navy);
+	font-size: 12px;
+}
+.topic-schedule-meta {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12px;
+	color: var(--muted);
+	font-size: 11px;
+}
+.topic-schedule-meta strong {
+	color: var(--navy);
+}
+.topic-schedule-customers {
+	margin-top: 4px;
+	padding-top: 6px;
+	border-top: 1px dashed var(--line);
+	display: grid;
+	gap: 4px;
+}
+.topic-schedule-customers strong {
+	color: var(--navy);
+	font-size: 11px;
+}
+.topic-schedule-booking-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	font-size: 11px;
+	color: var(--navy);
+}
+.topic-schedule-format-tag {
+	color: var(--muted);
+	font-size: 10px;
+	font-style: italic;
 }
 .video-library-link { width: auto; display: inline-flex; }
 .offline-video-trigger { width: 100%; margin-top: 16px; }

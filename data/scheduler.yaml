@@ -51,6 +51,12 @@ trainings:
     instructor: Charles
     accent: blue
     mode: Live
+  - id: killer
+    title: Killer Training
+    shortTitle: Killer
+    instructor: Richard
+    accent: mint
+    mode: Live
 sessions:
   - id: 1ed8bd6b-7d8f-485a-ae62-988473f83f96
     trainingId: wifi-8
@@ -24391,7 +24397,18 @@ bookings:
     requesterEmail: scheduler-block@local
     createdAt: '2026-09-01T08:56:39.668Z'
     status: confirmed
-version: 37
+  - id: 1033d5b6-cacf-4a0c-ad63-e94f84804b07
+    sessionId: 6f067d23-f94e-4c7f-a43a-927401fecf2d
+    trainingId: killer
+    oem: Dell
+    odm: Quanta
+    trainingFormat: with-video
+    requesterName: Jonathan Tsao
+    requesterEmail: jonathan.tsao@intel.com
+    createdAt: '2026-09-10T05:53:06.997Z'
+    status: confirmed
+    instructorEmail: tsao36@gmail.com
+version: 38
 unavailableDays:
   - date: '2026-09-14'
     label: BT HDT Asus
@@ -24441,3 +24458,4 @@ unavailableDays:
   - date: '2026-09-24'
     label: WiFi Debug Training
     warning: WiFi Debug Training is not available all day.
+attendance: []

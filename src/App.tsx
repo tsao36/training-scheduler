@@ -462,9 +462,21 @@ function App() {
   const [selectedSession, setSelectedSession] = useState<Session | null>(null);
   const [query, setQuery] = useState("");
   const [weekIndex, setWeekIndex] = useState(0);
-  const [modal, setModal] = useState<"booking" | "login" | "my-bookings" | "topic-customer" | "booking-blocks" | "booking-confirmation" | "verification-success" | "email-recipients" | "training-videos" | "course-agenda" | "attendance" | null>(
-    null,
-  );
+  const [modal, setModal] = useState<
+    | "booking"
+    | "login"
+    | "my-bookings"
+    | "topic-customer"
+    | "topic-schedule"
+    | "booking-blocks"
+    | "booking-confirmation"
+    | "verification-success"
+    | "email-recipients"
+    | "training-videos"
+    | "course-agenda"
+    | "attendance"
+    | null
+  >(null);
   const [bookingDraft, setBookingDraft] = useState<{
     oem: OemOption;
     odm: OdmOption;
@@ -494,6 +506,7 @@ function App() {
   const [lookupResults, setLookupResults] = useState<BookingLookup[] | null>(null);
   const [selectedOemFilter, setSelectedOemFilter] = useState<OemFilterOption>("");
   const [selectedOdmFilter, setSelectedOdmFilter] = useState<OdmFilterOption>("");
+  const [selectedScheduleTopicId, setSelectedScheduleTopicId] = useState<string>("");
   const [bookingConfirmation, setBookingConfirmation] = useState<{ bookingId: string; email: string; instructorEmail?: string | null } | null>(null);
   const [recipientRows, setRecipientRows] = useState<RecipientRow[]>([]);
   const [trainingVideoCatalog, setTrainingVideoCatalog] = useState<TrainingVideoCatalog | null>(null);
@@ -1052,6 +1065,40 @@ function App() {
     (sum, row) => sum + row.count,
     0,
   );
+  const topicScheduleBookedSessions = useMemo(() => {
+    if (!selectedScheduleTopicId) return [];
+    return sessions
+      .filter((session) => {
+        const sessionBookings = bookings.filter(
+          (booking) =>
+            booking.sessionId === session.id &&
+            (booking.status === "confirmed" || booking.status === "pending"),
+        );
+        if (sessionBookings.length === 0) return false;
+        const effectiveTrainingId =
+          resolveDisplayTrainingId(
+            session.trainingId,
+            sessionBookings,
+            session.id,
+          ) ?? session.trainingId ?? session.training?.id;
+        return effectiveTrainingId === selectedScheduleTopicId;
+      })
+      .sort(
+        (a, b) =>
+          a.date.localeCompare(b.date) ||
+          a.startTime.localeCompare(b.startTime),
+      );
+  }, [bookings, selectedScheduleTopicId, sessions]);
+  const topicScheduleTotalBookings = useMemo(() => {
+    return topicScheduleBookedSessions.reduce((sum, session) => {
+      const sessionBookings = bookings.filter(
+        (b) =>
+          b.sessionId === session.id &&
+          (b.status === "confirmed" || b.status === "pending"),
+      );
+      return sum + sessionBookings.length;
+    }, 0);
+  }, [bookings, topicScheduleBookedSessions]);
   const unavailableDays = useMemo(() => {
     if (data?.unavailableDays?.length) return data.unavailableDays;
     const bySession = new Map((data?.sessions ?? []).map((session) => [session.id, session]));
@@ -1386,14 +1433,26 @@ function App() {
             <button className="secondary-button" type="button" onClick={() => { setLookupResults(null); setModal("my-bookings"); }}>
               <CalendarDays size={16} /> My bookings
             </button>
+            <button className="secondary-button" type="button" onClick={() => setModal("topic-customer")}>
+              <Users size={16} /> Topic vs Customer
+            </button>
+            <button
+              className="secondary-button"
+              type="button"
+              onClick={() => {
+                if (!selectedScheduleTopicId && trainings[0]) {
+                  setSelectedScheduleTopicId(trainings[0].id);
+                }
+                setModal("topic-schedule");
+              }}
+            >
+              <CalendarDays size={16} /> Training Topic schedule View
+            </button>
             {authenticated && (
               <button className="secondary-button" type="button" onClick={loadRecipientConfig}>
                 Configure recipients
               </button>
             )}
-            <button className="secondary-button" type="button" onClick={() => setModal("topic-customer")}>
-              <Users size={16} /> Topic vs Customer
-            </button>
             {authenticated && (
               <button
                 className="secondary-button"
@@ -2151,6 +2210,77 @@ function App() {
               </div>
             ))}
           </div>
+        </Modal>
+      )}
+      {modal === "topic-schedule" && (
+        <Modal title="Training Topic schedule View" close={() => setModal(null)} wide>
+          <p className="modal-copy">Select a training topic to review all booked training sessions in chronological order.</p>
+          <label className="form-label">
+            Training topic
+            <select
+              value={selectedScheduleTopicId}
+              onChange={(event) => setSelectedScheduleTopicId(event.target.value)}
+            >
+              <option value="">Select training topic</option>
+              {trainings.map((training) => (
+                <option value={training.id} key={training.id}>
+                  {training.title}
+                </option>
+              ))}
+            </select>
+          </label>
+          {selectedScheduleTopicId ? (
+            <>
+              <div className="topic-summary-total">
+                <strong>{trainings.find((t) => t.id === selectedScheduleTopicId)?.title ?? "Training Topic"}:</strong>{" "}
+                {topicScheduleBookedSessions.length} booked {topicScheduleBookedSessions.length === 1 ? "session" : "sessions"} ({topicScheduleTotalBookings} {topicScheduleTotalBookings === 1 ? "booking" : "bookings"})
+              </div>
+              <div className="topic-schedule-list">
+                {topicScheduleBookedSessions.length === 0 ? (
+                  <p className="empty-list">No booked sessions found for this training topic.</p>
+                ) : (
+                  topicScheduleBookedSessions.map((session) => {
+                    const sessionBookings = bookings.filter(
+                      (b) => b.sessionId === session.id && (b.status === "confirmed" || b.status === "pending"),
+                    );
+                    const effectiveTraining = trainings.find((t) => t.id === selectedScheduleTopicId) ?? session.training;
+                    const delivery = deliveryModeForBookings(effectiveTraining, sessionBookings) === "Live" ? "Instructor-led" : "CFE online video";
+                    const instructor = instructorLabelForBookings(effectiveTraining, sessionBookings);
+                    const dayMeta = weekdays.find((d) => d.date === session.date);
+                    const dayLabel = dayMeta ? `${session.date} (${dayMeta.weekday})` : session.date;
+                    return (
+                      <div className="topic-schedule-item" key={session.id}>
+                        <div className="topic-schedule-header">
+                          <strong>{dayLabel} · {session.startTime} PT · {session.durationMinutes} min</strong>
+                          <span className={`mode-tag ${delivery === "Instructor-led" ? "live" : "video"}`}>
+                            {delivery}
+                          </span>
+                        </div>
+                        <div className="topic-schedule-meta">
+                          <span>Instructor: <strong>{instructor}</strong></span>
+                        </div>
+                        <div className="topic-schedule-customers">
+                          <strong>Booked customer(s):</strong>
+                          {sessionBookings.map((booking) => (
+                            <div className="topic-schedule-booking-row" key={booking.id}>
+                              <span>• {customerLabel(booking)} ({booking.requesterEmail})</span>
+                              {trainingFormatLabel(booking.trainingFormat) && (
+                                <span className="topic-schedule-format-tag">
+                                  {trainingFormatLabel(booking.trainingFormat)}
+                                </span>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </>
+          ) : (
+            <p className="empty-list">Please select a training topic above.</p>
+          )}
         </Modal>
       )}
       {modal === "course-agenda" && COURSE_AGENDAS[agendaCourseKey] && (
