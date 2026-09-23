@@ -52,8 +52,9 @@ const TEST_INSTRUCTOR_EMAIL = 'tsao36@gmail.com'
 const AVAILABLE_INSTRUCTOR_EMAILS = ['richard.yang@intel.com']
 const KILLER_DEFAULT_INSTRUCTOR_EMAIL = 'richard.yang@intel.com'
 const dellOnlyInstructorEmail = (trainingId?: string) => (trainingId ? DELL_ONLY_INSTRUCTOR_EMAILS[trainingId] : undefined)
-// Sessions after this date are reserved for Dell only.
-const DELL_ONLY_PERIOD_AFTER = '2026-10-09'
+// Sessions after this date are reserved for Dell and Asus.
+const DELL_ONLY_PERIOD_AFTER = '2026-10-02'
+const PERIOD_ALLOWED_OEMS = new Set(['Dell', 'Asus'])
 const instructorForTraining = async (trainingId: string, oem: string, odm: string) =>
   dellOnlyInstructorEmail(trainingId) ?? getCFEContactEmail(trainingId, oem, odm)
 const isDate = (value: unknown) => typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)
@@ -306,7 +307,7 @@ app.post('/api/bookings', async (request, response) => {
   const preCheckSession = preCheckData.sessions.find((item) => item.id === sessionId && item.status === 'active')
   const requestedTrainingId = typeof trainingId === 'string' ? trainingId : preCheckSession?.trainingId
   if (!preCheckSession || !requestedTrainingId || (requestedTrainingId !== preCheckSession.trainingId && !DELL_ONLY_TRAINING_IDS.has(requestedTrainingId))) return response.status(400).json({ error: 'SESSION_NOT_FOUND' })
-  if (preCheckSession.date > DELL_ONLY_PERIOD_AFTER && selectedOem !== DELL_ONLY_OEM) return response.status(400).json({ error: 'DELL_ONLY_PERIOD' })
+  if (preCheckSession.date > DELL_ONLY_PERIOD_AFTER && !PERIOD_ALLOWED_OEMS.has(selectedOem)) return response.status(400).json({ error: 'DELL_ONLY_PERIOD' })
   if (dellOnlyInstructorEmail(requestedTrainingId) && selectedOem !== DELL_ONLY_OEM) return response.status(400).json({ error: 'INVALID_CUSTOMER_SELECTION' })
   const preCheckTraining = preCheckData.trainings.find((item) => item.id === requestedTrainingId)
   if (!preCheckTraining) return response.status(400).json({ error: 'SESSION_NOT_FOUND' })
