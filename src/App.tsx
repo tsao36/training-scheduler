@@ -6,6 +6,7 @@ import {
   type MouseEvent,
   type ReactNode,
 } from "react";
+import { OEM_OPTIONS as SHARED_OEM_OPTIONS } from "../server/oem-options.ts";
 import {
   CalendarDays,
   ChevronLeft,
@@ -136,7 +137,7 @@ const weekGroups: { label: string; days: Day[] }[] = [
 const DELL_ONLY_PERIOD_AFTER = "2026-10-02";
 const PERIOD_ALLOWED_OEMS = new Set(["Dell", "Asus"]);
 const isDellOnlyDate = (date?: string) => Boolean(date && date > DELL_ONLY_PERIOD_AFTER);
-const OEM_OPTIONS = ["Dell", "HP", "Asus", "Acer", "Fujitsu", "VAIO", "Panasonic", "NEC", "Samsung", "LG", "Honor", "Wiko", "Dynabook", "Google", "Microsoft", "MSFT Surface", "MSI", "GIGABYTE", "Xiaomi", "Aistone", "PRC CTE", "Lenovo Ideapad", "Lenovo ThinkPad", "NA"] as const;
+const OEM_OPTIONS = SHARED_OEM_OPTIONS;
 const ODM_OPTIONS = ["Quanta", "Pegatron", "Wistron", "Inventec", "Compal", "LCFC", "Luxshare", "Huaqin", "Longcheer", "NA"] as const;
 const TRAINING_FORMAT_OPTIONS = [
   { value: "with-video", label: "Training with video: Instructor play online video and answer QnA in person" },
@@ -1449,6 +1450,11 @@ function App() {
             >
               <CalendarDays size={16} /> Training Topic schedule View
             </button>
+            {authenticated && (
+              <a className="secondary-button" href="/history">
+                <CalendarDays size={16} /> Training history
+              </a>
+            )}
             {authenticated && (
               <button className="secondary-button" type="button" onClick={loadRecipientConfig}>
                 Configure recipients

@@ -11,6 +11,8 @@ import { createDataStore, type AttendanceRecord, type Booking } from './data-sto
 import { readEmailRecipientConfig, sendBookingNotificationEmail, sendBookingCancellationNotificationEmail, sendInstructorUpdateNotificationEmail, getCFEContactEmail, getCFEContactEmailFromConfig, getExplicitCFEContactEmail, writeEmailRecipientConfig } from './email-service.js'
 import { resolveDisplayTrainingId } from './booking-topic.js'
 import { readTrainingVideoCatalog } from './training-videos.js'
+import { OEM_OPTIONS as OEM_OPTION_LIST } from './oem-options.js'
+import { buildTrainingHistory } from './training-history.js'
 
 const password = process.env.SCHEDULER_PASSWORD
 if (!password) throw new Error('SCHEDULER_PASSWORD is required')
@@ -39,7 +41,7 @@ const tlsEnabled = Boolean(tlsKeyFile && tlsCertFile)
 // Optional plain-HTTP listener that only redirects to HTTPS.
 const httpRedirectPort = process.env.HTTP_REDIRECT_PORT ? Number(process.env.HTTP_REDIRECT_PORT) : undefined
 const staticRoot = path.resolve('dist')
-const OEM_OPTIONS = new Set(['Dell', 'HP', 'Asus', 'Acer', 'Fujitsu', 'VAIO', 'Panasonic', 'NEC', 'Samsung', 'LG', 'Honor', 'Wiko', 'Dynabook', 'Google', 'Microsoft', 'MSFT Surface', 'MSI', 'GIGABYTE', 'Xiaomi', 'Aistone', 'PRC CTE', 'Lenovo Ideapad', 'Lenovo ThinkPad', 'NA'])
+const OEM_OPTIONS = new Set<string>(OEM_OPTION_LIST)
 const ODM_OPTIONS = new Set(['Quanta', 'Pegatron', 'Wistron', 'Inventec', 'Compal', 'LCFC', 'Luxshare', 'Huaqin', 'Longcheer', 'NA'])
 const TRAINING_FORMAT_OPTIONS = new Set(['with-video', 'without-video'])
 const DELL_ONLY_OEM = 'Dell'
@@ -178,6 +180,22 @@ app.get('/api/auth/status', (request, response) => response.json({ authenticated
 app.get('/api/email-recipients', requireScheduler, async (_request, response) => {
   const recipients = await readEmailRecipientConfig()
   response.json({ yaml: dump(recipients, { noRefs: true }) })
+})
+
+app.get('/api/history', requireScheduler, async (_request, response) => {
+  const data = await store.read()
+  const recipientConfig = await readEmailRecipientConfig()
+  const sessions = new Map(data.sessions.map((session) => [session.id, session]))
+  const bookings = data.bookings.map((booking) => {
+    if (booking.instructorEmail) return booking
+    const trainingId = booking.trainingId ?? sessions.get(booking.sessionId)?.trainingId
+    const instructorEmail = dellOnlyInstructorEmail(trainingId) ?? (trainingId ? getCFEContactEmailFromConfig(trainingId, booking.oem, booking.odm ?? 'NA', recipientConfig) ?? undefined : undefined)
+    return instructorEmail ? { ...booking, instructorEmail } : booking
+  })
+  const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Taipei' }).format(new Date())
+  const history = buildTrainingHistory({ ...data, bookings }, today, { hiddenTrainingIds: DELL_ONLY_TRAINING_IDS })
+  response.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate')
+  response.json({ today, oemOptions: OEM_OPTION_LIST, ...history })
 })
 
 app.put('/api/email-recipients', requireScheduler, async (request, response) => {

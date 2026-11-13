@@ -1,0 +1,1 @@
+export const OEM_OPTIONS = ['Dell', 'HP', 'Asus', 'Acer', 'Fujitsu', 'VAIO', 'Panasonic', 'NEC', 'Samsung', 'LG', 'Honor', 'Wiko', 'Dynabook', 'Google', 'Microsoft', 'MSFT Surface', 'MSI', 'GIGABYTE', 'Xiaomi', 'Aistone', 'PRC CTE', 'Lenovo Ideapad', 'Lenovo ThinkPad', 'NA'] as const
