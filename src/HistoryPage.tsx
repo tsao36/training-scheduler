@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { ArrowLeft, Download, FileJson, LockKeyhole } from "lucide-react";
-import { summarizeTrainingHistory, type HistoryBooking, type HistorySession } from "../server/training-history-summary.ts";
+import { isHeld, summarizeTrainingHistory, type HistoryBooking, type HistorySession } from "../server/training-history-summary.ts";
 
 type HistoryResponse = { today: string; oemOptions: string[]; sessions: HistorySession[] };
 type Filters = { trainingId: string; oem: string; instructor: string; from: string; to: string };
@@ -197,6 +197,7 @@ export default function HistoryPage() {
   if (!history) return <p style={{ padding: 24 }}>{error || "Loading training history..."}</p>;
 
   const { summary, sessions } = filtered;
+  const heldSessions = sessions.filter(isHeld);
   const updateFilter = (key: keyof Filters) => (event: { target: { value: string } }) => setFilters((current) => ({ ...current, [key]: event.target.value }));
 
   return (
@@ -272,6 +273,31 @@ export default function HistoryPage() {
                   <td>{session.date}</td><td>{session.startTime}</td><td>{session.trainingTitle}</td>
                   <td>{Array.from(new Set(session.bookings.map((item) => item.oem))).join(", ")}</td>
                   <td>{session.instructors.join(", ") || "Unknown"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+
+        <h2>Attendance by session ({heldSessions.length})</h2>
+        {heldSessions.length === 0 ? <p className="muted">No sessions match the filters.</p> : (
+          <table>
+            <thead>
+              <tr><th>Date</th><th>Time</th><th>Course</th><th>OEM</th><th>ODM</th><th>Instructor(s)</th><th>Bookings</th><th>Attendees</th><th>Attendees / booking</th><th>Notes</th></tr>
+            </thead>
+            <tbody>
+              {heldSessions.map((session) => (
+                <tr key={session.sessionId}>
+                  <td>{session.date}</td>
+                  <td>{session.startTime}</td>
+                  <td>{session.trainingTitle}{session.hidden && <span className="tag">Hidden</span>}</td>
+                  <td>{Array.from(new Set(session.bookings.map((item) => item.oem))).join(", ") || "-"}</td>
+                  <td>{Array.from(new Set(session.bookings.map((item) => item.odm ?? "NA"))).join(", ") || "-"}</td>
+                  <td>{session.instructors.join(", ") || "Unknown"}</td>
+                  <td>{session.bookings.length}</td>
+                  <td>{session.attendanceRecorded ? session.attendeeCount : <span className="note">Not recorded</span>}</td>
+                  <td>{ratioText(session.turnoutRatio)}</td>
+                  <td>{[...session.notes, ...session.attendance.flatMap((record) => (record.notes ? [record.notes] : []))].join("; ") || "-"}</td>
                 </tr>
               ))}
             </tbody>

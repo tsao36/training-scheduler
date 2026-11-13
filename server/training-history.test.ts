@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import type { Booking, SchedulerData } from './data-store.js'
-import { buildTrainingHistory, summarizeTrainingHistory } from './training-history.js'
+import { buildTrainingHistory, isHeld, summarizeTrainingHistory } from './training-history.js'
 
 const baseData = (overrides: Partial<SchedulerData> = {}): SchedulerData => ({
   window: { start: '2026-09-14', end: '2026-10-30', durationMinutes: 60 },
@@ -112,6 +112,29 @@ test('tracks cancelled sessions and bookings separately and ignores system block
   assert.equal(history.sessions[0].status, 'cancelled')
   assert.deepEqual(history.sessions[0].bookings, [])
   assert.deepEqual(history.sessions[0].cancelledBookings.map((item) => item.bookingId), ['b1'])
+})
+
+test('held sessions exclude cancelled-only bookings but retain recorded attendance', () => {
+  const data = baseData({
+    sessions: [
+      { id: 's1', trainingId: 'wifi-8', date: '2026-10-01', startTime: '10:00', durationMinutes: 60, status: 'active' },
+      { id: 's2', trainingId: 'wifi-8', date: '2026-10-01', startTime: '11:00', durationMinutes: 60, status: 'active' },
+      { id: 's3', trainingId: 'wifi-8', date: '2026-10-01', startTime: '12:00', durationMinutes: 60, status: 'active' },
+      { id: 's4', trainingId: 'wifi-8', date: '2026-10-01', startTime: '13:00', durationMinutes: 60, status: 'cancelled' },
+    ],
+    bookings: [
+      booking({ id: 'b1', sessionId: 's1', status: 'cancelled' }),
+      booking({ id: 'b2', sessionId: 's2' }),
+      booking({ id: 'b3', sessionId: 's4' }),
+    ],
+    attendance: [
+      { id: 'a1', sessionId: 's3', trainingId: 'wifi-8', attendeeCount: 2, instructorEmail: 'kj@example.com', recordedAt: '2026-10-01T03:00:00.000Z', updatedAt: '2026-10-01T03:00:00.000Z' },
+    ],
+  })
+
+  const history = buildTrainingHistory(data, '2026-11-13')
+
+  assert.deepEqual(history.sessions.filter(isHeld).map((session) => session.sessionId), ['s2', 's3'])
 })
 
 test('labels sessions with the displayed training, hidden flag, booking details and instructors', () => {

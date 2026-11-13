@@ -63,7 +63,7 @@ export type TrainingHistorySummary = {
   gaps: HistorySession[]
 }
 
-const isHeld = (session: HistorySession) => session.status === 'active' && (session.bookings.length > 0 || session.attendanceRecorded)
+export const isHeld = (session: HistorySession) => session.status === 'active' && (session.bookings.length > 0 || session.attendanceRecorded)
 const isGap = (session: HistorySession) => session.status === 'active' && session.bookings.length > 0 && !session.attendanceRecorded
 const ratio = (attendees: number, bookings: number) => (bookings ? attendees / bookings : null)
 
