@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<!--
+  data-analysis-skills 报告模板
+  ============================
+  使用方式（Python 端）：
+    把正文 script 中 window.__REPORT_DATA__ 赋值行右侧的数据占位符（REPORT_DATA_JSON，两侧各两条下划线，
+    全模板仅该一处字面量）replace 为 json.dumps(report_data, ensure_ascii=False) 的结果。
+  输出为单文件 HTML，依赖经 CDN 引入（固定版本），需联网打开。
+
+  数据契约 report_data（叙事文本的 Markdown 支持分两级：
+    · narrative 字段（background / data_overview / sections[] / conclusions 四处）：块级 Markdown
+      —— 空行分段、`### ` 小标题、`- ` 无序列表、`1. ` 有序列表、**加粗**；
+    · 其余叙事字段（headline/detail/objectives/insight/quality_summary/recommendations/notes 等）：仅 **加粗** 与换行）：
+  {
+    "meta":         {"title", "subtitle", "date", "industry_label", "audience", "lang"},
+    "key_findings": [{"headline", "detail", "type": "positive|negative|warning|neutral"}],   // 3-5 条
+    "background":   {"narrative", "objectives": ["..."]},
+    "data_overview":{"narrative", "stats": [{"label","value","note"}], "quality_summary"},
+    "sections":     [{"id","title","narrative",
+                      "charts":[{"id","title","question","option":{ECharts option，纯 JSON 无函数},
+                                 "insight","height"}],
+                      "tables":[{"title","columns":["..."],"rows":[["..."]]}]}],   // rows 为展示格式字符串（"¥1,200,000"）
+    "conclusions":  {"narrative","recommendations":[{"title","detail","priority":"高|中|低"}]},
+    "appendix":     {"processing_notes":["..."],"methods_notes":["..."]}
+  }
+  多数据集承载（契约字段不变，靠内容承载，见 references/data-sources.md）：
+    · 融合模式（多源 join/concat 成一张表，最常见）—— data_overview.narrative 说明来源与关联键
+      （如「本报告基于 N 个数据源：订单(800行)+客户(120行)+商品(40行)，按 customer_id/product_id 关联」），
+      appendix.processing_notes 记录关联键与丢失行数；其余按单数据集流程走。
+    · 分源模式（各源独立分析）—— sections 天然承载，每个 section 讲一个源（title 标注源名）。
+  约束：option 必须是纯 JSON（formatter 等用 ECharts 字符串模板如 '{b}: {c}'，不可用函数）。
+  约束（表格）：≤20 行渲染静态出版表；>20 行自动切换 Grid.js 交互表（分页/搜索/排序，数字列按解析值排序），
+      同一 tables 结构、无需任何标记字段；单表上限 500 行，超出须在注入前截断为 TOP-N 并在
+      appendix.processing_notes 注明（模板不做静默截断）。
+  视觉：「红印·出版」编辑风（经济学人式：白纸面 + 顶部红条，经济学人红 #e3120b 承担版面强调
+        与负向语义、数据蓝 #006ba6 为第一系列色与正向语义，全无衬线、数字 tabular-nums），
+        并向 ECharts 注册 economist 主题统一兜底色板与字体；option 自带配置仍优先于主题，
+        option 不必指定 color（语义色除外）。
+        系列色板经色彩科学校验（色盲安全 CVD ΔE、OKLCH 亮度带/色度下限、白面对比度≥3:1；
+        校验器 workspace/validate_palette.py，源自 Claude Code dataviz skill）——
+        改任何系列色 hex 须重跑 validate_template.py（内含调色板断言），不得目测定色。
+        标记规格（mark specs，同源 dataviz）由模板兜底：2px 线宽、8px 实心点带 2px 白环、
+        柱宽上限 24px、堆叠段/饼段间 2px 白缝、面积填充 12% 洗色、>50 点折线自动隐藏点标记、
+        visualMap 未设 inRange 时兜底数据蓝单色 ramp（ECharts 默认彩虹带违反数值渐变纪律）；
+        option 无需（也不应）重复设置这些样式——option 显式设置时仍以 option 优先。
+-->
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>数据分析报告</title>
+<!-- Tailwind Play CDN + typography 插件（均锁版，实测 2026-06-12：200/543KB；plugins 不带 @版本 会 302 至 latest，禁止）：
+     typography 承载 narrative 块级排版，主视觉仍由下方自定义 CSS 独立承载 -->
+<script src="https://cdn.tailwindcss.com/3.4.16?plugins=typography@0.5.16"></script>
+<!-- ECharts 5.4.3：主源 bootcdn（国内），失败回退 unpkg（实测 2026-06 均可达）-->
+<script src="https://cdn.bootcdn.net/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
+<script>window.echarts || document.write('<script src="https://unpkg.com/echarts@5.4.3/dist/echarts.min.js"><\/script>')</script>
+<!-- Grid.js 6.2.0（>20 行表格自动交互化）：主源 bootcdn，JS 失败回退 unpkg（实测 2026-06 均可达）；
+     主题 CSS 须先于下方自定义 <style>（覆盖块同特异度后序取胜），用 link onerror 回退备源
+     （CSS 无全局变量可同步探测，不能套用 document.write 模式） -->
+<link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/gridjs/6.2.0/theme/mermaid.min.css"
+      onerror="this.onerror=null;this.href='https://unpkg.com/gridjs@6.2.0/dist/theme/mermaid.min.css'">
+<script src="https://cdn.bootcdn.net/ajax/libs/gridjs/6.2.0/gridjs.umd.js"></script>
+<script>window.gridjs || document.write('<script src="https://unpkg.com/gridjs@6.2.0/dist/gridjs.umd.js"><\/script>')</script>
+<style>
+  /* ============ 「红印·出版」设计系统（经济学人风：白纸面、红顶条、红/蓝双强调） ============ */
+  :root {
+    --ink: #121212;          /* 墨黑：标题/重数字 */
+    --ink-2: #404040;        /* 正文 */
+    --muted: #6b6b6b;        /* 次要/轴标签/表头 */
+    --faint: #9a9a9a;        /* 弱化/图号/label */
+    --line: #e5e5e5;         /* 浅分隔线 */
+    --line-2: #c9c9c9;       /* 中分隔线（表头底线） */
+    --grid: #e3e3e3;         /* 图表横网格 */
+    --soft: #f7f7f5;         /* 浅灰底（质量说明/附录/hover） */
+    --accent: #e3120b;       /* 经济学人红：版面强调/负向语义 */
+    --blue: #006ba6;         /* 数据蓝：第一系列色/正向语义 */
+    --blue-soft: #f0f7fb;
+    --blue-line: #b3d4e4;
+    --amber: #b45309;        /* 警示琥珀（文字） */
+    --amber-line: #ecd1ae;
+    --amber-soft: #fdf6ec;
+    --red-line: #f3b8b5;
+    --red-soft: #fdf1f0;
+    --paper: #ffffff;
+    --paper-edge: #e8e6e1;
+
+    /* 纯系统字体栈：内网/离线打开也保证排版稳定 */
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Source Han Sans SC", Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth;
+         background: radial-gradient(120% 80% at 50% -10%, #f7f6f3 0%, #f2f1ed 55%, #edebe6 100%);
+         background-attachment: fixed; }
+  body { margin: 0; color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.75;
+         -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+  a { color: var(--accent); text-decoration: none; }
+  h1, h2, h3 { line-height: 1.3; margin: 0; }
+  p { margin: 0; }
+
+  /* ---------- 布局：桌面上的纸张 + 旁置目录（自管响应式） ---------- */
+  .fallback-wrap { max-width: 1240px; margin: 0 auto; padding: 0 20px; }
+  #toc-nav { display: none; }
+  @media (min-width: 1100px) {
+    .fallback-wrap { display: flex; gap: 44px; align-items: flex-start; }
+    #toc-nav { display: block; width: 192px; flex-shrink: 0; }
+    .report-main { flex: 1; min-width: 0; }
+  }
+  /* 纸张 */
+  .page { position: relative; background: var(--paper); border: 1px solid var(--paper-edge);
+          border-top: 6px solid var(--accent);
+          margin: 34px 0 56px; padding: 52px 60px 48px;
+          box-shadow: 0 1px 0 rgba(255,255,255,.7) inset,
+                      0 20px 50px -22px rgba(40,35,30,.25),
+                      0 2px 8px rgba(40,35,30,.06); }
+
+  /* ---------- 目录（桌面旁置便签） ---------- */
+  #toc-nav .toc-inner { position: sticky; top: 36px; padding-top: 102px; }
+  .toc-label { font-size: 11.5px; font-weight: 800; letter-spacing: .24em;
+               text-transform: uppercase; color: var(--accent); margin: 0 0 10px;
+               border-top: 3px solid var(--ink);
+               border-bottom: 1px solid var(--line-2); padding: 9px 0; }
+  #toc-list { list-style: none; margin: 0; padding: 0; font-size: 13.5px; }
+  #toc-list a { display: flex; gap: 9px; align-items: baseline; padding: 6px 0 6px 11px;
+                color: var(--ink-2); font-weight: 700;
+                text-decoration: none; border-left: 3px solid transparent; margin-left: -12px;
+                transition: color .25s, border-color .25s; }
+  #toc-list a:hover { color: var(--ink); border-left-color: var(--line-2); }
+  #toc-list a.active { color: var(--accent); border-left-color: var(--accent); }
+  #toc-list .toc-no { font-size: 11.5px; font-weight: 700;
+                      color: var(--faint); min-width: 16px; font-feature-settings: "tnum" 1; }
+  #toc-list a.active .toc-no { color: var(--accent); }
+
+  /* ---------- 报头 ---------- */
+  .masthead { padding-bottom: 0; margin-bottom: 46px; }
+  .masthead-kicker { margin: 0 0 12px; font-size: 12px; font-weight: 700;
+                     letter-spacing: .24em; text-transform: uppercase; color: var(--accent); }
+  .masthead h1 { font-size: clamp(28px, 3.4vw, 36px); line-height: 1.22; font-weight: 850;
+                 letter-spacing: .01em; color: var(--ink); }
+  #r-subtitle { margin: 9px 0 0; max-width: 60ch; color: #5f5f5f; font-size: 15px; line-height: 1.66; }
+  .meta-row { display: flex; flex-wrap: wrap; gap: 6px 26px; list-style: none;
+              margin: 18px 0 0; padding: 10px 0;
+              border-top: 1.5px solid var(--ink); border-bottom: 1px solid var(--line); }
+  .meta-row li { display: inline-flex; align-items: baseline; gap: 7px; }
+  .c-label { font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--faint); }
+  .c-value { font-size: 13.5px; color: var(--ink); font-weight: 600; font-feature-settings: "tnum" 1; }
+
+  /* ---------- 章节头（红方块 + 红序号 + 黑标题，无右伸线） ---------- */
+  section { margin-bottom: 56px; }
+  .section-head { display: flex; align-items: baseline; gap: 10px; margin: 0 0 18px; }
+  .section-head::before { content: ""; width: 9px; height: 9px; background: var(--accent);
+                          flex-shrink: 0; align-self: center; }
+  .section-index { font-size: 13.5px; font-weight: 800; color: var(--accent);
+                   font-feature-settings: "tnum" 1; }
+  .section-title { margin: 0; font-size: 18px; font-weight: 800; letter-spacing: .02em;
+                   color: var(--ink); white-space: nowrap; }
+
+  .narrative { color: var(--ink-2); }
+  /* 叙事排版：typography 插件 prose 映射「红印」。Play CDN 样式注入 head 末尾（晚于本表），
+     且插件 .prose 规则自身定义同名 --tw-prose-* 变量——故覆盖一律用 .narrative.prose（0,2,0）。 */
+  .narrative.prose {
+    max-width: 705px;            /* 压过插件 65ch */
+    font-size: inherit;          /* 屏 15px / 印 12.5px 跟随 body，压过插件 1rem */
+    line-height: inherit;        /* 1.78 / 1.6，压过插件 1.75 */
+    --tw-prose-body: var(--ink-2);
+    --tw-prose-headings: var(--ink);
+    --tw-prose-lead: var(--ink-2);
+    --tw-prose-links: var(--accent);
+    --tw-prose-bold: var(--accent);
+    --tw-prose-counters: var(--accent);
+    --tw-prose-bullets: var(--accent);
+    --tw-prose-hr: var(--line);
+    --tw-prose-quotes: var(--ink);
+    --tw-prose-quote-borders: var(--accent);
+    --tw-prose-captions: var(--muted);
+    --tw-prose-code: var(--ink);
+    --tw-prose-th-borders: var(--line-2);
+    --tw-prose-td-borders: var(--line);
+  }
+  .narrative.prose ul { list-style-type: square; }   /* 与 .objectives 方块 bullet 同语言 */
+  .narrative.prose h4 { font-weight: 800; font-size: 15px; letter-spacing: .02em;
+                        break-after: avoid; page-break-after: avoid; }
+  .narrative strong, .prose strong { color: var(--accent); font-feature-settings: "tnum" 1; }
+
+  /* ---------- 核心发现：头版要闻（描边胶囊语义标签，编号统一红色） ---------- */
+  .finding { display: flex; gap: 14px; padding: 15px 2px; border-bottom: 1px solid var(--line); }
+  .finding:first-child { padding-top: 4px; }
+  .finding-no { font-size: 16px; line-height: 1.55; min-width: 28px; font-weight: 800;
+                color: var(--accent); font-feature-settings: "tnum" 1; }
+  .finding-body { flex: 1; }
+  .finding-head { font-size: 16px; font-weight: 700; line-height: 1.55; color: var(--ink); }
+  .finding-head strong { color: var(--accent); font-feature-settings: "tnum" 1; }
+  .finding-detail { font-size: 14px; color: var(--muted); margin-top: 5px; max-width: 56em; line-height: 1.65; }
+  .finding-tag { font-size: 11.5px; font-weight: 700; letter-spacing: .06em; padding: 2px 10px;
+                 border-radius: 2px; align-self: flex-start; margin-top: 5px; white-space: nowrap; }
+  .t-positive { color: var(--blue);   border: 1px solid var(--blue-line);  background: var(--blue-soft); }
+  .t-negative { color: var(--accent); border: 1px solid var(--red-line);   background: var(--red-soft); }
+  .t-warning  { color: var(--amber);  border: 1px solid var(--amber-line); background: var(--amber-soft); }
+  .t-neutral  { color: var(--muted);  border: 1px solid var(--line-2);     background: var(--soft); }
+  /* JS 给编号也挂了语义类，覆盖规则确保编号统一红色、无边框无底色（级联顺序须在语义类之后） */
+  .finding-no.t-positive, .finding-no.t-negative, .finding-no.t-warning, .finding-no.t-neutral {
+    color: var(--accent); border: none; background: transparent; }
+  @media (max-width: 639px) {
+    .finding { gap: 13px; }
+    .finding-no { font-size: 15px; min-width: 24px; }
+    .finding-tag { display: none; }   /* 窄屏下语义已由编号颜色表达 */
+  }
+
+  /* ---------- 目标列表（正方块 bullet） ---------- */
+  .objectives { margin: 16px 0 0; padding: 0; list-style: none; max-width: 705px; }
+  .objectives li { position: relative; margin: 6px 0; padding-left: 17px; color: var(--ink-2); }
+  .objectives li::before { content: ""; position: absolute; left: 1px; top: .62em; width: 7px; height: 7px;
+                           background: var(--accent); }
+
+  /* ---------- 数据概况 ---------- */
+  #ov-stats { display: grid; grid-template-columns: repeat(2, 1fr); border-top: 2px solid var(--ink); margin: 22px 0; }
+  @media (min-width: 720px) { #ov-stats { grid-template-columns: repeat(4, 1fr); } }
+  .stat { padding: 14px 18px 12px 15px; border-bottom: 1px solid var(--line); border-left: 1px solid var(--line); }
+  .stat:nth-child(2n+1) { border-left: none; }
+  @media (min-width: 720px) { .stat:nth-child(2n+1) { border-left: 1px solid var(--line); } .stat:nth-child(4n+1) { border-left: none; } }
+  .stat-label { font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--faint); }
+  .stat-value { font-size: 29px; font-weight: 800; color: var(--ink); margin-top: 5px; line-height: 1.16;
+                letter-spacing: .01em; font-feature-settings: "tnum" 1; }
+  .stat-note { font-size: 12px; color: var(--muted); margin-top: 3px; }
+  .quality-note { margin: 0; padding: 11px 16px; border-left: 3px solid var(--accent); background: var(--soft);
+                  color: var(--ink-2); font-size: 14px; line-height: 1.7; border-radius: 0; max-width: 705px; }
+  .quality-note .q-label { color: var(--ink-2); font-weight: 700; margin-right: 8px; }
+  .quality-note strong { color: var(--ink-2); }
+
+  /* ---------- 图表（红块图题 + 无框图区） ---------- */
+  .figure { margin: 30px 0 38px; }
+  .figure-mark { width: 36px; height: 4px; background: var(--accent); margin-bottom: 8px; }
+  .figure-title { font-size: 16px; font-weight: 800; letter-spacing: .01em; color: var(--ink); }
+  .figure-sub { display: flex; justify-content: space-between; gap: 12px; margin-top: 4px;
+                font-size: 12.5px; color: var(--faint); }
+  .figure-no { white-space: nowrap; font-feature-settings: "tnum" 1; }
+  .chart-box { width: 100%; background: transparent; border: none; margin-top: 10px; }
+  .figure-insight { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line);
+                    font-size: 14.5px; color: var(--ink-2); line-height: 1.7; max-width: 705px; }
+  .insight-label { font-size: 11.5px; font-weight: 800; letter-spacing: .22em; color: var(--accent); margin-right: 9px; }
+  .figure-insight strong { color: var(--accent); font-feature-settings: "tnum" 1; }
+
+  /* ---------- 表格（红块表题 + 出版表线；类名避开 Tailwind 工具类 table-caption） ---------- */
+  .table-block { margin: 30px 0 38px; overflow-x: auto; }
+  .tbl-title { font-size: 16px; font-weight: 800; letter-spacing: .01em; color: var(--ink); }
+  .tbl-sub { display: flex; justify-content: flex-end; margin-top: 4px;
+             font-size: 11.5px; color: var(--faint); }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; margin-top: 10px; }
+  thead th { text-align: left; font-weight: 600; font-size: 11.5px; letter-spacing: .14em;
+             text-transform: uppercase; color: var(--muted);
+             border-top: 2px solid var(--ink); border-bottom: 1px solid var(--line-2);
+             padding: 8px 14px 8px 2px; white-space: nowrap; }
+  tbody td { border-bottom: 1px solid var(--line); padding: 8px 14px 8px 2px; color: var(--ink-2); }
+  tbody tr:hover td { background: var(--soft); }
+  tbody td:first-child { color: var(--ink); font-weight: 600; }
+  th.num, td.num { text-align: right; font-feature-settings: "tnum" 1; font-variant-numeric: tabular-nums; }
+
+  /* ---------- Grid.js 交互表（>20 行自动启用）：mermaid 主题覆盖为「红印·出版」同观感 ----------
+     本 <style> 晚于 mermaid <link>，类选择器同特异度后序取胜；th/td 与上方静态表逐项同值。
+     全局 table { margin-top:10px } 等裸元素选择器会命中 .gridjs-table，需显式归零。 */
+  .gridjs-container { display: block; padding: 0; color: inherit; width: 100%; }
+  .gridjs-wrapper { border: none; border-radius: 0; box-shadow: none; }
+  .gridjs-table { margin-top: 0; }
+  th.gridjs-th { background: transparent; border: none; border-top: 2px solid var(--ink);
+                 border-bottom: 1px solid var(--line-2); padding: 8px 14px 8px 2px;
+                 color: var(--muted); font-size: 11.5px; font-weight: 600;
+                 letter-spacing: .14em; text-transform: uppercase; }
+  th.gridjs-th-sort { padding-right: 22px; }   /* 给排序箭头留位 */
+  td.gridjs-td { background: transparent; border: none; border-bottom: 1px solid var(--line);
+                 padding: 8px 14px 8px 2px; color: var(--ink-2); font-size: 14px; }
+  .gridjs-tr:hover td.gridjs-td { background: var(--soft); }
+  td.gridjs-td:first-child { color: var(--ink); font-weight: 600; }
+  /* 数字列：列级 attributes 只注 data-num 属性（注 class/style 会覆盖 autoWidth 列宽，禁止） */
+  th.gridjs-th[data-num] .gridjs-th-content { float: right; text-align: right; }
+  td.gridjs-td[data-num] { text-align: right; font-feature-settings: "tnum" 1; font-variant-numeric: tabular-nums; }
+  .gridjs-head { padding: 0; margin-bottom: 8px; }
+  input.gridjs-input { border-radius: 0; border: 1px solid var(--line-2); background: var(--paper);
+                       font-family: inherit; font-size: 13.5px; padding: 7px 12px; }
+  input.gridjs-input:focus { border-color: var(--accent); box-shadow: none; outline: none; }
+  .gridjs-footer { background: transparent; border: none; border-radius: 0; box-shadow: none; padding: 10px 0 0; }
+  .gridjs-summary { color: var(--faint); font-size: 12.5px; font-feature-settings: "tnum" 1; }
+  .gridjs-pagination .gridjs-pages button { border-radius: 0; border: 1px solid var(--line-2);
+      background: transparent; color: var(--ink-2); font-size: 13px; padding: 4px 10px; }
+  .gridjs-pagination .gridjs-pages button.gridjs-currentPage {
+      background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 700; }
+  @media (max-width: 639px) { .gridjs-search-input { width: 100%; } }
+
+  /* ---------- 结论与建议 ---------- */
+  #cc-recommendations { margin-top: 18px; }
+  .rec { display: flex; gap: 14px; padding: 15px 2px; border-top: 1px solid var(--line); align-items: flex-start; }
+  .rec:last-child { border-bottom: 1px solid var(--line); }
+  .rec-prio { font-size: 11.5px; font-weight: 800; letter-spacing: .1em; padding: 3px 12px;
+              border-radius: 2px; flex-shrink: 0; margin-top: 2px; white-space: nowrap; }
+  .p-high { background: var(--accent); color: #fff; }
+  .p-mid  { border: 1px solid var(--amber-line); color: var(--amber); background: var(--amber-soft); }
+  .p-low  { border: 1px solid var(--line-2); color: var(--muted); }
+  .rec-title { font-size: 16px; font-weight: 700; color: var(--ink); }
+  .rec-no { font-weight: 800; color: var(--accent); margin-right: 6px; font-feature-settings: "tnum" 1; }
+  .rec-detail { font-size: 14px; color: var(--muted); margin-top: 4px; max-width: 56em; line-height: 1.65; }
+  .rec-detail strong, .rec-title strong { color: var(--accent); }
+
+  /* ---------- 附录（刊末说明） ---------- */
+  #sec-appendix details { background: var(--soft); border: 1px solid var(--paper-edge); border-radius: 0; padding: 16px 20px; }
+  #sec-appendix summary { cursor: pointer; font-size: 16px; font-weight: 800; letter-spacing: .03em;
+                          color: var(--ink); list-style: none; display: flex; align-items: center; gap: 11px; }
+  #sec-appendix summary::-webkit-details-marker { display: none; }
+  #sec-appendix summary::before { content: "+"; color: var(--accent); font-weight: 800;
+                                  font-size: 17px; line-height: 1; transition: transform .3s; }
+  #sec-appendix details[open] summary::before { transform: rotate(45deg); }
+  .ap-subhead { font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--faint); margin: 20px 0 7px; }
+  .ap-list { margin: 0; padding-left: 20px; font-size: 14px; color: var(--ink-2); list-style: decimal; }
+  .ap-list li { padding: 2px 0; }
+  .colophon { text-align: center; font-size: 12px; color: var(--faint); letter-spacing: .06em;
+              border-top: 1px solid var(--line); padding: 14px 0 0; margin-top: 48px; }
+
+  /* ---------- 入场动效（仅屏幕、尊重无障碍偏好） ---------- */
+  @media screen and (prefers-reduced-motion: no-preference) {
+    .masthead > * { animation: rise .6s cubic-bezier(.2, .7, .2, 1) backwards; }
+    .masthead > *:nth-child(4) { animation-delay: .08s; }
+    .reveal { opacity: 0; transform: translateY(9px);
+              transition: opacity .6s cubic-bezier(.2,.7,.2,1), transform .6s cubic-bezier(.2,.7,.2,1); }
+    .reveal.on { opacity: 1; transform: translateY(0); }
+    @keyframes rise { from { opacity: 0; transform: translateY(9px); } to { opacity: 1; transform: translateY(0); } }
+  }
+
+  /* ---------- 响应式（窄屏：纸张铺满） ---------- */
+  @media (max-width: 720px) {
+    .fallback-wrap { padding: 0; }
+    .page { margin: 0; padding: 28px 18px 30px; border: none; border-top: 6px solid var(--accent); box-shadow: none; }
+    .section-title { white-space: normal; }
+  }
+
+  /* ---------- 打印：A4、省墨、保留强调 ---------- */
+  @page { size: A4; margin: 12mm; }
+  @media print {
+    html { background: #ffffff; }
+    body { font-size: 13px; line-height: 1.6; }
+    #toc-nav { display: none; }
+    .page { margin: 0; padding: 14px 0 0; border: none; border-top: 6px solid var(--accent);
+            box-shadow: none; background: #ffffff; }
+    .masthead { padding-bottom: 12px; margin-bottom: 32px; }
+    .masthead > * { animation: none; }
+    .reveal { opacity: 1 !important; transform: none !important; transition: none; }
+    section { margin-bottom: 36px; }
+    .section-head { break-after: avoid; page-break-after: avoid; }
+    .figure, .table-block, .finding, .rec, .stat, .quality-note { break-inside: avoid; page-break-inside: avoid; }
+    p, li { orphans: 2; widows: 2; }
+    .finding-tag, .quality-note, .p-mid, #sec-appendix details,
+    .t-positive, .t-negative, .t-warning, .t-neutral { background: #ffffff; }
+    /* 交互表：搜索框/页码不上纸；summary 行保留，纸面明示「共 N 条」存在截断 */
+    .gridjs-search, .gridjs-pagination .gridjs-pages { display: none; }
+    th.gridjs-th, td.gridjs-td, .gridjs-footer { background: #ffffff; }
+    a { color: var(--ink); }
+    .btn-export-pdf { display: none !important; }
+  }
+
+  /* ---------- 导出 PDF 按钮（固定右上角悬浮） ---------- */
+  .btn-export-pdf {
+    position: fixed; top: 16px; right: 24px; z-index: 9999;
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 8px 18px;
+    font: 700 13px/1 var(--sans); letter-spacing: .04em;
+    color: var(--ink); background: var(--paper);
+    border: 1.5px solid var(--line-2); border-radius: 2px;
+    box-shadow: 0 2px 8px rgba(40,35,30,.10);
+    cursor: pointer; transition: all .2s;
+  }
+  .btn-export-pdf:hover { color: var(--accent); border-color: var(--accent); background: #fff8f8;
+                           box-shadow: 0 2px 12px rgba(227,18,11,.12); }
+  .btn-export-pdf:active { transform: scale(.97); }
+  .btn-export-pdf svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2; }
+</style>
+</head>
+<body>
+
+<!-- 导出 PDF 按钮（固定右上角，@media print 自动隐藏） -->
+<button class="btn-export-pdf" id="btn-export-pdf" title="打印 / 导出为 PDF 文件">
+  <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+  导出 PDF
+</button>
+
+<div class="fallback-wrap">
+
+  <!-- 目录（桌面端旁置） -->
+  <nav id="toc-nav">
+    <div class="toc-inner">
+      <p class="toc-label">目录 · Contents</p>
+      <ul id="toc-list"></ul>
+    </div>
+  </nav>
+
+  <!-- 主体：桌面上的纸张 -->
+  <main class="report-main page">
+
+    <!-- 报头 -->
+    <header class="masthead">
+      <p class="masthead-kicker">数据分析报告 · Data Analysis Report</p>
+      <h1 id="r-title"></h1>
+      <p id="r-subtitle"></p>
+      <ul class="meta-row" aria-label="报告信息">
+        <li><span class="c-label">日期</span><span class="c-value" id="r-date"></span></li>
+        <li><span class="c-label">行业</span><span class="c-value" id="r-industry"></span></li>
+        <li><span class="c-label">面向</span><span class="c-value" id="r-audience"></span></li>
+      </ul>
+    </header>
+
+    <!-- 1 核心发现 -->
+    <section id="sec-findings" class="reveal">
+      <div class="section-head"><span class="section-index">01</span><h2 class="section-title">核心发现</h2></div>
+      <div id="findings-list"></div>
+    </section>
+
+    <!-- 2 分析背景与目标 -->
+    <section id="sec-background" class="reveal">
+      <div class="section-head"><span class="section-index">02</span><h2 class="section-title">分析背景与目标</h2></div>
+      <div id="bg-narrative" class="narrative prose"></div>
+      <ul id="bg-objectives" class="objectives"></ul>
+    </section>
+
+    <!-- 3 数据概况 -->
+    <section id="sec-overview" class="reveal">
+      <div class="section-head"><span class="section-index">03</span><h2 class="section-title">数据概况</h2></div>
+      <div id="ov-narrative" class="narrative prose"></div>
+      <div id="ov-stats"></div>
+      <p id="ov-quality" class="quality-note"></p>
+    </section>
+
+    <!-- 4 深入分析（动态分节） -->
+    <div id="analysis-sections"></div>
+
+    <!-- 5 结论与建议 -->
+    <section id="sec-conclusions" class="reveal">
+      <div class="section-head"><span class="section-index" id="cc-no">05</span><h2 class="section-title">结论与建议</h2></div>
+      <div id="cc-narrative" class="narrative prose"></div>
+      <div id="cc-recommendations"></div>
+    </section>
+
+    <!-- 6 附录：数据处理说明（默认折叠） -->
+    <section id="sec-appendix" class="reveal">
+      <details>
+        <summary>附录：数据处理说明</summary>
+        <div>
+          <h3 class="ap-subhead">清洗与转换决策记录</h3>
+          <ol id="ap-processing" class="ap-list"></ol>
+          <h3 id="ap-methods-title" class="ap-subhead" style="display:none">方法与假设说明</h3>
+          <ol id="ap-methods" class="ap-list"></ol>
+        </div>
+      </details>
+      <p class="colophon">本报告由 data-analysis-skills 生成 · 图表基于 Apache ECharts · 需联网打开以加载图表组件</p>
+    </section>
+
+  </main>
+</div>
+
+<script>
+window.__REPORT_DATA__ = __REPORT_DATA_JSON__;
+
+(function () {
+  const D = window.__REPORT_DATA__;
+  if (!D) { document.body.innerHTML = '<p style="padding:40px">报告数据注入失败：数据占位符未被替换。</p>'; return; }
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  // 行内有限 Markdown：**加粗**
+  const mdInline = (s) => esc(s).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  // 短字段：加粗 + 换行（行为与原 md 完全一致）
+  const md = (s) => mdInline(s).replace(/\n/g, '<br>');
+  // narrative 专用块级 Markdown：空行分段、### 小标题、-/1. 列表（\d{1,3} 防年份误判，兼容 1、）
+  const mdBlock = (s) => {
+    const out = []; let para = [], list = null;
+    const fp = () => { if (para.length) { out.push('<p>' + para.map(mdInline).join('<br>') + '</p>'); para = []; } };
+    const fl = () => { if (list) { out.push('<' + list.t + '>' + list.items.map(i => '<li>' + mdInline(i) + '</li>').join('') + '</' + list.t + '>'); list = null; } };
+    for (const raw of String(s ?? '').split('\n')) {
+      const line = raw.trim(); let m;
+      if (!line) { fp(); fl(); }
+      else if ((m = line.match(/^###\s+(.*)/)))        { fp(); fl(); out.push('<h4>' + mdInline(m[1]) + '</h4>'); }
+      else if ((m = line.match(/^[-*]\s+(.*)/)))       { fp(); if (list && list.t !== 'ul') fl(); list = list || { t: 'ul', items: [] }; list.items.push(m[1]); }
+      else if ((m = line.match(/^\d{1,3}[.、]\s*(.*)/))) { fp(); if (list && list.t !== 'ol') fl(); list = list || { t: 'ol', items: [] }; list.items.push(m[1]); }
+      else { fl(); para.push(line); }
+    }
+    fp(); fl(); return out.join('');
+  };
+
+  /* ---------- 报头与元信息 ---------- */
+  document.title = D.meta.title || '数据分析报告';
+  $('r-title').textContent = D.meta.title || '数据分析报告';
+  $('r-subtitle').textContent = D.meta.subtitle || '';
+  $('r-date').textContent = D.meta.date || '';
+  $('r-industry').textContent = D.meta.industry_label || '';
+  $('r-audience').textContent = D.meta.audience || '';
+  ['r-date', 'r-industry', 'r-audience'].forEach(id => {
+    const el = $(id); if (!el.textContent) el.closest('li').style.display = 'none';
+  });
+
+  /* ---------- 1 核心发现 ---------- */
+  const tone = { positive: ['t-positive', '正向'], negative: ['t-negative', '风险'],
+                 warning:  ['t-warning', '关注'],  neutral:  ['t-neutral', '提示'] };
+  $('findings-list').innerHTML = (D.key_findings || []).map((f, i) => {
+    const [cls, tag] = tone[f.type] || tone.neutral;
+    return `
+    <article class="finding">
+      <span class="finding-no ${cls}">${String(i + 1).padStart(2, '0')}</span>
+      <div class="finding-body">
+        <p class="finding-head">${md(f.headline)}</p>
+        ${f.detail ? `<p class="finding-detail">${md(f.detail)}</p>` : ''}
+      </div>
+      <span class="finding-tag ${cls}">${tag}</span>
+    </article>`;
+  }).join('');
+
+  /* ---------- 2 背景与目标 ---------- */
+  $('bg-narrative').innerHTML = mdBlock(D.background?.narrative || '');
+  $('bg-objectives').innerHTML = (D.background?.objectives || []).map(o => `<li>${md(o)}</li>`).join('');
+
+  /* ---------- 3 数据概况 ---------- */
+  $('ov-narrative').innerHTML = mdBlock(D.data_overview?.narrative || '');
+  $('ov-stats').innerHTML = (D.data_overview?.stats || []).map(s => `
+    <div class="stat">
+      <p class="stat-label">${esc(s.label)}</p>
+      <p class="stat-value">${esc(s.value)}</p>
+      ${s.note ? `<p class="stat-note">${esc(s.note)}</p>` : ''}
+    </div>`).join('');
+  $('ov-quality').innerHTML = '<span class="q-label">数据质量</span>' + md(D.data_overview?.quality_summary || '—');
+
+  /* ---------- 4 深入分析 ---------- */
+  const chartJobs = [];
+  let figNo = 0, tabNo = 0;
+  const numLike = (v) => /^[\s¥$€＋+\-−]*[\d,.]+\s*[%％万亿kKmMwW]*\s*$/.test(String(v ?? '').trim());
+  // 表格双模式：≤TBL_STATIC_MAX 行直出静态出版表；超过则交 Grid.js 交互表（分页/搜索/排序）
+  const TBL_STATIC_MAX = 20;
+  const gridJobs = [];
+  // 解析展示格式字符串为可比数字："¥1,200,000"→1200000、"12.4%"→12.4、"3.2万"→32000；失败返 null
+  const parseNum = (v) => {
+    const s = String(v ?? '').trim().replace(/[¥$€,\s＋+]/g, '').replace(/％/g, '%').replace(/−/g, '-');
+    const n = parseFloat(s);
+    if (isNaN(n)) return null;
+    return n * (/亿/.test(s) ? 1e8 : /[万wW]/.test(s) ? 1e4 : /[mM]$/.test(s) ? 1e6 : /[kK]$/.test(s) ? 1e3 : 1);
+  };
+  const numCompare = (a, b) => {
+    const x = parseNum(a), y = parseNum(b);
+    if (x === null && y === null) return 0;
+    if (x === null) return 1;          // 非数值（"—"等）排后；desc 时被库取反，接受
+    if (y === null) return -1;
+    return x > y ? 1 : x < y ? -1 : 0;
+  };
+  const GRID_LANG = {
+    search: { placeholder: '搜索表格内容…' },
+    sort: { sortAsc: '升序排列', sortDesc: '降序排列' },
+    pagination: { previous: '上一页', next: '下一页',
+      navigate: (page, pages) => `第 ${page} 页，共 ${pages} 页`,
+      page: (page) => `第 ${page} 页`,
+      showing: '当前显示', to: '至', of: '条，共', results: () => '条记录' },
+    loading: '加载中…', noRecordsFound: '没有匹配的记录', error: '表格数据加载出错',
+  };
+  // 静态出版表：≤20 行的直出路径，也是 Grid.js 双源皆失败时的降级渲染（拼接与历史版本逐字一致）
+  const staticTableHtml = (t, numCols) => `
+          <table>
+            <thead><tr>${(t.columns || []).map((c, ci) => `<th${numCols[ci] ? ' class="num"' : ''}>${esc(c)}</th>`).join('')}</tr></thead>
+            <tbody>${(t.rows || []).map(r => `<tr>
+              ${r.map((v, ci) => `<td${numCols[ci] ? ' class="num"' : ''}>${esc(v)}</td>`).join('')}</tr>`).join('')}
+            </tbody>
+          </table>`;
+  $('analysis-sections').innerHTML = (D.sections || []).map((sec, si) => `
+    <section id="${esc(sec.id)}" class="reveal">
+      <div class="section-head"><span class="section-index">${String(si + 4).padStart(2, '0')}</span><h2 class="section-title">${esc(sec.title)}</h2></div>
+      ${sec.narrative ? `<div class="narrative prose">${mdBlock(sec.narrative)}</div>` : ''}
+      ${(sec.charts || []).map(ch => {
+        chartJobs.push(ch); figNo += 1;
+        return `
+        <figure class="figure" style="margin-left:0;margin-right:0">
+          <figcaption>
+            <div class="figure-mark"></div>
+            <p class="figure-title">${esc(ch.title)}</p>
+            <p class="figure-sub"><span>${esc(ch.question || '')}</span><span class="figure-no">图 ${figNo}</span></p>
+          </figcaption>
+          <div id="${esc(ch.id)}" class="chart-box" style="height:${(ch.height || 400)}px"></div>
+          <div class="figure-insight"><span class="insight-label">解读</span>${md(ch.insight || '')}</div>
+        </figure>`;
+      }).join('')}
+      ${(sec.tables || []).map(t => {
+        tabNo += 1;
+        const numCols = (t.columns || []).map((_, ci) => {
+          const vals = (t.rows || []).map(r => r[ci]).filter(v => String(v ?? '').trim() !== '');
+          return vals.length > 0 && vals.filter(numLike).length / vals.length > 0.6;
+        });
+        const head = `
+        <div class="table-block">
+          <div class="figure-mark"></div>
+          <p class="tbl-title">${esc(t.title)}</p>
+          <p class="tbl-sub"><span class="figure-no">表 ${tabNo}</span></p>`;
+        if ((t.rows || []).length <= TBL_STATIC_MAX) return `${head}${staticTableHtml(t, numCols)}
+        </div>`;
+        const gid = `tbl-grid-${tabNo}`;        // >20 行：先出空容器，交 renderGrids 渲染
+        gridJobs.push({ gid, t, numCols });
+        return `${head}
+          <div id="${gid}"></div>
+        </div>`;
+      }).join('')}
+    </section>`).join('');
+
+  /* ---------- 5 结论与建议 ---------- */
+  $('cc-no').textContent = String((D.sections || []).length + 4).padStart(2, '0');
+  $('cc-narrative').innerHTML = mdBlock(D.conclusions?.narrative || '');
+  const prio = { '高': ['p-high', '高'], '中': ['p-mid', '中'], '低': ['p-low', '低'] };
+  $('cc-recommendations').innerHTML = (D.conclusions?.recommendations || []).map((r, i) => {
+    const [cls, label] = prio[r.priority] || ['p-low', r.priority || '建议'];
+    return `
+    <div class="rec">
+      <span class="rec-prio ${cls}">${esc(label)}</span>
+      <div><p class="rec-title"><span class="rec-no">${String(i + 1).padStart(2, '0')}</span>${md(r.title)}</p>
+        ${r.detail ? `<p class="rec-detail">${md(r.detail)}</p>` : ''}</div>
+    </div>`;
+  }).join('');
+
+  /* ---------- 6 附录 ---------- */
+  $('ap-processing').innerHTML = (D.appendix?.processing_notes || []).map(n => `<li>${md(n)}</li>`).join('');
+  const mn = D.appendix?.methods_notes || [];
+  if (mn.length) { $('ap-methods-title').style.display = ''; $('ap-methods').innerHTML = mn.map(n => `<li>${md(n)}</li>`).join(''); }
+
+  /* ---------- 目录 ---------- */
+  const tocItems = [
+    ['sec-findings', '核心发现'], ['sec-background', '分析背景与目标'], ['sec-overview', '数据概况'],
+    ...(D.sections || []).map(s => [s.id, s.title]),
+    ['sec-conclusions', '结论与建议'], ['sec-appendix', '附录：数据处理说明'],
+  ];
+  $('toc-list').innerHTML = tocItems.map(([id, label], i) =>
+    `<li><a href="#${esc(id)}" data-sec="${esc(id)}"><span class="toc-no">${String(i + 1).padStart(2, '0')}</span><span>${esc(label)}</span></a></li>`).join('');
+
+  /* ---------- 滚动显现 + 目录跟随 ---------- */
+  if (window.IntersectionObserver) {
+    const revealObs = new IntersectionObserver((es) => es.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('on'); revealObs.unobserve(e.target); }
+    }), { rootMargin: '0px 0px -8% 0px' });
+    document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
+
+    const links = Array.from(document.querySelectorAll('#toc-list a'));
+    const spyObs = new IntersectionObserver((es) => {
+      const hit = es.find(e => e.isIntersecting);
+      if (!hit) return;
+      links.forEach(a => a.classList.toggle('active', a.dataset.sec === hit.target.id));
+    }, { rootMargin: '-12% 0px -62% 0px' });
+    tocItems.forEach(([id]) => { const el = document.getElementById(id); if (el) spyObs.observe(el); });
+  } else {
+    document.querySelectorAll('.reveal').forEach(el => el.classList.add('on'));
+  }
+
+  /* ---------- ECharts 渲染 ---------- */
+  function renderCharts() {
+    if (!window.echarts) { setTimeout(renderCharts, 300); return; }  // 等待备源加载
+    // economist 主题：「红印·出版」同源色板；option 自带配置优先于主题
+    // 系列色经色彩科学校验（workspace/validate_palette.py，OKLCH 亮度带/色度下限/
+    // Machado CVD 分离/对比度≥3:1 全过，white 表面）——改动任何 hex 须重跑该校验
+    const FONT = '-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif';
+    const AXIS = { axisLine: { lineStyle: { color: '#121212' } }, axisTick: { lineStyle: { color: '#c9c9c9' } },
+                   axisLabel: { color: '#6b6b6b' }, splitLine: { lineStyle: { color: '#e3e3e3' } },
+                   nameTextStyle: { color: '#9a9a9a' } };
+    echarts.registerTheme('economist', {
+      color: ['#006ba6', '#11a2b8', '#e3120b', '#d18221', '#189fa2', '#963c4c', '#20578d', '#a5762e'],
+      backgroundColor: 'transparent',
+      textStyle: { fontFamily: FONT, color: '#6b6b6b' },
+      categoryAxis: AXIS, valueAxis: AXIS, timeAxis: AXIS, logAxis: AXIS,
+      legend: { textStyle: { color: '#404040', fontFamily: FONT } },
+      title: { textStyle: { color: '#121212', fontFamily: FONT }, subtextStyle: { color: '#9a9a9a' } },
+      tooltip: { backgroundColor: '#ffffff', borderColor: '#dcdcdc', borderWidth: 1,
+                 textStyle: { color: '#121212', fontFamily: FONT },
+                 extraCssText: 'box-shadow:0 4px 14px rgba(0,0,0,.10)' },
+      toolbox: { iconStyle: { borderColor: '#9a9a9a' } },
+      dataZoom: { borderColor: '#c9c9c9', fillerColor: 'rgba(0,107,166,0.08)',
+                  handleStyle: { color: '#006ba6' }, textStyle: { color: '#9a9a9a' } },
+      visualMap: { textStyle: { color: '#6b6b6b' } },
+      // mark specs（源自 dataviz skill）：2px 细线 + 8px 实心点标记；点/柱段/饼段一律以
+      // 2px 纸面白描边做分隔（surface gap/ring）——重叠与堆叠靠白缝区分，不靠深色描边
+      line: { symbol: 'circle', symbolSize: 8, lineStyle: { width: 2 },
+              itemStyle: { borderColor: '#ffffff', borderWidth: 2 } },
+      bar: { itemStyle: { borderColor: '#ffffff', borderWidth: 2 } },
+      pie: { itemStyle: { borderColor: '#ffffff', borderWidth: 2 } },
+      scatter: { itemStyle: { borderColor: '#ffffff', borderWidth: 2 } },
+    });
+    // mark specs 兜底（布局属性主题不生效，setOption 前补；option 已显式设置的一律不碰）
+    const LINE_SYMBOL_MAX = 50;   // 折线超过 50 点不画点标记（hover 强调时仍显示）
+    // 数值渐变单色 ramp（数据蓝同色相浅→深，OKLCH 等距校验过）：ECharts visualMap
+    // 默认色带是彩虹系，违反「数值 = 单色相亮度渐变」纪律，未显式设 inRange 时以此兜底
+    const SEQ_RAMP = ['#d5ebfe', '#91c1e8', '#5196ca', '#016ca7', '#034c77'];
+    function applyMarkSpecs(option) {
+      const list = Array.isArray(option.series) ? option.series : (option.series ? [option.series] : []);
+      list.forEach(s => {
+        if (s.type === 'bar' && s.barMaxWidth == null) s.barMaxWidth = 24;   // 柱不填满槽位，留呼吸感
+        if (s.type === 'line') {
+          if (s.showSymbol == null && (s.data || []).length > LINE_SYMBOL_MAX) s.showSymbol = false;
+          if (s.areaStyle && typeof s.areaStyle === 'object' && s.areaStyle.opacity == null)
+            s.areaStyle.opacity = 0.12;   // 面积是洗色不是色块，不得盖住网格
+        }
+      });
+      const vms = Array.isArray(option.visualMap) ? option.visualMap : (option.visualMap ? [option.visualMap] : []);
+      vms.forEach(v => { if (v.inRange == null) v.inRange = { color: SEQ_RAMP }; });
+      return option;
+    }
+    const instances = chartJobs.map(ch => {
+      const el = document.getElementById(ch.id);
+      if (!el || !ch.option) return null;
+      const inst = echarts.init(el, 'economist');
+      inst.setOption(applyMarkSpecs(ch.option));
+      return inst;
+    }).filter(Boolean);
+    window.addEventListener('resize', () => instances.forEach(i => i.resize()));
+  }
+  renderCharts();
+
+  /* ---------- Grid.js 渲染（>20 行交互表） ---------- */
+  function renderGrids(tries) {
+    if (!gridJobs.length) return;
+    if (!window.gridjs) {
+      if (tries > 20) {   // ~6 秒双源皆失败：降级为静态全量表，数据不丢
+        gridJobs.forEach(j => { document.getElementById(j.gid).outerHTML = staticTableHtml(j.t, j.numCols); });
+        return;
+      }
+      setTimeout(() => renderGrids(tries + 1), 300); return;
+    }
+    gridJobs.forEach(j => {
+      new gridjs.Grid({
+        // 数字列：解析值排序 + data-num 对齐钩子；attributes 禁注 class/style（会覆盖 autoWidth 列宽）
+        columns: (j.t.columns || []).map((c, ci) => (j.numCols[ci]
+          ? { name: c, sort: { compare: numCompare }, attributes: { 'data-num': '' } }
+          : { name: c })),
+        data: j.t.rows || [],
+        sort: true,
+        search: true,
+        pagination: { limit: 15, summary: true },   // 阈值 21 行起步，恒有 ≥2 页，分页不空转
+        language: GRID_LANG,
+      }).render(document.getElementById(j.gid));
+    });
+  }
+  renderGrids(0);
+
+  /* ---------- 导出 PDF（浏览器原生打印，100% CSS 保真） ---------- */
+  document.getElementById('btn-export-pdf').addEventListener('click', function () {
+    window.print();
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
-import { ArrowLeft, Download, FileJson, Save } from "lucide-react";
+import { ArrowLeft, BarChart3, Download, FileJson, LockKeyhole, Save } from "lucide-react";
 import { isHeld, summarizeTrainingHistory, type HistoryBooking, type HistorySession } from "../server/training-history-summary.ts";
+import { HistoryAnalytics } from "./HistoryAnalytics.tsx";
 
 type HistoryResponse = { today: string; oemOptions: string[]; sessions: HistorySession[] };
 type Filters = { trainingId: string; oem: string; instructor: string; from: string; to: string };
@@ -31,6 +32,22 @@ const HISTORY_CSS = `
 .history-toolbar label { display: grid; gap: 2px; font-size: 11px; font-weight: 700; }
 .history-toolbar select, .history-toolbar input { padding: 6px 8px; font: inherit; font-size: 12px; }
 .history-error { color: #90626C; font-weight: 700; }
+.analytics-section { margin: 24px 0 8px; }
+.analytics-header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 12px; }
+.analytics-header h2 { margin: 0; border-bottom: 2px solid #779FE3; padding-bottom: 4px; flex: 1 1 auto; }
+.findings-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.finding-card { background: #fff; border: 1px solid #D8DDD9; border-left: 4px solid #779FE3; padding: 12px 14px; }
+.finding-card h3 { margin: 0 0 6px; font-size: 13px; color: #121212; }
+.finding-card p { margin: 0; font-size: 12px; color: #404040; }
+.finding-negative { border-left-color: #e3120b; }
+.finding-warning { border-left-color: #b45309; }
+.finding-positive { border-left-color: #006ba6; }
+.finding-neutral { border-left-color: #6F7D88; }
+.analytics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 16px; }
+.analytics-card { background: #fff; border: 1px solid #D8DDD9; padding: 14px 16px; }
+.analytics-card-head h3 { margin: 0 0 2px; font-size: 14px; }
+.analytics-question { margin: 0 0 8px; font-size: 12px; color: #6F7D88; }
+.analytics-insight { margin: 10px 0 0; padding: 8px 10px; background: #F7F7F5; border-left: 3px solid #006ba6; font-size: 12px; color: #32526A; }
 `;
 
 const ratioText = (value: number | null) => (value === null ? "n/a" : value.toFixed(2));
@@ -128,7 +145,7 @@ function AttendanceEntry({ session, onSaved }: { session: HistorySession; onSave
         method: "PUT", body: JSON.stringify({ attendeeCount: count }),
       });
       if (result.status !== 200) {
-        setError(result.status === 409 ? "Attendance was recorded. Refresh to see it." : "Could not save attendance.");
+        setError(result.status === 409 ? "Attendance was recorded. Refresh to see it." : result.status === 401 ? "Session expired. Log in again." : "Could not save attendance.");
         return;
       }
       await onSaved();
@@ -151,19 +168,32 @@ function AttendanceEntry({ session, onSaved }: { session: HistorySession; onSave
 
 export default function HistoryPage() {
   const [history, setHistory] = useState<HistoryResponse | null>(null);
+  const [needsLogin, setNeedsLogin] = useState(false);
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [filters, setFilters] = useState<Filters>({ trainingId: "", oem: "", instructor: "", from: "", to: "" });
   const reportRef = useRef<HTMLDivElement>(null);
 
   const load = async () => {
     const result = await fetchJson<HistoryResponse>("/api/history");
+    if (result.status === 401) return setNeedsLogin(true);
     if (result.status !== 200) return setError(`Failed to load history (${result.status})`);
+    setNeedsLogin(false);
     setHistory(result.body);
   };
 
   useEffect(() => {
     load().catch((cause: Error) => setError(cause.message));
   }, []);
+
+  const login = async (event: FormEvent) => {
+    event.preventDefault();
+    const result = await fetchJson("/api/auth/login", { method: "POST", body: JSON.stringify({ password }) });
+    if (result.status !== 200) return setError("Invalid password");
+    setPassword("");
+    setError("");
+    await load();
+  };
 
   const options = useMemo(() => {
     const sessions = history?.sessions ?? [];
@@ -210,6 +240,19 @@ export default function HistoryPage() {
     downloadFile(`training-history-${fileStamp}.json`, "application/json", JSON.stringify(payload, null, 2));
   };
 
+  if (needsLogin) {
+    return (
+      <form className="history-login" onSubmit={login}>
+        <style>{HISTORY_CSS}</style>
+        <h2><LockKeyhole size={18} /> Admin login required</h2>
+        <input type="password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Scheduler password" autoFocus />
+        {error && <p className="history-error">{error}</p>}
+        <button className="primary-button" type="submit">Log in</button>
+        <a href="/">Back to scheduler</a>
+      </form>
+    );
+  }
+
   if (!history) return <p style={{ padding: 24 }}>{error || "Loading training history..."}</p>;
 
   const { summary, sessions } = filtered;
@@ -242,6 +285,7 @@ export default function HistoryPage() {
         <label>From<input type="date" value={filters.from} min={options.minDate} max={options.maxDate} onChange={updateFilter("from")} /></label>
         <label>To<input type="date" value={filters.to} min={options.minDate} max={options.maxDate} onChange={updateFilter("to")} /></label>
         <button className="secondary-button" type="button" onClick={() => setFilters({ trainingId: "", oem: "", instructor: "", from: "", to: "" })}>Reset</button>
+        <a className="secondary-button" href="/training-analysis-report.html" target="_blank" rel="noopener noreferrer"><BarChart3 size={14} /> Full Analysis Report</a>
         <button className="primary-button" type="button" onClick={saveHtml}><Download size={14} /> Save HTML</button>
         <button className="primary-button" type="button" onClick={saveJson}><FileJson size={14} /> Save JSON</button>
       </div>
@@ -258,6 +302,8 @@ export default function HistoryPage() {
           <div className="total"><strong>{summary.totals.attendanceGaps}</strong>Attendance not recorded</div>
           <div className="total"><strong>{summary.totals.cancelledSessions} / {summary.totals.cancelledBookings}</strong>Cancelled sessions / bookings</div>
         </div>
+
+        <HistoryAnalytics sessions={sessions} summary={summary} />
 
         <h2>Coverage by course</h2>
         {summary.courses.length === 0 && <p className="muted">No sessions match the filters.</p>}
