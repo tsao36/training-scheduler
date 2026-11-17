@@ -1450,11 +1450,9 @@ function App() {
             >
               <CalendarDays size={16} /> Training Topic schedule View
             </button>
-            {authenticated && (
-              <a className="secondary-button" href="/history">
-                <CalendarDays size={16} /> Training history
-              </a>
-            )}
+            <a className="secondary-button" href="/history">
+              <CalendarDays size={16} /> Training history
+            </a>
             {authenticated && (
               <button className="secondary-button" type="button" onClick={loadRecipientConfig}>
                 Configure recipients

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
-import { ArrowLeft, Download, FileJson, LockKeyhole } from "lucide-react";
+import { ArrowLeft, Download, FileJson, Save } from "lucide-react";
 import { isHeld, summarizeTrainingHistory, type HistoryBooking, type HistorySession } from "../server/training-history-summary.ts";
 
 type HistoryResponse = { today: string; oemOptions: string[]; sessions: HistorySession[] };
@@ -21,13 +21,15 @@ const HISTORY_CSS = `
 .history-report .tag { display: inline-block; font-size: 10px; font-weight: 700; padding: 1px 6px; margin-left: 6px; background: #A18851; color: #fff; }
 .history-report .note { color: #90626C; font-weight: 700; }
 .history-report .muted { color: #6F7D88; }
+.history-report .attendance-entry { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; }
+.history-report .attendance-entry input { width: 5em; padding: 4px; font: inherit; }
+.history-report .attendance-entry button { display: inline-flex; align-items: center; gap: 4px; padding: 4px 6px; cursor: pointer; }
+.history-report .attendance-entry .history-error { flex-basis: 100%; }
 .history-report details { background: #fff; border: 1px solid #D8DDD9; margin: 6px 0; padding: 6px 10px; }
 .history-report summary { cursor: pointer; font-weight: 700; }
 .history-toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; padding: 16px 24px; border-bottom: 1px solid #D8DDD9; }
 .history-toolbar label { display: grid; gap: 2px; font-size: 11px; font-weight: 700; }
 .history-toolbar select, .history-toolbar input { padding: 6px 8px; font: inherit; font-size: 12px; }
-.history-login { max-width: 360px; margin: 80px auto; display: grid; gap: 12px; }
-.history-login input { padding: 10px; font: inherit; }
 .history-error { color: #90626C; font-weight: 700; }
 `;
 
@@ -107,34 +109,61 @@ function SessionDetails({ session }: { session: HistorySession }) {
   );
 }
 
+function AttendanceEntry({ session, onSaved }: { session: HistorySession; onSaved: () => Promise<void> }) {
+  const [value, setValue] = useState(session.attendanceEstimated ? String(session.attendeeCount) : "");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  const save = async (event: FormEvent) => {
+    event.preventDefault();
+    const count = Number(value);
+    if (!value.trim() || !Number.isInteger(count) || count < 0 || count > 1000) {
+      setError("Enter a whole number from 0 to 1000.");
+      return;
+    }
+    setSaving(true);
+    setError("");
+    try {
+      const result = await fetchJson(`/api/sessions/${encodeURIComponent(session.sessionId)}/attendance-estimate`, {
+        method: "PUT", body: JSON.stringify({ attendeeCount: count }),
+      });
+      if (result.status !== 200) {
+        setError(result.status === 409 ? "Attendance was recorded. Refresh to see it." : "Could not save attendance.");
+        return;
+      }
+      await onSaved();
+    } catch {
+      setError("Could not save attendance. Try again.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <form className="attendance-entry" onSubmit={save}>
+      <span className="note">{session.attendanceEstimated ? "Estimated" : "Not recorded"}</span>
+      <input type="number" min="0" max="1000" step="1" required value={value} onChange={(event) => setValue(event.target.value)} aria-label={`Estimated attendees for ${session.trainingTitle}, ${session.date} ${session.startTime}`} />
+      <button type="submit" disabled={saving} title="Save attendance estimate"><Save size={14} /> {saving ? "Saving" : "Save"}</button>
+      {error && <span className="history-error" role="alert">{error}</span>}
+    </form>
+  );
+}
+
 export default function HistoryPage() {
   const [history, setHistory] = useState<HistoryResponse | null>(null);
-  const [needsLogin, setNeedsLogin] = useState(false);
-  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [filters, setFilters] = useState<Filters>({ trainingId: "", oem: "", instructor: "", from: "", to: "" });
   const reportRef = useRef<HTMLDivElement>(null);
 
   const load = async () => {
     const result = await fetchJson<HistoryResponse>("/api/history");
-    if (result.status === 401) return setNeedsLogin(true);
     if (result.status !== 200) return setError(`Failed to load history (${result.status})`);
-    setNeedsLogin(false);
     setHistory(result.body);
   };
 
   useEffect(() => {
     load().catch((cause: Error) => setError(cause.message));
   }, []);
-
-  const login = async (event: FormEvent) => {
-    event.preventDefault();
-    const result = await fetchJson("/api/auth/login", { method: "POST", body: JSON.stringify({ password }) });
-    if (result.status !== 200) return setError("Invalid password");
-    setPassword("");
-    setError("");
-    await load();
-  };
 
   const options = useMemo(() => {
     const sessions = history?.sessions ?? [];
@@ -180,19 +209,6 @@ export default function HistoryPage() {
     const payload = { generatedAt: new Date().toISOString(), today: history?.today, filters, summary: filtered.summary, sessions: filtered.sessions };
     downloadFile(`training-history-${fileStamp}.json`, "application/json", JSON.stringify(payload, null, 2));
   };
-
-  if (needsLogin) {
-    return (
-      <form className="history-login" onSubmit={login}>
-        <style>{HISTORY_CSS}</style>
-        <h2><LockKeyhole size={18} /> Admin login required</h2>
-        <input type="password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Scheduler password" autoFocus />
-        {error && <p className="history-error">{error}</p>}
-        <button className="primary-button" type="submit">Log in</button>
-        <a href="/">Back to scheduler</a>
-      </form>
-    );
-  }
 
   if (!history) return <p style={{ padding: 24 }}>{error || "Loading training history..."}</p>;
 
@@ -295,7 +311,7 @@ export default function HistoryPage() {
                   <td>{Array.from(new Set(session.bookings.map((item) => item.odm ?? "NA"))).join(", ") || "-"}</td>
                   <td>{session.instructors.join(", ") || "Unknown"}</td>
                   <td>{session.bookings.length}</td>
-                  <td>{session.attendanceRecorded ? session.attendeeCount : <span className="note">Not recorded</span>}</td>
+                  <td>{session.attendanceRecorded && !session.attendanceEstimated ? session.attendeeCount : <AttendanceEntry session={session} onSaved={load} />}</td>
                   <td>{ratioText(session.turnoutRatio)}</td>
                   <td>{[...session.notes, ...session.attendance.flatMap((record) => (record.notes ? [record.notes] : []))].join("; ") || "-"}</td>
                 </tr>

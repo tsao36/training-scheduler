@@ -137,6 +137,27 @@ test('held sessions exclude cancelled-only bookings but retain recorded attendan
   assert.deepEqual(history.sessions.filter(isHeld).map((session) => session.sessionId), ['s2', 's3'])
 })
 
+test('uses estimated attendance until actual instructor attendance is recorded', () => {
+  const data = baseData({
+    sessions: [{ id: 's1', trainingId: 'wifi-8', date: '2026-10-01', startTime: '10:00', durationMinutes: 60, status: 'active', estimatedAttendeeCount: 0 }],
+    bookings: [booking({ id: 'b1', sessionId: 's1', instructorEmail: 'kj@example.com' })],
+  })
+
+  const estimated = buildTrainingHistory(data, '2026-11-13').sessions[0]
+  assert.equal(estimated.attendeeCount, 0)
+  assert.equal(estimated.attendanceRecorded, true)
+  assert.equal(estimated.attendanceEstimated, true)
+  assert.deepEqual(estimated.instructors, ['kj@example.com'])
+  assert.deepEqual(estimated.notes, ['Estimated attendance'])
+  assert.equal(summarizeTrainingHistory([estimated], []).totals.attendanceGaps, 0)
+
+  data.attendance = [{ id: 'a1', sessionId: 's1', trainingId: 'wifi-8', attendeeCount: 5, instructorEmail: 'kj@example.com', recordedAt: '2026-10-01T03:00:00.000Z', updatedAt: '2026-10-01T03:00:00.000Z' }]
+  const actual = buildTrainingHistory(data, '2026-11-13').sessions[0]
+  assert.equal(actual.attendeeCount, 5)
+  assert.equal(actual.attendanceEstimated, undefined)
+  assert.deepEqual(actual.notes, [])
+})
+
 test('labels sessions with the displayed training, hidden flag, booking details and instructors', () => {
   const data = baseData({
     sessions: [

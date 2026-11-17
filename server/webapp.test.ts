@@ -1,8 +1,11 @@
 import assert from 'node:assert/strict'
+import { spawn } from 'node:child_process'
 import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
+import { createServer } from 'node:net'
 import os from 'node:os'
 import path from 'node:path'
 import test from 'node:test'
+import { DataStore } from './data-store.js'
 import { getExplicitCFEContactEmailFromConfig, readEmailRecipientConfig, writeEmailRecipientConfig } from './email-service.js'
 import { readTrainingVideoCatalog } from './training-videos.js'
 
@@ -18,6 +21,71 @@ const withTempEnv = async <T>(key: string, value: string | undefined, callback: 
     else process.env[key] = originalValue
   }
 }
+
+test('public history attendance estimates persist without overwriting actual attendance', async () => {
+  const directory = await mkdtemp(path.join(os.tmpdir(), 'training-scheduler-estimate-'))
+  const filePath = path.join(directory, 'scheduler.yaml')
+  await writeFile(filePath, JSON.stringify({
+    window: { start: '2020-01-01', end: '2020-01-31', durationMinutes: 60 },
+    trainings: [{ id: 'bt-log', title: 'BT Debug Training', shortTitle: 'BT Debug', instructor: 'Test', accent: 'blue', mode: 'Live' }],
+    sessions: [
+      { id: 's1', trainingId: 'bt-log', date: '2020-01-01', startTime: '10:00', durationMinutes: 60, status: 'active' },
+      { id: 's2', trainingId: 'bt-log', date: '2020-01-01', startTime: '11:00', durationMinutes: 60, status: 'active' },
+    ],
+    bookings: [
+      { id: 'b1', sessionId: 's1', oem: 'Dell', requesterName: 'Test', requesterEmail: 'test@example.com', createdAt: '2020-01-01T00:00:00Z', status: 'confirmed' },
+      { id: 'b2', sessionId: 's2', oem: 'Dell', requesterName: 'Test', requesterEmail: 'test@example.com', createdAt: '2020-01-01T00:00:00Z', status: 'cancelled' },
+    ],
+    attendance: [], version: 0,
+  }), 'utf8')
+  const socket = createServer()
+  await new Promise<void>((resolve) => socket.listen(0, '127.0.0.1', resolve))
+  const address = socket.address()
+  if (!address || typeof address === 'string') throw new Error('PORT_UNAVAILABLE')
+  const port = address.port
+  await new Promise<void>((resolve, reject) => socket.close((error) => error ? reject(error) : resolve()))
+  const server = spawn(process.execPath, ['--import', 'tsx', 'server/index.ts'], {
+    env: { ...process.env, PORT: String(port), DATA_FILE: filePath, SCHEDULER_PASSWORD: 'test-password', EMAIL_RECIPIENTS_FILE: path.join(directory, 'recipients.yaml'), TLS_KEY_FILE: '', TLS_CERT_FILE: '', HTTP_REDIRECT_PORT: '' },
+    stdio: ['ignore', 'pipe', 'pipe'],
+  })
+  try {
+    await new Promise<void>((resolve, reject) => {
+      const timer = setTimeout(() => reject(new Error('SERVER_START_TIMEOUT')), 10000)
+      server.once('error', (error) => { clearTimeout(timer); reject(error) })
+      server.once('exit', (code) => { clearTimeout(timer); reject(new Error(`SERVER_EXITED_${code}`)) })
+      server.stdout.once('data', () => { clearTimeout(timer); resolve() })
+    })
+    const baseUrl = `http://127.0.0.1:${port}`
+    const save = (sessionId: string, attendeeCount: unknown) => fetch(`${baseUrl}/api/sessions/${sessionId}/attendance-estimate`, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ attendeeCount }),
+    })
+    assert.equal((await fetch(`${baseUrl}/api/email-recipients`)).status, 401)
+    assert.equal((await save('s1', null)).status, 400)
+    assert.equal((await save('s1', 1001)).status, 400)
+    assert.equal((await save('s2', 3)).status, 400)
+    assert.equal((await save('missing', 3)).status, 404)
+    assert.equal((await save('s1', 0)).status, 200)
+    assert.equal((await save('s1', 7)).status, 200)
+    const stored = await new DataStore(filePath).read()
+    assert.equal(stored.sessions.find((session) => session.id === 's1')?.estimatedAttendeeCount, 7)
+    const historyResponse = await fetch(`${baseUrl}/api/history`)
+    assert.equal(historyResponse.status, 200)
+    const history = await historyResponse.json() as { sessions: { sessionId: string; attendeeCount: number; attendanceEstimated?: boolean }[] }
+    assert.equal(history.sessions.find((session) => session.sessionId === 's1')?.attendeeCount, 7)
+    assert.equal(history.sessions.find((session) => session.sessionId === 's1')?.attendanceEstimated, true)
+    await new DataStore(filePath).update((data) => {
+      data.attendance?.push({ id: 'a1', sessionId: 's1', trainingId: 'bt-log', attendeeCount: 9, instructorEmail: 'instructor@example.com', recordedAt: '2020-01-01T00:00:00Z', updatedAt: '2020-01-01T00:00:00Z' })
+    })
+    assert.equal((await save('s1', 8)).status, 409)
+  } finally {
+    if (server.exitCode === null && server.signalCode === null) {
+      const exited = new Promise<void>((resolve) => server.once('exit', () => resolve()))
+      server.kill()
+      await exited
+    }
+    await rm(directory, { recursive: true, force: true })
+  }
+})
 
 test('reads a custom email recipient config from disk', async () => {
   const directory = await mkdtemp(path.join(os.tmpdir(), 'training-scheduler-recipients-'))

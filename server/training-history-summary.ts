@@ -32,6 +32,7 @@ export type HistorySession = {
   attendance: HistoryAttendance[]
   attendeeCount: number
   attendanceRecorded: boolean
+  attendanceEstimated?: boolean
   turnoutRatio: number | null
   instructors: string[]
   notes: string[]

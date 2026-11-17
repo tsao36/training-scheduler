@@ -182,7 +182,7 @@ app.get('/api/email-recipients', requireScheduler, async (_request, response) =>
   response.json({ yaml: dump(recipients, { noRefs: true }) })
 })
 
-app.get('/api/history', requireScheduler, async (_request, response) => {
+app.get('/api/history', async (_request, response) => {
   const data = await store.read()
   const recipientConfig = await readEmailRecipientConfig()
   const sessions = new Map(data.sessions.map((session) => [session.id, session]))
@@ -196,6 +196,24 @@ app.get('/api/history', requireScheduler, async (_request, response) => {
   const history = buildTrainingHistory({ ...data, bookings }, today, { hiddenTrainingIds: DELL_ONLY_TRAINING_IDS })
   response.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate')
   response.json({ today, oemOptions: OEM_OPTION_LIST, ...history })
+})
+
+app.put('/api/sessions/:id/attendance-estimate', async (request, response) => {
+  const attendeeCount = request.body?.attendeeCount
+  if (typeof attendeeCount !== 'number' || !Number.isInteger(attendeeCount) || attendeeCount < 0 || attendeeCount > 1000) {
+    return response.status(400).json({ error: 'INVALID_ATTENDANCE_COUNT' })
+  }
+  const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Taipei' }).format(new Date())
+  await store.update((data) => {
+    const session = data.sessions.find((item) => item.id === request.params.id)
+    if (!session) throw new Error('SESSION_NOT_FOUND')
+    if (session.status !== 'active' || session.date >= today || !data.bookings.some((booking) => booking.sessionId === session.id && booking.status === 'confirmed' && !isSystemUnavailableBooking(booking))) {
+      throw new Error('INVALID_ATTENDANCE_SESSION')
+    }
+    if ((data.attendance ?? []).some((record) => record.sessionId === session.id)) throw new Error('ATTENDANCE_CONFLICT')
+    session.estimatedAttendeeCount = attendeeCount
+  })
+  response.json({ estimatedAttendeeCount: attendeeCount })
 })
 
 app.put('/api/email-recipients', requireScheduler, async (request, response) => {

@@ -63,6 +63,7 @@ The server creates automatic backups in a `scheduler-backups` directory beside t
 - Hovering a booked slot shows details in tooltip, including topic, instructor, delivery type, OEM, and ODM.
 - Shared slots remain bookable. A slot with existing booking(s) is shown as shared, not full.
 - "My bookings" lets users search with requester email and cancel with the same email confirmation.
+- Anyone can open training history, including booking and attendance details, and save or update an estimated attendee count for a past session without recorded attendance. Estimates are labeled in reports; instructor-recorded attendance takes precedence.
 
 ### Booking behavior
 

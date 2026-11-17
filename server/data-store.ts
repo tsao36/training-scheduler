@@ -20,6 +20,7 @@ export type Session = {
   startTime: string
   durationMinutes: number
   status: 'active' | 'cancelled'
+  estimatedAttendeeCount?: number
 }
 
 export type Booking = {

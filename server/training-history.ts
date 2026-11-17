@@ -42,13 +42,15 @@ export function buildTrainingHistory(
           ...(record.notes ? { notes: record.notes } : {}),
           recordedAt: record.recordedAt,
         }))
-      const attendeeCount = attendance.reduce((total, record) => total + record.attendeeCount, 0)
+      const attendanceEstimated = attendance.length === 0 && session.estimatedAttendeeCount !== undefined
+      const attendeeCount = attendanceEstimated ? (session.estimatedAttendeeCount ?? 0) : attendance.reduce((total, record) => total + record.attendeeCount, 0)
       const trainingId = resolveDisplayTrainingId(session.trainingId, confirmed, session.id) ?? session.trainingId
       const instructors = attendance.length
         ? attendance.map((record) => record.instructorEmail)
         : bookings.flatMap((item) => (item.instructorEmail ? [item.instructorEmail] : []))
       const notes: string[] = []
       if (!bookings.length && attendance.length) notes.push('Attendance recorded but no confirmed bookings')
+      if (attendanceEstimated) notes.push('Estimated attendance')
       return {
         sessionId: session.id,
         trainingId,
@@ -62,7 +64,8 @@ export function buildTrainingHistory(
         cancelledBookings,
         attendance,
         attendeeCount,
-        attendanceRecorded: attendance.length > 0,
+        attendanceRecorded: attendance.length > 0 || attendanceEstimated,
+        ...(attendanceEstimated ? { attendanceEstimated: true } : {}),
         turnoutRatio: bookings.length ? attendeeCount / bookings.length : null,
         instructors: Array.from(new Set(instructors.map((email) => email.trim().toLowerCase()))),
         notes,
